@@ -1,0 +1,33 @@
+slug = "privatebin"
+name = "PrivateBin"
+category = "App"
+description = "A minimalist, open source online pastebin where the server has zero knowledge of pasted data. Data is encrypted/decrypted in the browser using 256 bits AES."
+keywords = ["privatebin"]
+compose = '''
+services:
+  privatebin:
+    image: privatebin/nginx-fpm-alpine:{{VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PHP_TZ: '{{TZ}}'
+    volumes:
+    - privatebin-data:/srv/data
+    - privatebin-cfg:/srv/cfg
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  privatebin-data:
+  privatebin-cfg:
+'''
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/New_York"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "VERSION"
+label = "PrivateBin Version"
+default = "1.5.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/privatebin/nginx-fpm-alpine/tags"

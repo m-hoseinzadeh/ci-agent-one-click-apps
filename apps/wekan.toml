@@ -1,0 +1,42 @@
+slug = "wekan"
+name = "WeKan"
+category = "App"
+description = "WeKan ® is an completely Open Source and Free software collaborative kanban board application with MIT license."
+keywords = ["wekan"]
+compose = '''
+services:
+  wekan-db:
+    image: mongo:6
+    volumes:
+    - wekan-mongo:/data/db
+    - wekan-db-data-dump:/dump
+  wekan:
+    depends_on:
+    - wekan-db
+    image: wekanteam/wekan:{{MYAPP_VERSION}}
+    hostname: wekan.{{ROOT_DOMAIN}}
+    restart: always
+    environment:
+      ROOT_URL: https://wekan.{{ROOT_DOMAIN}}
+      MONGO_URL: mongodb://wekan-db:27017/wekan
+    volumes:
+    - wekan-data:/data
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  wekan-mongo:
+  wekan-db-data-dump:
+  wekan-data:
+'''
+
+[[variables]]
+key = "MYAPP_VERSION"
+label = "WeKan version"
+default = "v7.60"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/wekanteam/wekan/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

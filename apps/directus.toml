@@ -1,0 +1,99 @@
+slug = "directus"
+name = "Directus"
+category = "App"
+description = "Directus is an open-source tool for managing content across all your omni-channel digital experiences"
+keywords = ["directus"]
+compose = '''
+services:
+  directus-postgres:
+    image: postgres:13
+    volumes:
+    - directus-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DATABASE_NAME}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWD}}'
+  directus-redis:
+    image: redis:7
+    volumes:
+    - directus-redis:/data
+  directus:
+    depends_on:
+    - directus-postgres
+    - directus-redis
+    image: directus/directus:{{DIRECTUS_TAG}}
+    volumes:
+    - directus-uploads:/directus/uploads
+    - directus-extensions:/directus/extensions
+    restart: always
+    environment:
+      KEY: '{{DIRECTUS_AUTH_PUBLIC_KEY}}'
+      SECRET: '{{DIRECTUS_AUTH_SECRET_KEY}}'
+      DB_CLIENT: pg
+      DB_HOST: directus-postgres
+      DB_PORT: '5432'
+      DB_DATABASE: '{{POSTGRES_DATABASE_NAME}}'
+      DB_USER: '{{POSTGRES_USER}}'
+      DB_PASSWORD: '{{POSTGRES_PASSWD}}'
+      CACHE_ENABLED: 'true'
+      CACHE_STORE: redis
+      REDIS_HOST: directus-redis
+      REDIS_PORT: '6379'
+      ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:8055'
+volumes:
+  directus-data:
+  directus-redis:
+  directus-uploads:
+  directus-extensions:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Directus admin user email"
+default = "admin@example.com"
+description = "Directus admin user email"
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Directus admin user password"
+generate = true
+description = "Directus admin user password"
+
+[[variables]]
+key = "DIRECTUS_AUTH_PUBLIC_KEY"
+label = "Directus Auth Public Key"
+generate = true
+description = "Directus Auth Public Key (must not be the same as Directus Auth Secret Key)"
+
+[[variables]]
+key = "DIRECTUS_AUTH_SECRET_KEY"
+label = "Directus Auth Secret Key"
+generate = true
+description = "Directus Auth Secret Key (must not be the same as Directus Auth Public Key)"
+
+[[variables]]
+key = "DIRECTUS_TAG"
+label = "Directus image tag"
+default = "10.4.3"
+description = "Tag of Directus image on https://hub.docker.com/r/directus/directus/tags"
+
+[[variables]]
+key = "POSTGRES_DATABASE_NAME"
+label = "Postgres database name"
+default = "directus"
+description = "Name of the Directus database instance."
+
+[[variables]]
+key = "POSTGRES_PASSWD"
+label = "Postgres user password"
+generate = true
+description = "User password for the Directus database instance."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Postgres user"
+default = "directus"
+description = "User for the Directus database instance."

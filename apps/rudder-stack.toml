@@ -1,0 +1,92 @@
+slug = "rudder-stack"
+name = "RudderStack Data Plane"
+category = "Database"
+description = "Deploy RudderStack Data Plane, the open-source Customer Data Platform. This template includes the backend server, PostgreSQL database, data transformer, and metrics exporter."
+keywords = ["data", "plane", "rudder", "rudderstack", "stack"]
+compose = '''
+services:
+  rudder-stack-backend:
+    image: rudderlabs/rudder-server:{{APP_VERSION}}
+    depends_on:
+    - rudder-stack-db
+    - rudder-stack-metrics-exporter
+    - rudder-stack-d-transformer
+    environment:
+      JOBS_DB_HOST: rudder-stack-db
+      JOBS_DB_USER: '{{APP_DB_USERNAME}}'
+      JOBS_DB_PASSWORD: '{{APP_DB_PASSWORD}}'
+      JOBS_DB_DB_NAME: '{{APP_DB_NAME}}'
+      JOBS_DB_PORT: '5432'
+      CONFIG_BACKEND_URL: '{{APP_BACKEND_URL}}'
+      WORKSPACE_TOKEN: '{{RUDDER_WORKSPACE_TOKEN}}'
+      DEST_TRANSFORM_URL: http://rudder-stack-d-transformer:9090
+      STATSD_SERVER_URL: rudder-stack-metrics-exporter:9125
+      RSERVER_GATEWAY_WEBHOOK_SOURCE_LIST_FOR_PARSING_PARAMS: Shopify
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  rudder-stack-db:
+    image: postgres:15-alpine
+    volumes:
+    - rudder-stack-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{APP_DB_USERNAME}}'
+      POSTGRES_PASSWORD: '{{APP_DB_PASSWORD}}'
+      POSTGRES_DB: '{{APP_DB_NAME}}'
+  rudder-stack-d-transformer:
+    image: rudderstack/rudder-transformer:{{RUDDER_TRANSFORMER_VERSION}}
+    depends_on:
+    - rudder-stack-metrics-exporter
+    environment:
+      STATSD_SERVER_HOST: rudder-stack-metrics-exporter
+      STATSD_SERVER_PORT: '9125'
+  rudder-stack-metrics-exporter:
+    image: prom/statsd-exporter:{{METRICS_EXPORTER_VERSION}}
+volumes:
+  rudder-stack-db-data:
+'''
+
+[[variables]]
+key = "APP_BACKEND_URL"
+label = "RudderStack Backend URL"
+default = "https://api.rudderstack.com"
+description = "The URL of the RudderStack backend server. This is used to generate the URLs for the web dashboard and the API endpoints."
+
+[[variables]]
+key = "APP_DB_NAME"
+label = "Postgres Database Name"
+default = "rudder"
+
+[[variables]]
+key = "APP_DB_PASSWORD"
+label = "Postgres Password"
+generate = true
+description = "Must be at least 8 characters long. Recommended to leave the default generated"
+
+[[variables]]
+key = "APP_DB_USERNAME"
+label = "Postgres Username"
+default = "postgres"
+
+[[variables]]
+key = "APP_VERSION"
+label = "RudderStack Version"
+default = "1.49.3"
+description = "See https://hub.docker.com/r/rudderlabs/rudder-server/tags for supported versions."
+
+[[variables]]
+key = "METRICS_EXPORTER_VERSION"
+label = "Prometheus Exporter Version"
+default = "v0.22.4"
+description = "See https://hub.docker.com/r/prom/statsd-exporter/tags for supported versions."
+
+[[variables]]
+key = "RUDDER_TRANSFORMER_VERSION"
+label = "RudderStack Transformer Version"
+default = "1.100.0"
+description = "See https://hub.docker.com/r/rudderstack/rudder-transformer/tags for supported versions."
+
+[[variables]]
+key = "RUDDER_WORKSPACE_TOKEN"
+label = "RudderStack Workspace Token"
+description = "See https://app.rudderstack.com/workspace"

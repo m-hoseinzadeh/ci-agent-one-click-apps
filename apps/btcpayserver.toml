@@ -1,0 +1,451 @@
+slug = "btcpayserver"
+name = "BTCPay Server"
+category = "App"
+description = "Free, open-source & self-hosted, Bitcoin payment processor."
+keywords = ["btcpay", "btcpayserver", "server"]
+compose = '''
+services:
+  btcpayserver:
+    image: btcpayserver/btcpayserver:{{BTCPAYSERVER_VERSION}}
+    hostname: btcpayserver.{{ROOT_DOMAIN}}
+    environment:
+      BTCPAY_HOST: btcpayserver.{{ROOT_DOMAIN}}
+      BTCPAY_POSTGRES: User ID={{POSTGRES_USER}};Host=btcpayserver-postgres;Port={{POSTGRES_PORT}};Application Name=btcpayserver;Database=btcpayserver{{NBITCOIN_NETWORK}}
+      BTCPAY_EXPLORERPOSTGRES: User ID={{POSTGRES_USER}};Host=btcpayserver-postgres;Port={{POSTGRES_PORT}};Application Name=btcpayserver;MaxPoolSize=80;Database=nbxplorer{{NBITCOIN_NETWORK}}
+      BTCPAY_NETWORK: '{{NBITCOIN_NETWORK}}'
+      BTCPAY_BIND: '{{BIND_ADDRESS}}:{{BTCPAY_PORT}}'
+      BTCPAY_ROOTPATH: '{{BTCPAY_ROOTPATH}}'
+      BTCPAY_DEBUGLOG: '{{BTCPAY_DEBUGLOG}}'
+      BTCPAY_UPDATEURL: '{{BTCPAY_UPDATEURL}}'
+      BTCPAY_DOCKERDEPLOYMENT: 'true'
+      BTCPAY_CHAINS: '{{USED_CHAIN}}'
+      BTCPAY_BTCEXPLORERURL: http://btcpayserver-nbxplorer:{{NBXPLORER_PORT}}/
+      BTCPAY_BTCLIGHTNING: type=clightning;server=unix://etc/clightning_bitcoin/lightning-rpc
+      BTCPAY_BTCEXTERNALSPARK: server=/spark/btc/;cookiefile=/etc/clightning_bitcoin_spark/.cookie
+      BTCPAY_BTCEXTERNALRTL: server=/rtl/api/authenticate/cookie;cookiefile=/etc/clightning_bitcoin_rtl/.cookie
+      BTCPAY_BTCEXTERNALCLIGHTNINGREST: server=/clightning-rest/btc;macaroonfilepath=/etc/clightning_bitcoin_rest_certs/access.macaroon;macaroondirectorypath=/etc/clightning_bitcoin_rest_certs
+    depends_on:
+    - btcpayserver-postgres
+    - btcpayserver-bitcoind
+    - btcpayserver-lightning
+    volumes:
+    - btcpayserver-data:/datadir
+    - btcpayserver-nbxplorer-data:/root/.nbxplorer
+    - btcpayserver-plugins:/root/.btcpayserver/Plugins
+    - btcpayserver-lightning-data:/etc/clightning_bitcoin
+    - btcpayserver-lightning-spark:/etc/clightning_bitcoin_spark
+    - btcpayserver-lightning-rtl-data:/etc/clightning_bitcoin_rtl
+    - btcpayserver-lightning-rest-certificates:/etc/clightning_bitcoin_rest_certs
+    ports:
+    - '{{HTTP_PORT}}:$$cap_BTCPAY_PORT'
+  btcpayserver-postgres:
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: '{{POSTGRES_HOST_AUTH_METHOD}}'
+    volumes:
+    - btcpayserver-postgres:/var/lib/postgresql/data
+  btcpayserver-nbxplorer:
+    image: nicolasdorier/nbxplorer:{{NBXPLORER_VERSION}}
+    environment:
+      NBXPLORER_NETWORK: '{{NBITCOIN_NETWORK}}'
+      NBXPLORER_BIND: '{{BIND_ADDRESS}}:{{NBXPLORER_PORT}}'
+      NBXPLORER_TRIMEVENTS: '{{NBXPLORER_TRIMEVENTS}}'
+      NBXPLORER_SIGNALFILESDIR: '{{NBXPLORER_SIGNALFILESDIR}}'
+      NBXPLORER_POSTGRES: User ID={{POSTGRES_USER}};Host=btcpayserver-postgres;Port={{POSTGRES_PORT}};Application Name=nbxplorer;MaxPoolSize=20;Database=nbxplorer{{NBITCOIN_NETWORK}}
+      NBXPLORER_AUTOMIGRATE: '{{NBXPLORER_AUTOMIGRATE}}'
+      NBXPLORER_NOMIGRATEEVTS: '{{NBXPLORER_NOMIGRATEEVTS}}'
+      NBXPLORER_CHAINS: '{{USED_CHAIN}}'
+      NBXPLORER_BTCRPCURL: http://btcpayserver-bitcoind:{{BITCOIN_RPC_PORT}}/
+      NBXPLORER_BTCNODEENDPOINT: btcpayserver-bitcoind:{{BITCOIN_NODE_PORT}}
+    depends_on:
+    - btcpayserver-postgres
+    volumes:
+    - btcpayserver-nbxplorer-data:/datadir
+    - btcpayserver-bitcoind-data:/root/.bitcoin
+  btcpayserver-bitcoind:
+    image: btcpayserver/bitcoin:{{BITCOIN_VERSION}}
+    environment:
+      BITCOIN_NETWORK: '{{NBITCOIN_NETWORK}}'
+      BITCOIN_WALLETDIR: '{{BITCOIN_WALLETDIR}}'
+      BITCOIN_EXTRA_ARGS: 'rpcport={{BITCOIN_RPC_PORT}}
+
+        rpcbind={{BIND_ADDRESS}}:{{BITCOIN_RPC_PORT}}
+
+        rpcallowip={{BIND_ADDRESS}}/{{BITCOIN_IP_ALLOWLIST_CIDR}}
+
+        port={{BITCOIN_NODE_PORT}}
+
+        whitelist={{BIND_ADDRESS}}/{{BITCOIN_IP_ALLOWLIST_CIDR}}
+
+        maxmempool={{BITCOIN_MAX_MEMPOOL}}
+
+        prune={{BITCOIN_PRUNE}}
+
+        {{BITCOIN_ADDITIONAL_ARGUMENTS}}
+
+        '
+    volumes:
+    - btcpayserver-bitcoind-wallet-data:/walletdata
+    - btcpayserver-bitcoind-data:/data
+  btcpayserver-lightning:
+    image: btcpayserver/lightning:{{LIGHTNING_VERSION}}
+    environment:
+      LIGHTNINGD_NETWORK: '{{NBITCOIN_NETWORK}}'
+      LIGHTNINGD_CHAIN: '{{USED_CHAIN}}'
+      LIGHTNINGD_ALIAS: '{{LIGHTNINGD_ALIAS}}'
+      LIGHTNINGD_ANNOUNCEADDR: '{{LIGHTNINGD_ANNOUNCEADDR}}'
+      LIGHTNINGD_PORT: '{{LIGHTNINGD_PORT}}'
+      LIGHTNINGD_READY_FILE: '{{LIGHTNINGD_READY_FILE}}'
+      LIGHTNINGD_OPT: 'bitcoin-datadir={{LIGHTNINGD_BITCOIN_DATA_DIRECTORY}}
+
+        bitcoin-rpcconnect=btcpayserver-bitcoind
+
+        experimental-offers
+
+        {{LIGHTNINGD_ADDITIONAL_ARGUMENTS}}
+
+        '
+    ports:
+    - '{{LIGHTNINGD_PORT}}:{{LIGHTNINGD_PORT}}'
+    depends_on:
+    - btcpayserver-bitcoind
+    volumes:
+    - btcpayserver-lightning-data:/root/.lightning
+    - btcpayserver-bitcoind-data:/etc/bitcoin
+    - btcpayserver-nbxplorer-data:/root/.nbxplorer
+  btcpayserver-lightning-spark:
+    image: shesek/spark-wallet:{{LIGHTNING_SPARK_VERSION}}
+    environment:
+      NETWORK: '{{NBITCOIN_NETWORK}}'
+      SPARK_OPT: '{{LIGHTNING_SPARK_OPTIONS}}'
+    volumes:
+    - btcpayserver-lightning-data:/etc/lightning
+    - btcpayserver-lightning-spark:/data
+    depends_on:
+    - btcpayserver-lightning
+  btcpayserver-lightning-rest:
+    image: saubyk/c-lightning-rest:{{LIGHTNING_REST_VERSION}}
+    environment:
+      PROTOCOL: '{{LIGHTNING_REST_PROTOCOL}}'
+      NODE: btcpayserver-lightning:{{LIGHTNING_REST_LIGHTNINGD_PORT}}
+      LIGHTNINGD_READY_FILE: '{{LIGHTNINGD_READY_FILE}}'
+    depends_on:
+    - btcpayserver-lightning
+    volumes:
+    - btcpayserver-lightning-data:/root/.lightning
+    - btcpayserver-bitcoind-data:/etc/bitcoin
+    - btcpayserver-lightning-rest-certificates:/usr/src/app/certs
+    - btcpayserver-nbxplorer-data:/root/.nbxplorer
+  btcpayserver-rtl:
+    image: shahanafarooqui/rtl:{{RTL_VERSION}}
+    environment:
+      LN_IMPLEMENTATION: '{{RTL_LN_IMPLEMENTATION}}'
+      CONFIG_PATH: '{{RTL_LIGHTNING_CONFIG_PATH}}'
+      LN_SERVER_URL: http://btcpayserver-lightning-rest:{{RTL_LN_SERVER_URL_PORT}}/v1
+      MACAROON_PATH: '{{RTL_MACAROON_PATH}}'
+      RTL_CONFIG_PATH: '{{RTL_CONFIG_PATH}}'
+      BITCOIND_CONFIG_PATH: '{{RTL_BITCOIND_CONFIG_PATH}}'
+      RTL_SSO: '{{RTL_SSO}}'
+      RTL_COOKIE_PATH: '{{RTL_COOKIE_PATH}}'
+      LOGOUT_REDIRECT_LINK: '{{RTL_LOGOUT_REDIRECT_LINK}}'
+    volumes:
+    - btcpayserver-lightning-data:/root/.lightning
+    - btcpayserver-bitcoind-data:/etc/bitcoin
+    - btcpayserver-lightning-rtl-data:/data
+    - btcpayserver-lightning-rest-certificates:/etc/clightning_bitcoin_rest_certs
+volumes:
+  btcpayserver-data:
+  btcpayserver-nbxplorer-data:
+  btcpayserver-plugins:
+  btcpayserver-lightning-data:
+  btcpayserver-lightning-spark:
+  btcpayserver-lightning-rtl-data:
+  btcpayserver-lightning-rest-certificates:
+  btcpayserver-postgres:
+  btcpayserver-bitcoind-data:
+  btcpayserver-bitcoind-wallet-data:
+'''
+
+[[variables]]
+key = "BIND_ADDRESS"
+label = "General | Bind Address"
+default = "0.0.0.0"
+description = "Address to bind the services."
+
+[[variables]]
+key = "BITCOIN_ADDITIONAL_ARGUMENTS"
+label = "Bitcoin Node | Additional Arguments"
+description = "Additional Bitcoin node startup arguments."
+
+[[variables]]
+key = "BITCOIN_IP_ALLOWLIST_CIDR"
+label = "Bitcoin Node | Allowlist Subnet"
+default = "0"
+description = "Whitelist IP subnet using CIDR notation for the Bitcoin node."
+
+[[variables]]
+key = "BITCOIN_MAX_MEMPOOL"
+label = "Bitcoin Node | Maximum Mempool Size"
+default = "500"
+description = "Maximum Bitcoin node mempool size in megabytes."
+
+[[variables]]
+key = "BITCOIN_NODE_PORT"
+label = "Bitcoin Node | Node Port"
+default = "39388"
+description = "Port of Bitcoin node endpoint."
+
+[[variables]]
+key = "BITCOIN_PRUNE"
+label = "Bitcoin Node | Prune"
+default = "50000"
+description = "Configure a disk space on stored blocks of the Bitcoin node, denoted in megabytes. Default is 50 gigabytes, this will keep around 6 months of blocks."
+
+[[variables]]
+key = "BITCOIN_RPC_PORT"
+label = "Bitcoin Node | RPC Port"
+default = "43782"
+description = "Port of Bitcoin node RPC."
+
+[[variables]]
+key = "BITCOIN_VERSION"
+label = "General | Bitcoin Node Version"
+default = "23.0"
+description = "Check out their valid tags at https://hub.docker.com/r/btcpayserver/bitcoin/tags"
+
+[[variables]]
+key = "BITCOIN_WALLETDIR"
+label = "Bitcoin Node | Wallet Directory"
+default = "/walletdata"
+description = "Path to wallet files directory of the Bitcoin node."
+
+[[variables]]
+key = "BTCPAYSERVER_VERSION"
+label = "General | BTCPay Server Version"
+default = "1.6.11"
+description = "Check out their valid tags at https://hub.docker.com/r/btcpayserver/btcpayserver/tags"
+
+[[variables]]
+key = "BTCPAY_DEBUGLOG"
+label = "Application | Debug Log"
+default = "btcpay.log"
+description = "Log file for debugging information."
+
+[[variables]]
+key = "BTCPAY_PORT"
+label = "Application | Port"
+default = "49392"
+description = "Port of the application host."
+
+[[variables]]
+key = "BTCPAY_ROOTPATH"
+label = "Application | Root Path"
+default = "/"
+description = "Root path of the application."
+
+[[variables]]
+key = "BTCPAY_UPDATEURL"
+label = "Application | Update URL"
+default = "https://api.github.com/repos/btcpayserver/btcpayserver/releases/latest"
+description = "URL to BTCPay Server releases."
+
+[[variables]]
+key = "LIGHTNINGD_ADDITIONAL_ARGUMENTS"
+label = "Lightning Node | Additional Arguments"
+description = "Additional Lightning node startup arguments."
+
+[[variables]]
+key = "LIGHTNINGD_ALIAS"
+label = "Lightning Node | Alias"
+generate = true
+description = "An alias for your Lightning node."
+
+[[variables]]
+key = "LIGHTNINGD_ANNOUNCEADDR"
+label = "Lightning Node | Announced Address"
+description = "IP address of your server. E.g. `123.123.123.123`."
+
+[[variables]]
+key = "LIGHTNINGD_BITCOIN_DATA_DIRECTORY"
+label = "Lightning Node | Bitcoin Data Directory"
+default = "/etc/bitcoin"
+description = "Path to Bitcoin data directory in the Lightning node."
+
+[[variables]]
+key = "LIGHTNINGD_PORT"
+label = "Lightning Node | Port"
+default = "9735"
+description = "Port of your Lightning node host."
+
+[[variables]]
+key = "LIGHTNINGD_READY_FILE"
+label = "Lightning Node | Ready File"
+default = "/root/.nbxplorer/btc_fully_synched"
+description = "Path to Bitcoin node ready status indicator file in the Lightning node."
+
+[[variables]]
+key = "LIGHTNING_REST_LIGHTNINGD_PORT"
+label = "Lightning Node | Spark | Lightning REST API Port"
+default = "9835"
+description = "REST API port of the Lightning node."
+
+[[variables]]
+key = "LIGHTNING_REST_PROTOCOL"
+label = "Lightning Node | REST | Protocol"
+default = "http"
+description = "Which HTTP protocol to use in Lightning REST."
+
+[[variables]]
+key = "LIGHTNING_REST_VERSION"
+label = "General | Lightning REST Version"
+default = "0.9.0"
+description = "Check out their valid tags at https://hub.docker.com/r/saubyk/c-lightning-rest/tags"
+
+[[variables]]
+key = "LIGHTNING_SPARK_OPTIONS"
+label = "Lightning Node | Spark | Lightning Network Files"
+default = "--no-tls -C /data/.cookie"
+description = "Additional start up options for Lightning Spark."
+
+[[variables]]
+key = "LIGHTNING_SPARK_VERSION"
+label = "General | Lightning Spark Version"
+default = "0.3.1-standalone"
+description = "Check out their valid tags at https://hub.docker.com/r/shesek/spark-wallet/tags"
+
+[[variables]]
+key = "LIGHTNING_VERSION"
+label = "General | Lightning Version"
+default = "v0.10.2"
+description = "Check out their valid tags at https://hub.docker.com/r/btcpayserver/lightning/tags"
+
+[[variables]]
+key = "NBITCOIN_NETWORK"
+label = "General | Network Type"
+default = "mainnet"
+description = "The type of Bitcoin network to use (e.g. `mainnet`, `testnet`, or `regtest`)"
+
+[[variables]]
+key = "NBXPLORER_AUTOMIGRATE"
+label = "Explorer | Automatic Migrations"
+default = "true"
+description = "Whether to enable automatic migrations."
+
+[[variables]]
+key = "NBXPLORER_NOMIGRATEEVTS"
+label = "Explorer | Event Migrations"
+default = "true"
+description = "Whether to disable event migrations."
+
+[[variables]]
+key = "NBXPLORER_PORT"
+label = "Explorer | Port"
+default = "32838"
+description = "Port of the NBXplorer host."
+
+[[variables]]
+key = "NBXPLORER_SIGNALFILESDIR"
+label = "Explorer | Signal Files Directory"
+default = "/datadir"
+description = "Path to signal files directory in NBXplorer."
+
+[[variables]]
+key = "NBXPLORER_TRIMEVENTS"
+label = "Explorer | Trim Events"
+default = "10000"
+description = "Trim the amount of events in NBXplorer."
+
+[[variables]]
+key = "NBXPLORER_VERSION"
+label = "General | NBXplorer Version"
+default = "2.3.38"
+description = "Check out their valid tags at https://hub.docker.com/r/nicolasdorier/nbxplorer/tags"
+
+[[variables]]
+key = "POSTGRES_HOST_AUTH_METHOD"
+label = "Database | Authentication Method"
+default = "trust"
+description = "Method of authentication for incoming connections in PostgreSQL."
+
+[[variables]]
+key = "POSTGRES_PORT"
+label = "Database | Port"
+default = "5432"
+description = "Port of the PostgreSQL database host."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User"
+default = "postgres"
+description = "User of the PostgreSQL database."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "RTL_BITCOIND_CONFIG_PATH"
+label = "Ride The Lightning | Bitcoin Configuration Path"
+default = "/etc/bitcoin/bitcoin.conf"
+description = "Path to the Bitcoin configuration file for Ride The Lightning."
+
+[[variables]]
+key = "RTL_CONFIG_PATH"
+label = "Ride The Lightning | Configuration Path"
+default = "/data/"
+description = "Path to the configuration file for Ride The Lightning."
+
+[[variables]]
+key = "RTL_COOKIE_PATH"
+label = "Ride The Lightning | Cookie Path"
+default = "/data/.cookie"
+description = "Path to the cookie file for Ride The Lightning."
+
+[[variables]]
+key = "RTL_LIGHTNING_CONFIG_PATH"
+label = "Ride The Lightning | Lightning Configuration"
+default = "/root/.lightning/config"
+description = "Path to Lightning configuration for Ride The Lightning."
+
+[[variables]]
+key = "RTL_LN_IMPLEMENTATION"
+label = "Ride The Lightning | Lightning Implementation"
+default = "CLT"
+description = "Lightning implementation used for Ride The Lightning."
+
+[[variables]]
+key = "RTL_LN_SERVER_URL_PORT"
+label = "Ride The Lightning | Lightning REST Server Port"
+default = "3001"
+description = "Port of the Lightning REST server for Ride The Lightning."
+
+[[variables]]
+key = "RTL_LOGOUT_REDIRECT_LINK"
+label = "Ride The Lightning | Log-Out Redirect Link"
+default = "/server/services"
+description = "Log-Out redirect link for Ride The Lightning."
+
+[[variables]]
+key = "RTL_MACAROON_PATH"
+label = "Ride The Lightning | Macaroon Path"
+default = "/etc/clightning_bitcoin_rest_certs"
+description = "Path to the macaroon file for Ride The Lightning."
+
+[[variables]]
+key = "RTL_SSO"
+label = "Ride The Lightning | Single-Sign-On"
+default = "1"
+description = "Whether to use Single-Sign-On for Ride The Lightning."
+
+[[variables]]
+key = "RTL_VERSION"
+label = "General | Ride The Lightning Version"
+default = "0.13.1"
+description = "Check out their valid tags at https://hub.docker.com/r/shahanafarooqui/rtl/tags"
+
+[[variables]]
+key = "USED_CHAIN"
+label = "Explorer | Chain"
+default = "btc"
+description = "Blockchain to be used. Defaults is `btc` and should **not** be changed."

@@ -1,0 +1,40 @@
+slug = "calibre"
+name = "Calibre Web"
+category = "Database"
+description = "Calibre-web is a web app providing a clean interface for browsing, reading and downloading eBooks using an existing Calibre database."
+keywords = ["calibre", "web"]
+compose = '''
+services:
+  calibre:
+    image: lscr.io/linuxserver/calibre-web:{{APP_VERSION}}
+    restart: always
+    environment:
+      APP_URL: http://calibre.{{ROOT_DOMAIN}}
+      TZ: '{{TIMEZONE}}'
+    volumes:
+    - calibre-config:/config
+    - calibre-books:/books
+    ports:
+    - '{{HTTP_PORT}}:8083'
+volumes:
+  calibre-config:
+  calibre-books:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "Calibre-web"
+default = "2021.10.24"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/linuxserver/calibre-web/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TIMEZONE"
+label = "Timezone"
+default = "Europe/London"
+description = "See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones for list of timezones."

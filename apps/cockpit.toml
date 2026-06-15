@@ -1,0 +1,20 @@
+slug = "cockpit"
+name = "Cockpit"
+category = "App"
+description = "Headless Content Platform"
+keywords = ["cockpit"]
+compose = '''
+services:
+  cockpit:
+    image: cockpithq/cockpit:core-{{COCKPIT_VERSION}}
+    volumes:
+    - cockpit:/var/www/html
+volumes:
+  cockpit:
+'''
+
+[[variables]]
+key = "COCKPIT_VERSION"
+label = "Version"
+default = "2.5.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/cockpithq/cockpit/tags"

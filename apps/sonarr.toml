@@ -1,0 +1,63 @@
+slug = "sonarr"
+name = "Sonarr"
+category = "Dev tools"
+description = "Sonarr (formerly NZBdrone) is a PVR for usenet and bittorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them."
+keywords = ["sonarr"]
+compose = '''
+services:
+  sonarr:
+    image: linuxserver/sonarr:{{SONARR_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    hostname: sonarr.{{ROOT_DOMAIN}}
+    volumes:
+    - sonarr-config:/config
+    - '{{PATH_TO_TV}}:/tv'
+    - '{{PATH_TO_DOWNLOADS}}:/downloads'
+    ports:
+    - '{{HTTP_PORT}}:8989'
+volumes:
+  sonarr-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "PATH_TO_DOWNLOADS"
+label = "Location of download managers output directory"
+description = "Location of download managers output directory"
+
+[[variables]]
+key = "PATH_TO_TV"
+label = "Location of TV library on disk"
+description = "Location of TV library on disk"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SONARR_VERSION"
+label = "Sonarr Version"
+default = "preview"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/sonarr/tags"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Brussels"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

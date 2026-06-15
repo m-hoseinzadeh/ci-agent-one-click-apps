@@ -1,0 +1,19 @@
+slug = "redlib"
+name = "Redlib"
+category = "App"
+description = "Alternative private front-end to Reddit. Redlib hopes to provide an easier way to browse Reddit, without the ads, trackers, and bloat."
+keywords = ["redlib"]
+compose = '''
+services:
+  redlib:
+    image: quay.io/redlib/redlib:{{REDLIB_VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8080'
+'''
+
+[[variables]]
+key = "REDLIB_VERSION"
+label = "Redlib Docker Image SHA Hash"
+default = "sha-6c64ebd"
+description = "Check out their Docker page for the valid tags https://quay.io/repository/redlib/redlib?tab=tags"

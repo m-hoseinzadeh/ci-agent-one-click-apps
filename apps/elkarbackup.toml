@@ -1,0 +1,63 @@
+slug = "elkarbackup"
+name = "Elkarbackup"
+category = "App"
+description = "Open source backup solution for your network."
+keywords = ["elkarbackup"]
+compose = '''
+services:
+  elkarbackup:
+    image: elkarbackup/elkarbackup:{{ELKAR_VERSION}}
+    restart: always
+    environment:
+      TZ: '{{TZ}}'
+      PHP_TZ: '{{TZ}}'
+      EB_CRON: enabled
+      SYMFONY__DATABASE__HOST: elkarbackup-mariadb
+      SYMFONY__DATABASE__USER: '{{MARIADB}}-user'
+      SYMFONY__DATABASE__PASSWORD: '{{MARIADB}}-pass'
+      SYMFONY__DATABASE__NAME: '{{MARIADB}}-db'
+    volumes:
+    - elkarbackup-backups:/app/backups
+    - elkarbackup-uploads:/app/uploads
+    - elkarbackup-ssh-keys:/app/.ssh
+  elkarbackup-mariadb:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: '{{MARIADB}}-db'
+      MYSQL_USER: '{{MARIADB}}-user'
+      MYSQL_PASSWORD: '{{MARIADB}}-pass'
+    volumes:
+    - elkarbackup-mariadb-data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:3306'
+volumes:
+  elkarbackup-backups:
+  elkarbackup-uploads:
+  elkarbackup-ssh-keys:
+  elkarbackup-mariadb-data:
+'''
+
+[[variables]]
+key = "ELKAR_VERSION"
+label = "Version Tag"
+default = "2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/elkarbackup/elkarbackup/tags"
+
+[[variables]]
+key = "MARIADB"
+label = "Mariadb"
+default = ""
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.6.2"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags/"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "Europe/Brussels"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

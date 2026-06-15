@@ -1,0 +1,48 @@
+slug = "mercure"
+name = "Mercure"
+category = "App"
+description = "Mercure is a protocol allowing to push data updates to web browsers and other HTTP clients."
+keywords = ["mercure"]
+compose = '''
+services:
+  mercure:
+    image: dunglas/mercure:{{MERCURE_VERSION}}
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: :80
+      MERCURE_PUBLISHER_JWT_KEY: '{{MERCURE_PUBLISHER_JWT_KEY}}'
+      MERCURE_SUBSCRIBER_JWT_KEY: '{{MERCURE_SUBSCRIBER_JWT_KEY}}'
+      MERCURE_EXTRA_DIRECTIVES: '{{MERCURE_EXTRA_DIRECTIVES}}'
+    volumes:
+    - mercure-mercure-data:/data
+    - mercure-mercure-config:/config
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  mercure-mercure-data:
+  mercure-mercure-config:
+'''
+
+[[variables]]
+key = "MERCURE_EXTRA_DIRECTIVES"
+label = "Extra Directives"
+default = "subscriptions demo anonymous cors_origins * publish_origins *"
+description = "A list of extra Mercure directives inject in the Caddy file, one per line"
+
+[[variables]]
+key = "MERCURE_PUBLISHER_JWT_KEY"
+label = "Mercure Publisher JWT Key"
+default = "!ChangeMe!"
+description = "The JWT key to use for publishers"
+
+[[variables]]
+key = "MERCURE_SUBSCRIBER_JWT_KEY"
+label = "Mercure Subscriber JWT Key"
+default = "!ChangeMe!"
+description = "The JWT key to use for subscribers"
+
+[[variables]]
+key = "MERCURE_VERSION"
+label = "Mercure Version"
+default = "v0.13"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/dunglas/mercure/tags"

@@ -1,0 +1,53 @@
+slug = "healthchecks"
+name = "HealthChecks"
+category = "Monitoring"
+description = "Healthchecks is a cron job monitoring service."
+keywords = ["healthchecks"]
+compose = '''
+services:
+  healthchecks:
+    image: healthchecks/healthchecks:{{HC_VERSION}}
+    restart: always
+    environment:
+      DB: postgres
+      DB_HOST: healthchecks-db
+      DB_NAME: hc
+      DB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      DB_PORT: 5432
+      DB_SSLMODE: prefer
+      DB_TARGET_SESSION_ATTRS: read-write
+      DB_USER: postgres
+      DEBUG: false
+      SECRET_KEY: '{{GEN_RANDOM_HEX}}(64)'
+      SITE_ROOT: http://0.0.0.0:8000
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  healthchecks-db:
+    image: postgres:12
+    volumes:
+    - healthchecks-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: hc
+volumes:
+  healthchecks-db-data:
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "HC_VERSION"
+label = "hc Manifest digest"
+default = "v1.25.0"
+description = "Find on https://hub.docker.com/r/healthchecks/healthchecks/tags"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+description = "Password must be at least 12 characters.  Please use a random string."

@@ -1,0 +1,60 @@
+slug = "cloudflareddns"
+name = "CloudFlare DDNS"
+category = "App"
+description = "This small image will allow you to use the free CloudFlare DNS Service as a Dynamic DNS Provider (DDNS)."
+keywords = ["cloudflare", "cloudflareddns", "ddns"]
+compose = '''
+services:
+  cloudflareddns:
+    image: oznu/cloudflare-ddns:latest
+    environment:
+      API_KEY: '{{API_KEY}}'
+      ZONE: '{{ZONE}}'
+      SUBDOMAIN: '{{SUBDOMAIN}}'
+      PROXIED: '{{PROXIED}}'
+      RRTYPE: '{{RRTYPE}}'
+      DNS_SERVER: '{{DNS_SERVER}}'
+      CRON: '{{CRON}}'
+'''
+
+[[variables]]
+key = "API_KEY"
+label = "Cloudflare API token"
+default = ""
+description = "Your CloudFlare scoped API token. See the Creating a Cloudflare API token upward."
+
+[[variables]]
+key = "CRON"
+label = "Cron"
+default = "*/5 * * * *"
+description = "Sets how often your container checks for IP changes. Defaults to every 5 minutes. You can read more about CRON configuration here https://en.wikipedia.org/wiki/Cron"
+
+[[variables]]
+key = "DNS_SERVER"
+label = "DNS server"
+default = "1.1.1.1"
+description = "Set to the IP address of the DNS server you would like to use. Defaults to 1.1.1.1 (CloudFlare DNS) otherwise."
+
+[[variables]]
+key = "PROXIED"
+label = "Proxied?"
+default = "false"
+description = "If you are using free ClourFlare tier, leave as false. Set to true to make traffic go through the CloudFlare CDN."
+
+[[variables]]
+key = "RRTYPE"
+label = "Resource record type"
+default = "A"
+description = "Set to AAAA to use set IPv6 records instead of IPv4 records. Defaults to A for IPv4 records."
+
+[[variables]]
+key = "SUBDOMAIN"
+label = "Zone's subdomain"
+default = "*"
+description = "A subdomain of the ZONE to write DNS changes to. If this is not supplied the root zone will be used. Defaults to your CapRover apps subdomains."
+
+[[variables]]
+key = "ZONE"
+label = "DNS zone"
+default = "$$cap_root_domain"
+description = "The DNS zone that DDNS updates should be applied to. Defaults to your CapRover root domain."

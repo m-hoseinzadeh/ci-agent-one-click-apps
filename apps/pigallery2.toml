@@ -1,0 +1,33 @@
+slug = "pigallery2"
+name = "PiGallery2"
+category = "App"
+description = "A fast directory-first photo gallery website, with rich UI, optimized for running on low resource servers (especially on raspberry pi)"
+keywords = ["pigallery2"]
+compose = '''
+services:
+  pigallery2:
+    image: bpatrik/pigallery2:{{VERSION}}
+    environment:
+      NODE_ENV: production
+    volumes:
+    - pigallery2-config:/app/data/config
+    - pigallery2-db:/app/data/db
+    - '{{IMAGES}}:/app/data/images'
+    - pigallery2-tmp:/app/data/tmp
+    restart: always
+volumes:
+  pigallery2-config:
+  pigallery2-db:
+  pigallery2-tmp:
+'''
+
+[[variables]]
+key = "IMAGES"
+label = "Set path to images"
+description = "Path containing your pictures library. IMPORTANT, this must be an existing directory on your host, otherwise the app crashes."
+
+[[variables]]
+key = "VERSION"
+label = "PiGallery2 Version"
+default = "2.0.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/bpatrik/pigallery2/tags"

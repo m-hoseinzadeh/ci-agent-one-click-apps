@@ -1,0 +1,60 @@
+slug = "filerun"
+name = "FileRun - No DB"
+category = "App"
+description = "FileRun is a self-hosted Google Drive alternative. It is a full featured web based file manager with an easy to use user interface."
+keywords = ["db", "filerun", "no"]
+compose = '''
+services:
+  filerun:
+    image: filerun/filerun:{{WP_VERSION}}
+    volumes:
+    - filerun-html:/var/www/html
+    - filerun-userfiles:/user-files
+    restart: always
+    environment:
+      FR_DB_HOST: '{{DB_HOST}}'
+      FR_DB_PORT: '{{DB_PORT}}'
+      FR_DB_NAME: '{{DB_NAME}}'
+      FR_DB_USER: '{{DB_USER}}'
+      FR_DB_PASS: '{{DB_PASS}}'
+      APACHE_RUN_USER: www-data
+      APACHE_RUN_USER_ID: 33
+      APACHE_RUN_GROUP: www-data
+      APACHE_RUN_GROUP_ID: 33
+volumes:
+  filerun-html:
+  filerun-userfiles:
+'''
+
+[[variables]]
+key = "DB_HOST"
+label = "Database Host"
+default = "srv-captain--xxx"
+description = "Database host. Remember Latest version of MYSQL use SHA256_Hashing plugin for authentication by default, If you are using MySQL database, change user password hashing plugin into Native authentication plugin."
+
+[[variables]]
+key = "DB_NAME"
+label = "DB Name"
+default = "filerun"
+description = "Database name"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+
+[[variables]]
+key = "DB_PORT"
+label = "Database Port"
+default = "3306"
+description = "Database port. Default Value is 3306"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "filerunuser"
+
+[[variables]]
+key = "WP_VERSION"
+label = "Filerun Version."
+default = "latest"
+description = "Use 'latest' tag for normal installation. Check out their Docker page for the valid tags https://hub.docker.com/r/filerun/filerun/tags"

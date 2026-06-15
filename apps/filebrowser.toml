@@ -1,0 +1,28 @@
+slug = "filebrowser"
+name = "filebrowser"
+category = "Storage"
+description = "filebrowser provides a file managing interface within a specified directory and it can be used to upload, delete, preview, rename and edit your files with supports for multi users."
+keywords = ["filebrowser"]
+compose = '''
+services:
+  filebrowser:
+    volumes:
+    - filebrowser-database:/database
+    - filebrowser-files:/srv
+    - filebrowser-config:/config
+    restart: always
+    environment:
+      PUID: '0'
+      PGID: '0'
+    image: filebrowser/filebrowser:{{FILEBROWSER_VERSION}}
+volumes:
+  filebrowser-database:
+  filebrowser-files:
+  filebrowser-config:
+'''
+
+[[variables]]
+key = "FILEBROWSER_VERSION"
+label = "File Browser Version Tag"
+default = "v2.36.1-s6"
+description = "Check out their Docker page for the valid tags: https://hub.docker.com/r/filebrowser/filebrowser/tags"

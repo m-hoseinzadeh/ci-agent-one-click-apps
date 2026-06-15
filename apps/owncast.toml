@@ -1,0 +1,36 @@
+slug = "owncast"
+name = "Owncast"
+category = "Communication"
+description = "Self-hosted live video and web chat server"
+keywords = ["owncast"]
+compose = '''
+services:
+  owncast:
+    image: gabekangas/owncast:{{OWNCAST_VERSION}}
+    hostname: owncast.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:$$cap_OWNCAST_HTTP_PORT'
+    - '{{OWNCAST_RMTP_PORT}}:{{OWNCAST_RMTP_PORT}}'
+    volumes:
+    - owncast:/app/data
+volumes:
+  owncast:
+'''
+
+[[variables]]
+key = "OWNCAST_RMTP_PORT"
+label = "Networking | RMTP Port"
+default = "1935"
+description = "Port of the RMTP service. Should not be changed."
+
+[[variables]]
+key = "OWNCAST_VERSION"
+label = "General | Version Tag"
+default = "0.0.12"
+description = "Check out their valid tags at https://hub.docker.com/r/gabekangas/owncast/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

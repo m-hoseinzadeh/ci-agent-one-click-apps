@@ -1,0 +1,30 @@
+slug = "changedetection"
+name = "ChangeDetection.io"
+category = "Monitoring"
+description = "ChangeDetection.io is the self-hosted website change detection monitoring."
+keywords = ["changedetection", "changedetection.io"]
+compose = '''
+services:
+  changedetection:
+    image: dgtlmoon/changedetection.io:{{VERSION}}
+    environment:
+      BASE_URL: http://changedetection.{{ROOT_DOMAIN}}
+    volumes:
+    - changedetection-data:/datastore
+    ports:
+    - '{{HTTP_PORT}}:5000'
+volumes:
+  changedetection-data:
+'''
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "VERSION"
+label = "ChangeDetection.io version"
+default = "0.40.2"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/dgtlmoon/changedetection.io/tags"

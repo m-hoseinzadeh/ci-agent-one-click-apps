@@ -1,0 +1,91 @@
+slug = "vikunja"
+name = "Vikunja"
+category = "App"
+description = "Open Source Task Management"
+keywords = ["vikunja"]
+compose = '''
+services:
+  vikunja:
+    image: vikunja/vikunja:{{VIKUNJA_VERSION}}
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: '{{APP_URL}}'
+      VIKUNJA_SERVICE_SECRET: '{{SERVICE_SECRET}}'
+      VIKUNJA_SERVICE_TIMEZONE: '{{TIMEZONE}}'
+      VIKUNJA_SERVICE_ENABLEREGISTRATION: '{{ENABLE_REGISTRATION}}'
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_HOST: vikunja-db
+      VIKUNJA_DATABASE_USER: '{{POSTGRES_USER}}'
+      VIKUNJA_DATABASE_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      VIKUNJA_DATABASE_DATABASE: '{{POSTGRES_DATABASE}}'
+    volumes:
+    - vikunja-files:/app/vikunja/files
+    depends_on:
+    - vikunja-db
+    ports:
+    - '{{HTTP_PORT}}:3456'
+  vikunja-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DATABASE}}'
+    volumes:
+    - vikunja-db:/var/lib/postgresql
+volumes:
+  vikunja-files:
+  vikunja-db:
+'''
+
+[[variables]]
+key = "APP_URL"
+label = "Vikunja Public URL"
+default = "https://tasks.example.com"
+description = "The full URL where Vikunja will be accessible (e.g., https://tasks.example.com). Required for CORS and link generation."
+
+[[variables]]
+key = "ENABLE_REGISTRATION"
+label = "Enable Registration"
+default = "true"
+description = "Allow new users to register. Set to false to disable after creating your account."
+
+[[variables]]
+key = "POSTGRES_DATABASE"
+label = "Database Name"
+default = "vikunja"
+description = "The name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database Password"
+generate = true
+description = "The PostgreSQL database password."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database User"
+default = "vikunja"
+description = "The PostgreSQL database user."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "PostgreSQL Version"
+default = "18"
+description = "Check out valid tags at https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "SERVICE_SECRET"
+label = "Service Secret"
+generate = true
+description = "A random secret used for JWT signing and encryption. Must be set, otherwise it regenerates on each restart."
+
+[[variables]]
+key = "TIMEZONE"
+label = "Timezone"
+default = "UTC"
+description = "Timezone for timestamps (e.g., UTC, America/New_York). Uses TZ database names."
+
+[[variables]]
+key = "VIKUNJA_VERSION"
+label = "Vikunja Version"
+default = "2.3"
+description = "Check out valid tags at https://hub.docker.com/r/vikunja/vikunja/tags"

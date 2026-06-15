@@ -1,0 +1,106 @@
+slug = "passbolt"
+name = "Passbolt (MariaDB)"
+category = "Database"
+description = "Passbolt is a free and open source password manager that allows team members to store and share credentials securely."
+keywords = ["(mariadb)", "passbolt"]
+compose = '''
+services:
+  passbolt-db:
+    image: mariadb:{{MARIA_VERSION}}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_ROOT_PASS}}'
+      MYSQL_DATABASE: passbolt_oca
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+    volumes:
+    - passbolt-db:/var/lib/mysql
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  passbolt-pb:
+    image: passbolt/passbolt:{{PB_VERSION}}
+    restart: unless-stopped
+    depends_on:
+    - passbolt-db
+    environment:
+      DATASOURCES_DEFAULT_HOST: passbolt-db:3306
+      DATASOURCES_DEFAULT_DATABASE: passbolt_oca
+      DATASOURCES_DEFAULT_USERNAME: '{{DB_USER}}'
+      DATASOURCES_DEFAULT_PASSWORD: '{{DB_PASS}}'
+      APP_FULL_BASE_URL: '{{URL}}'
+      EMAIL_TRANSPORT_DEFAULT_HOST: '{{EMAIL_HOST}}'
+      EMAIL_TRANSPORT_DEFAULT_PORT: '{{EMAIL_PORT}}'
+      EMAIL_TRANSPORT_DEFAULT_USERNAME: '{{EMAIL_USER}}'
+      EMAIL_DEFAULT_FROM: '{{EMAIL_USER}}'
+      EMAIL_TRANSPORT_DEFAULT_PASSWORD: '{{EMAIL_PASS}}'
+      EMAIL_TRANSPORT_DEFAULT_TLS: '{{EMAIL_TLS}}'
+    volumes:
+    - passbolt-gpg:/etc/passbolt/gpg
+    - passbolt-jwt:/etc/passbolt/jwt
+    - passbolt-images:/usr/share/php/passbolt/webroot/img/public/images
+volumes:
+  passbolt-db:
+  passbolt-gpg:
+  passbolt-jwt:
+  passbolt-images:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+default = "password"
+
+[[variables]]
+key = "DB_ROOT_PASS"
+label = "Database Root Password"
+default = "rootpassword"
+
+[[variables]]
+key = "DB_USER"
+label = "Database Username"
+default = "passbolt"
+
+[[variables]]
+key = "EMAIL_HOST"
+label = "Email SMTP Server"
+default = "smtp.gmail.com"
+description = "Host used as smtp server. More info: https://help.passbolt.com/configure/email/setup."
+
+[[variables]]
+key = "EMAIL_PASS"
+label = "Email Password"
+default = "password"
+
+[[variables]]
+key = "EMAIL_PORT"
+label = "Email SMTP Port"
+default = "587"
+description = "Port used with the smtp server. More info: https://help.passbolt.com/configure/email/setup"
+
+[[variables]]
+key = "EMAIL_TLS"
+label = "TLS Enabled"
+default = "true"
+
+[[variables]]
+key = "EMAIL_USER"
+label = "Email Username"
+default = "user@gmail.com"
+
+[[variables]]
+key = "MARIA_VERSION"
+label = "MariaDB Version"
+default = "10.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb"
+
+[[variables]]
+key = "PB_VERSION"
+label = "Passbolt Version"
+default = "3.9.0-2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/passbolt/passbolt/tags/"
+
+[[variables]]
+key = "URL"
+label = "Passbolt URL"
+default = "https://yourdomain.com"
+description = "This is VERY IMPORTANT, if you won't use a custom domain (ex: km.yourdomain.com), after deployed you will need to go into the App Configs and update the ENV APP_FULL_BASE_URL with the external URL that CapRover assigned to your App, otherwhise it won't work"

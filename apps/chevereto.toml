@@ -1,0 +1,73 @@
+slug = "chevereto"
+name = "Chevereto"
+category = "App"
+description = "Chevereto is a powerful and fast image hosting script that allows you to create your very own full featured image hosting website in just minutes."
+keywords = ["chevereto"]
+compose = '''
+services:
+  chevereto:
+    depends_on:
+    - chevereto-mariadb
+    image: nmtan/chevereto:{{CHEVERETO_VERSION}}
+    restart: always
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+      CHEVERETO_DB_HOST: chevereto-mariadb
+      CHEVERETO_DB_USERNAME: '{{MARIADB}}-user'
+      CHEVERETO_DB_PASSWORD: '{{MARIADB}}-pass'
+      CHEVERETO_DB_NAME: '{{MARIADB}}-db'
+    volumes:
+    - chevereto-images:/var/www/html/images
+  chevereto-mariadb:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: '{{MARIADB}}-db'
+      MYSQL_USER: '{{MARIADB}}-user'
+      MYSQL_PASSWORD: '{{MARIADB}}-pass'
+    volumes:
+    - chevereto-mariadb-data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:3306'
+volumes:
+  chevereto-images:
+  chevereto-mariadb-data:
+'''
+
+[[variables]]
+key = "CHEVERETO_VERSION"
+label = "Version Tag"
+default = "1.2.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/nmtan/chevereto/tags"
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "MARIADB"
+label = "Mariadb"
+default = ""
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.5.6"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags/"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "Europe/Brussels"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

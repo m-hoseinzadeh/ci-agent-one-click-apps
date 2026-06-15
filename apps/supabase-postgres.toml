@@ -1,0 +1,95 @@
+slug = "supabase-postgres"
+name = "Supabase PostgreSQL"
+category = "Database"
+description = "Supabase makes it easy to use Postgres."
+keywords = ["postgres", "postgresql", "supabase"]
+compose = '''
+services:
+  supabase-postgres-db:
+    image: bitnamilegacy/supabase-postgres-archived:{{APP_VERSION}}
+    volumes:
+    - supabase-postgres-db-persistence:/bitnami/postgresql
+    restart: always
+    environment:
+      POSTGRES_USER: '{{PG_USER}}'
+      POSTGRES_DB: '{{PG_DB}}'
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_PORT_NUMBER: '{{PG_PORT}}'
+      POSTGRES_INITDB_ARGS: '{{PG_INITDB_ARGS}}'
+      POSTGRES_REPLICATION_USER: '{{PG_REPL_USER}}'
+      POSTGRES_REPLICATION_MODE: '{{PG_REPL_MODE}}'
+      POSTGRES_REPLICATION_PASSWORD: '{{PG_REPL_PASS}}'
+      POSTGRES_MASTER_HOST: '{{PG_MASTER_HOST}}'
+      POSTGRES_MASTER_PORT_NUMBER: '{{PG_MASTER_PORT}}'
+      POSTGRES_NUM_SYNCHRONOUS_REPLICAS: '{{PG_NUM_SYNC_REPL}}'
+      POSTGRES_SYNCHRONOUS_COMMIT_MODE: '{{PG_SYNC_COMMIT_MODE}}'
+volumes:
+  supabase-postgres-db-persistence:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "Postgres Version"
+default = "15.1.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/bitnamilegacy/supabase-postgres/tags"
+
+[[variables]]
+key = "PG_DB"
+label = "Postgres Default Database"
+default = "postgres"
+
+[[variables]]
+key = "PG_INITDB_ARGS"
+label = "OPTIONAL: Arguments for 'postgres initdb'"
+description = "For example, --data-checksums"
+
+[[variables]]
+key = "PG_MASTER_HOST"
+label = "Postgres Master Host"
+description = "Hostname/IP of replication master (slave parameter). No defaults."
+
+[[variables]]
+key = "PG_MASTER_PORT"
+label = "Postgres Master Port"
+description = "Server port of the replication master (slave parameter). Defaults to 5432."
+
+[[variables]]
+key = "PG_NUM_SYNC_REPL"
+label = "Postgres number of synchronous replica"
+description = "Number of replicas that will enable synchronous replication"
+
+[[variables]]
+key = "PG_PASS"
+label = "Postgres Password"
+generate = true
+
+[[variables]]
+key = "PG_PORT"
+label = "Postgres Port"
+default = "5432"
+
+[[variables]]
+key = "PG_REPL_MODE"
+label = "Postgres Replication Mode"
+description = "Replication mode. Possible values `master` or `slave`. No defaults."
+
+[[variables]]
+key = "PG_REPL_PASS"
+label = "Postgres Replication Password"
+description = "The replication users password. No defaults."
+
+[[variables]]
+key = "PG_REPL_USER"
+label = "Postgres Replication User"
+description = "The replication user created on the master on first run. No defaults."
+
+[[variables]]
+key = "PG_SYNC_COMMIT_MODE"
+label = "Postgres Replication Commit Mode"
+default = "on"
+description = "Type of synchronous commit. The available options are: `on`, `remote_apply`, `remote_write`, `local` and `off`. The default value is on."
+
+[[variables]]
+key = "PG_USER"
+label = "Postgres Username"
+default = "postgres"

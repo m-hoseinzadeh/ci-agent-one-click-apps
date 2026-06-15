@@ -1,0 +1,111 @@
+slug = "mongodb-backup-s3"
+name = "MongoDB Backup Amazon S3"
+category = "Database"
+description = "Runs mongodump to backup data using cronjob to an Amazon S3 bucket"
+keywords = ["amazon", "backup", "mongodb", "s3"]
+compose = '''
+services:
+  mongodb-backup-s3:
+    environment:
+      AWS_ACCESS_KEY_ID: '{{AWS_ACCESS_KEY_ID}}'
+      AWS_SECRET_ACCESS_KEY: '{{AWS_SECRET_ACCESS_KEY}}'
+      BUCKET: '{{BUCKET}}'
+      BACKUP_FOLDER: '{{BACKUP_FOLDER}}'
+      MONGODB_HOST: '{{MONGODB_HOST}}'
+      MONGODB_PORT: '{{MONGODB_PORT}}'
+      MONGODB_USER: '{{MONGODB_USER}}'
+      MONGODB_PASS: '{{MONGODB_PASS}}'
+      MONGODB_DB: '{{MONGODB_DB}}'
+      EXTRA_OPTS: '{{EXTRA_OPTS}}'
+      CRON_TIME: '{{CRON_TIME}}'
+      TZ: '{{TZ}}'
+      CRON_TZ: '{{TZ}}'
+      INIT_BACKUP: '{{INIT_BACKUP}}'
+      INIT_RESTORE: '{{INIT_RESTORE}}'
+      DISABLE_CRON: '{{DISABLE_CRON}}'
+    image: halvves/mongodb-backup-s3@sha256:e709db5e0fe5d44873ac5a385af214e951f2a0366a7c02b515ebf7c983658b0c
+    restart: always
+'''
+
+[[variables]]
+key = "AWS_ACCESS_KEY_ID"
+label = "AWS ACCESS KEY ID"
+description = "Your aws access key id (for your s3 bucket)"
+
+[[variables]]
+key = "AWS_SECRET_ACCESS_KEY"
+label = "AWS SECRET ACCESS KEY"
+description = "Your aws secret access key (for your s3 bucket)"
+
+[[variables]]
+key = "BACKUP_FOLDER"
+label = "BACKUP_FOLDER"
+default = "mongo_dumps/"
+description = "Name of folder or path to put backups (eg myapp/db_backups/)"
+
+[[variables]]
+key = "BUCKET"
+label = "BUCKET"
+description = "Your s3 bucket."
+
+[[variables]]
+key = "CRON_TIME"
+label = "CRON TIME"
+default = "0 3 * * *"
+description = "The interval of cron job to run mongodump. 0 3 * * * by default, which is every day at 03:00hrs."
+
+[[variables]]
+key = "DISABLE_CRON"
+label = "DISABLE CRON"
+default = ""
+description = "if set (any string, eg.true), it will skip setting up automated backups. good for when you want to use this container to seed a dev environment."
+
+[[variables]]
+key = "EXTRA_OPTS"
+label = "EXTRA_OPTS"
+description = "Any extra options to pass to mongodump command. If you see *Unrecognized field 'snapshot'* problem add --forceTableScan here"
+
+[[variables]]
+key = "INIT_BACKUP"
+label = "INIT BACKUP"
+default = "true"
+description = "If set, create a backup when the container launched"
+
+[[variables]]
+key = "INIT_RESTORE"
+label = "INIT RESTORE"
+default = ""
+description = "If set (any string, eg. true), restore from latest when container is launched."
+
+[[variables]]
+key = "MONGODB_DB"
+label = "MONGODB DB"
+description = "The database name to dump. If not specified, it will dump all the databases"
+
+[[variables]]
+key = "MONGODB_HOST"
+label = "MONGODB HOST"
+description = "The host/ip of your mongodb database. For CapRover hosted database, use srv-captain--your-mongodb-name"
+
+[[variables]]
+key = "MONGODB_PASS"
+label = "MONGODB PASS"
+description = "The password of your mongodb database"
+
+[[variables]]
+key = "MONGODB_PORT"
+label = "MONGODB PORT"
+default = "27017"
+description = "The port number of your mongodb database"
+
+[[variables]]
+key = "MONGODB_USER"
+label = "MONGODB USER"
+default = "admin"
+description = "The username of your mongodb database. If MONGODB_USER is empty while MONGODB_PASS is not, the image will use admin as the default username"
+
+[[variables]]
+key = "TZ"
+label = "TIMEZONE"
+default = "US/Eastern"
+description = "timezone"

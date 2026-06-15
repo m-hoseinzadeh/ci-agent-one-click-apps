@@ -1,0 +1,46 @@
+slug = "mysql-backup"
+name = "Mysql-Backup"
+category = "Database"
+description = "mysql-backup is a simple way to do MySQL database backups and restores when the database is running in a container."
+keywords = ["backup", "mysql"]
+compose = '''
+services:
+  mysql-backup-db:
+    image: databack/mysql-backup:{{MYSQL_BACKUP_VERSION}}
+    restart: always
+    environment:
+      DB_SERVER: '{{DB_SERVER}}'
+      DB_PORT: '{{DB_PORT}}'
+      DB_USER: '{{DB_USER}}'
+      DB_PASS: '{{DB_PASSWORD}}'
+'''
+
+[[variables]]
+key = "DB_PASSWORD"
+label = "Database Password"
+default = ""
+description = "Database Password"
+
+[[variables]]
+key = "DB_PORT"
+label = "Database Port"
+default = "3306"
+description = "Database Port"
+
+[[variables]]
+key = "DB_SERVER"
+label = "Database Server"
+default = "srv-captain--"
+description = "Database Server"
+
+[[variables]]
+key = "DB_USER"
+label = "Database User"
+default = "root"
+description = "Database User"
+
+[[variables]]
+key = "MYSQL_BACKUP_VERSION"
+label = "Mysql Backup Version"
+default = "v0.11.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/databack/mysql-backup/tags"

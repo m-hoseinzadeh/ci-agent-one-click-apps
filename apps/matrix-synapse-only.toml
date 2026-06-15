@@ -1,0 +1,24 @@
+slug = "matrix-synapse-only"
+name = "Matrix Synapse - No Database"
+category = "Database"
+description = "Server for the matrix protocol (external PostgreSQL)"
+keywords = ["database", "matrix", "no", "only", "synapse"]
+compose = '''
+services:
+  matrix-synapse-only:
+    restart: unless-stopped
+    environment:
+      TZ: '{{TIME_ZONE}}'
+    volumes:
+    - matrix-synapse-only-data:/data
+    ports:
+    - '{{HTTP_PORT}}:8008'
+volumes:
+  matrix-synapse-only-data:
+'''
+
+[[variables]]
+key = "TIME_ZONE"
+label = "Time zone"
+default = "Europe/Berlin"
+description = "The time zone of your server https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

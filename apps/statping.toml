@@ -1,0 +1,74 @@
+slug = "statping"
+name = "Statping"
+category = "Monitoring"
+description = "Statping - Web and App Status Monitoring for Any Type of Project."
+keywords = ["statping"]
+compose = '''
+services:
+  statping:
+    depends_on:
+    - statping-postgres
+    image: statping/statping:{{STATPING_VERSION}}
+    volumes:
+    - statping-app:/app
+    environment:
+      ADMIN_USER: '{{ADMIN_USER}}'
+      ADMIN_PASSWORD: '{{ADMIN_PASS}}'
+      ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      DB_CONN: postgres
+      DB_HOST: statping-postgres
+      DB_USER: '{{DB_USER}}'
+      DB_PASS: '{{DB_PASS}}'
+      DB_DATABASE: '{{DB_NAME}}'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  statping-postgres:
+    image: postgres:13-alpine
+    environment:
+      POSTGRES_USER: '{{DB_USER}}'
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_DB: '{{DB_NAME}}'
+    volumes:
+    - statping-postgres-data:/var/lib/postgresql/data
+volumes:
+  statping-app:
+  statping-postgres-data:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Statping Admin Email"
+
+[[variables]]
+key = "ADMIN_PASS"
+label = "Statping Admin Password"
+description = "Password to access the statping dashboard"
+
+[[variables]]
+key = "ADMIN_USER"
+label = "Statping Admin"
+description = "Username to access the statping dashboard"
+
+[[variables]]
+key = "DB_NAME"
+label = "Database name"
+default = "statping"
+description = "Database name"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+generate = true
+description = "Password to connect to the database"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "statping"
+description = "Database username"
+
+[[variables]]
+key = "STATPING_VERSION"
+label = "Statping Version"
+default = "v0.90.74"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/statping/statping/tags"

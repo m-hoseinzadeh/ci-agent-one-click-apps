@@ -1,0 +1,96 @@
+slug = "budibase"
+name = "Budibase"
+category = "App"
+description = "Low code platform for creating internal apps, workflows, and admin panels in minutes"
+keywords = ["budibase"]
+compose = '''
+services:
+  budibase:
+    image: budibase/budibase:{{BUDIBASE_VERSION}}
+    environment:
+      ENABLE_ANALYTICS: '{{BUDIBASE_ENABLE_ANALYTICS}}'
+      JWT_SECRET: '{{BUDIBASE_JWT_SECRET}}'
+      MINIO_ACCESS_KEY: '{{MINIO_ACCESS_KEY}}'
+      MINIO_SECRET_KEY: '{{MINIO_SECRET_KEY}}'
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      COUCHDB_USER: '{{COUCH_DB_USER}}'
+      COUCHDB_PASSWORD: '{{COUCH_DB_PASSWORD}}'
+      INTERNAL_API_KEY: '{{BUDIBASE_INTERNAL_API_KEY}}'
+      BB_ADMIN_USER_EMAIL: '{{BUDIBASE_ADMIN_USER_EMAIL}}'
+      BB_ADMIN_USER_PASSWORD: '{{BUDIBASE_ADMIN_USER_PASSWORD}}'
+      SENTRY_DSN: '{{BUDIBASE_SENTRY_DSN}}'
+    volumes:
+    - budibase:/data
+volumes:
+  budibase:
+'''
+
+[[variables]]
+key = "BUDIBASE_ADMIN_USER_EMAIL"
+label = "Application | Admin User Mail"
+description = "Administrator mail address."
+
+[[variables]]
+key = "BUDIBASE_ADMIN_USER_PASSWORD"
+label = "Application | Admin User Password"
+generate = true
+description = "Administrator password."
+
+[[variables]]
+key = "BUDIBASE_ENABLE_ANALYTICS"
+label = "Application | Enable Analytics"
+default = "false"
+description = "Whether to send telemetry data."
+
+[[variables]]
+key = "BUDIBASE_INTERNAL_API_KEY"
+label = "Application | Internal API Key"
+generate = true
+description = "Key for the internal API."
+
+[[variables]]
+key = "BUDIBASE_JWT_SECRET"
+label = "Application | JWT Secret"
+generate = true
+description = "Secret for JWT."
+
+[[variables]]
+key = "BUDIBASE_SENTRY_DSN"
+label = "Application | Sentry DSN"
+description = "Optional Sentry DSN for error tracking."
+
+[[variables]]
+key = "BUDIBASE_VERSION"
+label = "Application | Version"
+default = "v2.0.31"
+description = "Budibase version. Check out their valid tags at https://hub.docker.com/r/budibase/budibase/tags"
+
+[[variables]]
+key = "COUCH_DB_PASSWORD"
+label = "Database | Password"
+generate = true
+description = "Password for CouchDB."
+
+[[variables]]
+key = "COUCH_DB_USER"
+label = "Database | User"
+default = "budibase"
+description = "User for CouchDB."
+
+[[variables]]
+key = "MINIO_ACCESS_KEY"
+label = "Storage | Access Key"
+generate = true
+description = "Access key for Minio."
+
+[[variables]]
+key = "MINIO_SECRET_KEY"
+label = "Storage | Secret Key"
+generate = true
+description = "Secret key for Minio."
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Queue | Password"
+generate = true
+description = "Password for Redis."

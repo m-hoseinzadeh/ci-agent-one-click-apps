@@ -1,0 +1,16 @@
+slug = "cyberchef"
+name = "CyberChef"
+category = "App"
+description = "CyberChef is a simple, intuitive web app for carrying out all manner of \"cyber\" operations within a web browser."
+keywords = ["cyberchef"]
+compose = '''
+services:
+  cyberchef:
+    image: ghcr.io/gchq/cyberchef:{{CYBERCHEF_VERSION}}
+'''
+
+[[variables]]
+key = "CYBERCHEF_VERSION"
+label = "CyberChef App Version"
+default = "10"
+description = "Check out their Docker page for the valid tags https://github.com/gchq/CyberChef/pkgs/container/cyberchef"

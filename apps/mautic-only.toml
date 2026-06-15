@@ -1,0 +1,47 @@
+slug = "mautic-only"
+name = "Mautic - No Database"
+category = "Database"
+description = "This will create a Mautic only. You will need to create and configure the database information manually. Intended for advanced users."
+keywords = ["database", "mautic", "no", "only"]
+compose = '''
+services:
+  mautic-only:
+    image: mautic/mautic:{{MAUTIC_VERSION}}
+    volumes:
+    - mautic-only-data:/var/www/html
+    restart: always
+    environment:
+      MAUTIC_DB_HOST: '{{DB_HOST}}'
+      MAUTIC_DB_USER: '{{DB_USER}}'
+      MAUTIC_DB_PASSWORD: '{{DB_PASS}}'
+      MAUTIC_DB_NAME: '{{DB_NAME}}'
+      MAUTIC_RUN_CRON_JOBS: 'true'
+volumes:
+  mautic-only-data:
+'''
+
+[[variables]]
+key = "DB_HOST"
+label = "Database Host"
+description = "Database host ex. srv-captain--mydbsrv:3306"
+
+[[variables]]
+key = "DB_NAME"
+label = "Db Name"
+default = ""
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+description = "Inform the database password"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+description = "Inform the database user"
+
+[[variables]]
+key = "MAUTIC_VERSION"
+label = "Mautic Version"
+default = "v3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mautic/mautic/tags"

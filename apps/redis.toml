@@ -1,0 +1,33 @@
+slug = "redis"
+name = "Redis"
+category = "Database"
+description = "Redis is an in-memory data structure store, used as a database, cache and message broker"
+keywords = ["redis"]
+compose = '''
+services:
+  redis:
+    volumes:
+    - redis-redis-data:/data
+    restart: always
+    environment:
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+    image: redis:{{REDIS_VERSION}}
+    command:
+    - sh
+    - -c
+    - redis-server --requirepass $$REDIS_PASSWORD
+    ports:
+    - '{{HTTP_PORT}}:6379'
+volumes:
+  redis-redis-data:
+'''
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis Password"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version Tag"
+default = "7.2.4"
+description = "Check out their Docker page for the valid tags: https://hub.docker.com/_/redis?tab=tags"

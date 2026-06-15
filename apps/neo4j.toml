@@ -1,0 +1,37 @@
+slug = "neo4j"
+name = "Neo4j"
+category = "Database"
+description = "Neo4j is an open-source, NoSQL, native graph database that provides an ACID-compliant transactional backend for your applications."
+keywords = ["neo4j"]
+compose = '''
+services:
+  neo4j-db:
+    image: neo4j:{{NEO4J_VERSION}}
+    volumes:
+    - neo4j-db-data:/data
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: '{{DB_USER}}/{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:7474'
+volumes:
+  neo4j-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Neo4j Root password"
+generate = true
+description = "Password for the database user"
+
+[[variables]]
+key = "DB_USER"
+label = "Neo4j Root User"
+default = "neo4j"
+description = "Username for the database user"
+
+[[variables]]
+key = "NEO4J_VERSION"
+label = "Neo4j Version"
+default = "4.1.9"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/neo4j?tab=tags"

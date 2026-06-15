@@ -1,0 +1,68 @@
+slug = "mattermost-ee"
+name = "Mattermost Entreprise Edition E0"
+category = "Communication"
+description = "Mattermost Team Edition open source collaboration/chat software"
+keywords = ["e0", "edition", "ee", "entreprise", "mattermost"]
+compose = '''
+services:
+  mattermost-ee-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - mattermost-ee-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: mmuser
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: mattermost
+  mattermost-ee:
+    image: mattermost/mattermost-enterprise-edition:{{MATTERMOST_VERSION}}
+    depends_on:
+    - mattermost-ee-db
+    volumes:
+    - mattermost-ee-data:/mattermost/data
+    - mattermost-ee-logs:/mattermost/logs
+    - mattermost-ee-config:/mattermost/config
+    - mattermost-ee-plugins:/mattermost/plugins
+    - mattermost-ee-clientplugins:/mattermost/client/plugins
+    restart: always
+    environment:
+      MM_USERNAME: mmuser
+      MM_PASSWORD: '{{PG_PASS}}'
+      MM_DBNAME: mattermost
+      DB_HOST: mattermost-ee-db
+      MM_SERVICESETTINGS_SITEURL: https://mattermost-ee.{{ROOT_DOMAIN}}
+      MM_SQLSETTINGS_DATASOURCE: postgres://mmuser:{{PG_PASS}}@mattermost-ee-db:5432/mattermost?sslmode=disable&connect_timeout=10
+    ports:
+    - '{{HTTP_PORT}}:8065'
+volumes:
+  mattermost-ee-db-data:
+  mattermost-ee-data:
+  mattermost-ee-logs:
+  mattermost-ee-config:
+  mattermost-ee-plugins:
+  mattermost-ee-clientplugins:
+'''
+
+[[variables]]
+key = "MATTERMOST_VERSION"
+label = "mattermost Docker Image tag. Use 'latest' for updated images."
+default = "release-6.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mattermost/mattermost-prod-app/tags"
+
+[[variables]]
+key = "PG_PASS"
+label = "Database Password"
+generate = true
+description = "Password must be at least 30 characters.  Please use a random string."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "postgres database Docker Image tag. Use 'latest' for updated images."
+default = "14.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

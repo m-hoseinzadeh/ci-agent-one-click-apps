@@ -1,0 +1,197 @@
+slug = "browserless"
+name = "Browserless"
+category = "App"
+description = "Browserless Web is communication between web applications without the need for a web browser."
+keywords = ["browserless"]
+compose = '''
+services:
+  browserless:
+    documentation: https://docs.browserless.io/docs/docker-quickstart.html
+    image: browserless/chrome:{{BROWSERLESS_VERSION}}
+    restart: always
+    volumes:
+    - browserless-workspace:/downloads
+    - browserless-metrics:/metrics
+    - browserless-user-data:/user-data
+    environment:
+      DEMO_MODE: '{{DEMO_MODE}}'
+      ENABLE_DEBUGGER: '{{ENABLE_DEBUGGER}}'
+      MAX_CONCURRENT_SESSIONS: '{{MAX_CONCURRENT_SESSIONS}}'
+      CONNECTION_TIMEOUT: '{{CONNECTION_TIMEOUT}}'
+      MAX_QUEUE_LENGTH: '{{MAX_QUEUE_LENGTH}}'
+      WORKSPACE_DIR: '{{WORKSPACE_DIR}}'
+      WORKSPACE_DELETE_EXPIRED: '{{WORKSPACE_DELETE_EXPIRED}}'
+      WORKSPACE_EXPIRE_DAYS: '{{WORKSPACE_EXPIRE_DAYS}}'
+      DEFAULT_USER_DATA_DIR: '{{DEFAULT_USER_DATA_DIR}}'
+      METRICS_JSON_PATH: '{{METRICS_JSON_PATH}}'
+      DISABLE_AUTO_SET_DOWNLOAD_BEHAVIOR: '{{DISABLE_AUTO_SET_DOWNLOAD_BEHAVIOR}}'
+      DEFAULT_BLOCK_ADS: '{{DEFAULT_BLOCK_ADS}}'
+      ENABLE_API_GET: '{{ENABLE_API_GET}}'
+      TOKEN: '{{TOKEN}}'
+      ENABLE_CORS: '{{ENABLE_CORS}}'
+      ENABLE_XVBF: '{{ENABLE_XVBF}}'
+      EXIT_ON_HEALTH_FAILURE: '{{EXIT_ON_HEALTH_FAILURE}}'
+      DEFAULT_IGNORE_HTTPS_ERRORS: '{{DEFAULT_IGNORE_HTTPS_ERRORS}}'
+      DEFAULT_IGNORE_DEFAULT_ARGS: '{{DEFAULT_IGNORE_DEFAULT_ARGS}}'
+      DISABLED_FEATURES: '{{DISABLED_FEATURES}}'
+      PREBOOT_CHROME: '{{PREBOOT_CHROME}}'
+      KEEP_ALIVE: '{{KEEP_ALIVE}}'
+      CHROME_REFRESH_TIME: '{{CHROME_REFRESH_TIME}}'
+      FUNCTION_ENABLE_INCOGNITO_MODE: '{{FUNCTION_ENABLE_INCOGNITO_MODE}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  browserless-workspace:
+  browserless-metrics:
+  browserless-user-data:
+'''
+
+[[variables]]
+key = "BROWSERLESS_VERSION"
+label = "Browserless Version"
+default = "1-chrome-stable"
+description = "Browserless Image Version"
+
+[[variables]]
+key = "CHROME_REFRESH_TIME"
+label = "Chrome Refresh Time"
+default = "3600000"
+description = "When both PREBOOT_CHROME and KEEP_ALIVE are true browserless keeps track of how long Chrome has been running, and will attempt to close it after a certain period."
+
+[[variables]]
+key = "CONNECTION_TIMEOUT"
+label = "Connection Timeout"
+default = "30000"
+description = "Connection timeout is a parameter that sets how long any session can run for. This is in place to prevent scripts that don't cleanup properly, or run into errors tha cause them to hang. The value of which can be set in milliseconds, and defaults to 30000, or 30 seconds."
+
+[[variables]]
+key = "DEFAULT_BLOCK_ADS"
+label = "Block Ads"
+default = "false"
+description = "Starts all sessions with the ad-blocker already running"
+
+[[variables]]
+key = "DEFAULT_IGNORE_DEFAULT_ARGS"
+label = "Ignore Default Args"
+default = "false"
+description = "When set this will override any default arguments set by browserless to Chrome's launch arguments"
+
+[[variables]]
+key = "DEFAULT_IGNORE_HTTPS_ERRORS"
+label = "Ignore HTTPS errors"
+default = "true"
+description = "Tells browserless to, by default, ignore or not ignore HTTPS errors on sites."
+
+[[variables]]
+key = "DEFAULT_USER_DATA_DIR"
+label = "User Data Dir"
+default = "/user-data"
+description = "Sets a default directory to cache user data to (cookies, local-storage and more)."
+
+[[variables]]
+key = "DEMO_MODE"
+label = "Demo Mode"
+default = "false"
+description = "If you want to serve the interactive debugger, but not allow it to handle puppeteer.connect calls, you can do so via the DEMO_MODE flag."
+
+[[variables]]
+key = "DISABLED_FEATURES"
+label = "Disable Routes"
+default = ""
+description = "Allows for disabling routes by supplying a list of routes to disable"
+
+[[variables]]
+key = "DISABLE_AUTO_SET_DOWNLOAD_BEHAVIOR"
+label = "Disable download behavior"
+default = "false"
+description = "By default, browserless tells chromium to use a special directory in /tmp for storing files. If you want opt-out of this behavior, set to true"
+
+[[variables]]
+key = "ENABLE_API_GET"
+label = "Enable API GET"
+default = "true"
+description = "Allows for enabling an expiremental GET-style operation, as opposed to POSTing bodies of code to run on our APIs."
+
+[[variables]]
+key = "ENABLE_CORS"
+label = "Enable CORS"
+default = "true"
+description = "You can enable cross-origin-resource-sharing with browserless"
+
+[[variables]]
+key = "ENABLE_DEBUGGER"
+label = "Enable Debugger"
+default = "true"
+description = "If you want to disable the debugger (and all accompnaying HTML) you can set the ENABLE_DEBUGGER to false to only allow puppeteer.connect calls to succeed."
+
+[[variables]]
+key = "ENABLE_XVBF"
+label = "Enable XVFB"
+default = "true"
+description = "in some hosting environments it's not possible to write to the appropriate folders to support XVFB and you should set this parameter to false."
+
+[[variables]]
+key = "EXIT_ON_HEALTH_FAILURE"
+label = "Exit on health failure"
+default = "true"
+description = "In order for browserless to restart on health-failure checks, you'll have to set to true."
+
+[[variables]]
+key = "FUNCTION_ENABLE_INCOGNITO_MODE"
+label = "Function Incognito Mode"
+default = "false"
+description = "When set, and PREBOOT_CHROME and KEEP_ALIVE are set, allows for generating a fresh page (incognito page) from a re-used browser."
+
+[[variables]]
+key = "KEEP_ALIVE"
+label = "Keeping Chrome Alive"
+default = "false"
+description = "When the PREBOOT_CHROME flag is set, you can optionally keep Chrome \"alive\" after sessions are complete. This allows you to re-use Chrome instances without having to start and stop them (making for much faster execution)."
+
+[[variables]]
+key = "MAX_CONCURRENT_SESSIONS"
+label = "Max Concurrent Sessions"
+default = "5"
+description = "Since running Chrome can be rather resource intensive you'll probably want to limit the number of concurrent sessions. This is, by default, set to 5 when not specified. Once the limit is reached then queueing begins to take place and requests will wait until more workers are ready."
+
+[[variables]]
+key = "MAX_QUEUE_LENGTH"
+label = "Max Queue Length"
+default = "5"
+description = "This value determines how many items in the queue are allowed before requests are issued a 429 response code and closed."
+
+[[variables]]
+key = "METRICS_JSON_PATH"
+label = "Persisting Metrics"
+default = "/metrics/metrics.json"
+description = "browserless captures metrics while it's running, and exposes them via the /metrics endpoint."
+
+[[variables]]
+key = "PREBOOT_CHROME"
+label = "Pre-booting Chrome"
+default = "false"
+description = "You can, optionally, pre-boot Chrome and keep it in a pool of instances (determined by MAX_CONCURRENT_SESSIONS) in order to cut-down on the boot time."
+
+[[variables]]
+key = "TOKEN"
+label = "Token"
+generate = true
+description = "If you're exposing your instance to the world, but don't want anyone to use it, you can optionally apply a TOKEN param that will restrict calls without a token query-string parameter."
+
+[[variables]]
+key = "WORKSPACE_DELETE_EXPIRED"
+label = "Deleting workspace files automatically"
+default = "false"
+description = "When downloads from Chrome are larger, it's easy for the docker image to fill it's disk-space if you forget to periodically delete files."
+
+[[variables]]
+key = "WORKSPACE_DIR"
+label = "workspace location"
+default = "/downloads"
+description = "Defining a workspace location"
+
+[[variables]]
+key = "WORKSPACE_EXPIRE_DAYS"
+label = "time to delete workspace files"
+default = "30"
+description = "When WORKSPACE_DELETE_EXPIRED is true, browserless attempts to delete files older than 30 days in the workspace directory."

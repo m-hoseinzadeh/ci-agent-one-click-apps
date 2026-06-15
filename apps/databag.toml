@@ -1,0 +1,31 @@
+slug = "databag"
+name = "Databag"
+category = "Communication"
+description = "Databag is a federated chat app for selfhosting that focuses on privacy and security; the service includes clients for the browser as well as F-Droid, iOS and Android."
+keywords = ["databag"]
+compose = '''
+services:
+  databag:
+    image: balzack/databag:{{VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PHP_TZ: '{{TZ}}'
+    volumes:
+    - databag-data:/var/lib/databag
+    ports:
+    - '{{HTTP_PORT}}:7000'
+volumes:
+  databag-data:
+'''
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/Los_Angeles"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "VERSION"
+label = "Databag Version"
+default = "0.1.17"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/balzack/databag/tags"

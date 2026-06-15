@@ -1,0 +1,58 @@
+slug = "miniflux"
+name = "Miniflux"
+category = "App"
+description = "Self hosted RSS server"
+keywords = ["miniflux"]
+compose = '''
+services:
+  miniflux-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - miniflux-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: miniflux
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: miniflux
+  miniflux:
+    image: miniflux/miniflux:{{MINIFLUX_VERSION}}
+    depends_on:
+    - miniflux-db
+    restart: always
+    environment:
+      DATABASE_URL: postgres://miniflux:{{POSTGRES_PASSWORD}}@miniflux-db/miniflux?sslmode=disable
+      RUN_MIGRATIONS: '1'
+      CREATE_ADMIN: '1'
+      ADMIN_USERNAME: '{{ADMIN_USER}}'
+      ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  miniflux-db-data:
+'''
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Admin Password"
+generate = true
+
+[[variables]]
+key = "ADMIN_USER"
+label = "Admin user"
+
+[[variables]]
+key = "MINIFLUX_VERSION"
+label = "Miniflux version"
+default = "2.0.22"
+description = "Check out valid tags at https://hub.docker.com/r/miniflux/miniflux/tags"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "9.6.18-alpine"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"

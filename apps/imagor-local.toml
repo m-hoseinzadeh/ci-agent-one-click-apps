@@ -1,0 +1,40 @@
+slug = "imagor-local"
+name = "Imagor (Local storage)"
+category = "Storage"
+description = "Imagor is a fast, Docker-ready image processing server written in Go. (Stores images locally as docker volumes)"
+keywords = ["(local", "imagor", "local", "storage)"]
+compose = '''
+services:
+  imagor-local:
+    image: shumc/imagor:{{IMAGOR_VERSION}}
+    volumes:
+    - imagor-local-data:/mnt/data
+    environment:
+      PORT: 80
+      IMAGOR_UNSAFE: '{{ENV_IMAGOR_UNSAFE}}'
+      IMAGOR_SECRET: '{{ENV_IMAGOR_SECRET}}'
+      FILE_LOADER_BASE_DIR: /mnt/data
+      FILE_STORAGE_BASE_DIR: /mnt/data
+      FILE_RESULT_STORAGE_BASE_DIR: /mnt/data/result
+    restart: always
+volumes:
+  imagor-local-data:
+'''
+
+[[variables]]
+key = "ENV_IMAGOR_SECRET"
+label = "Imagor Secret"
+generate = true
+description = "Secret key for URL signature"
+
+[[variables]]
+key = "ENV_IMAGOR_UNSAFE"
+label = "Imagor Undafe"
+default = "1"
+description = "unsafe URL for testing (valid value 1 or 0)"
+
+[[variables]]
+key = "IMAGOR_VERSION"
+label = "App Version"
+default = "0.8.11"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/shumc/imagor/tags"

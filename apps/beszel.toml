@@ -1,0 +1,23 @@
+slug = "beszel"
+name = "Beszel"
+category = "Monitoring"
+description = "Lightweight server monitoring hub with historical data, Docker stats, and alerts."
+keywords = ["beszel"]
+compose = '''
+services:
+  beszel:
+    image: henrygd/beszel:{{BESZEL_VERSION}}
+    restart: unless-stopped
+    volumes:
+    - beszel-data:/beszel_data
+    ports:
+    - '{{HTTP_PORT}}:8090'
+volumes:
+  beszel-data:
+'''
+
+[[variables]]
+key = "BESZEL_VERSION"
+label = "Beszel Version"
+default = "0.18.6"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/henrygd/beszel/tags"

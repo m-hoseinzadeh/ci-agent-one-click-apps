@@ -1,0 +1,96 @@
+slug = "teslamate"
+name = "TeslaMate"
+category = "App"
+description = "A powerful, self-hosted data logger for your Tesla."
+keywords = ["teslamate"]
+compose = '''
+services:
+  teslamate-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    restart: always
+    environment:
+      POSTGRES_DB: '{{DATABASE_NAME}}'
+      POSTGRES_USER: '{{DATABASE_USER}}'
+      POSTGRES_PASSWORD: '{{DATABASE_PASS}}'
+    volumes:
+    - teslamate-db:/var/lib/postgresql/data
+  teslamate-grafana:
+    image: teslamate/grafana:{{GRAFANA_VERSION}}
+    restart: always
+    environment:
+      DATABASE_USER: '{{DATABASE_USER}}'
+      DATABASE_PASS: '{{DATABASE_PASS}}'
+      DATABASE_NAME: '{{DATABASE_NAME}}'
+      DATABASE_HOST: teslamate-db
+    volumes:
+    - teslamate-db:/var/lib/postgresql/data
+    depends_on:
+    - teslamate-db
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  teslamate-mqtt:
+    volumes:
+    - teslamate-mosquitto-conf:/mosquitto/config
+    - teslamate-mosquitto-data:/mosquitto/data
+    restart: always
+  teslamate:
+    image: teslamate/teslamate:{{TESLAMATE_VERSION}}
+    environment:
+      ENCRYPTION_KEY: '{{SECRET_KEY}}'
+      DATABASE_USER: '{{DATABASE_USER}}'
+      DATABASE_PASS: '{{DATABASE_PASS}}'
+      DATABASE_NAME: '{{DATABASE_NAME}}'
+      DATABASE_HOST: teslamate-db
+      MQTT_HOST: teslamate-mqtt
+    volumes:
+    - teslamate-import:/opt/app/import
+    depends_on:
+    - teslamate-db
+volumes:
+  teslamate-db:
+  teslamate-mosquitto-conf:
+  teslamate-mosquitto-data:
+  teslamate-import:
+'''
+
+[[variables]]
+key = "DATABASE_NAME"
+label = "Database | Name"
+default = "teslamate"
+description = "Name of the PostgreSQL database."
+
+[[variables]]
+key = "DATABASE_PASS"
+label = "Database | Password"
+generate = true
+description = "Password of the PostgreSQL database user."
+
+[[variables]]
+key = "DATABASE_USER"
+label = "Database | User"
+default = "teslamate"
+description = "Username for the PostgreSQL database."
+
+[[variables]]
+key = "GRAFANA_VERSION"
+label = "Grafana | Version"
+default = "1.28"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/teslamate/grafana/tags"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Database | Version"
+default = "15"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "SECRET_KEY"
+label = "Application | Encryption"
+generate = true
+description = "A secure key to encrypt your Tesla API tokens"
+
+[[variables]]
+key = "TESLAMATE_VERSION"
+label = "Application | Version"
+default = "1.28"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/teslamate/teslamate/tags"

@@ -1,0 +1,25 @@
+slug = "sourcegraph"
+name = "Sourcegraph"
+category = "App"
+description = "Sourcegraph is a free, self-hosted code search and intelligence server that helps developers find, review, understand, and debug code"
+keywords = ["sourcegraph"]
+compose = '''
+services:
+  sourcegraph:
+    image: sourcegraph/server:{{CONTAINER_VERSION}}
+    volumes:
+    - sourcegraph-config:/etc/sourcegraph
+    - sourcegraph-data:/var/opt/sourcegraph
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:7080'
+volumes:
+  sourcegraph-config:
+  sourcegraph-data:
+'''
+
+[[variables]]
+key = "CONTAINER_VERSION"
+label = "Version"
+default = "3.2.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/sourcegraph/server/tags"

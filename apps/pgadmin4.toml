@@ -1,0 +1,36 @@
+slug = "pgadmin4"
+name = "pgAdmin"
+category = "App"
+description = "pgAdmin 4 is a complete rewrite of pgAdmin, built using Python and Javascript/jQuery"
+keywords = ["pgadmin", "pgadmin4"]
+compose = '''
+services:
+  pgadmin4:
+    image: dpage/pgadmin4:{{PGADMIN4_VERSION}}
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: '{{EMAIL}}'
+      PGADMIN_DEFAULT_PASSWORD: '{{PASSWORD}}'
+    volumes:
+    - pgadmin4-data:/var/lib/pgadmin
+volumes:
+  pgadmin4-data:
+'''
+
+[[variables]]
+key = "EMAIL"
+label = "Email"
+default = ""
+description = "Email address used when setting up the initial administrator account to login to pgAdmin"
+
+[[variables]]
+key = "PASSWORD"
+label = "Password"
+generate = true
+description = "Password used when setting up the initial administrator account to login to pgAdmin"
+
+[[variables]]
+key = "PGADMIN4_VERSION"
+label = "Version Tag"
+default = "4.27"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/dpage/pgadmin4/tags/"

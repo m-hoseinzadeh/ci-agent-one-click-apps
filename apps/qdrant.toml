@@ -1,0 +1,33 @@
+slug = "qdrant"
+name = "Qdrant Vector Database"
+category = "Database"
+description = "Qdrant - Vector Similarity Search Engine with extended filtering support."
+keywords = ["database", "qdrant", "vector"]
+compose = '''
+services:
+  qdrant:
+    image: qdrant/qdrant:{{QDRANT_VERSION}}
+    volumes:
+    - qdrant-data:/qdrant/storage
+    restart: always
+    environment:
+      QDRANT__LOG_LEVEL: info
+      QDRANT__STORAGE_PATH: /qdrant/storage
+      QDRANT__SERVICE__API_KEY: '{{QDRANT_API_KEY}}'
+    ports:
+    - '{{HTTP_PORT}}:6333'
+volumes:
+  qdrant-data:
+'''
+
+[[variables]]
+key = "QDRANT_API_KEY"
+label = "API Key for Qdrant Service"
+generate = true
+description = "A long random string used as the API key for Qdrant. You can change this value if needed."
+
+[[variables]]
+key = "QDRANT_VERSION"
+label = "Qdrant Docker Image tag. Use a specific version."
+default = "v1.18.0"
+description = "Check out the Docker page for valid tags https://hub.docker.com/r/qdrant/qdrant/tags"

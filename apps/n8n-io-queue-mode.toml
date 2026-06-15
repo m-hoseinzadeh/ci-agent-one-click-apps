@@ -1,0 +1,262 @@
+slug = "n8n-io-queue-mode"
+name = "n8n.io Queue Mode"
+category = "Automation"
+description = "Node based workflow automation tool - Queue mode"
+keywords = ["io", "mode", "n8n", "n8n.io", "queue"]
+compose = '''
+services:
+  n8n-io-queue-mode-editor:
+    image: n8nio/n8n:{{N8N_VERSION}}
+    restart: always
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8n-io-queue-mode-postgres
+      DB_POSTGRESDB_DATABASE: '{{POSTGRES_DB}}'
+      DB_POSTGRESDB_USER: '{{POSTGRES_USER}}'
+      DB_POSTGRESDB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
+      TZ: '{{N8N_TIMEZONE}}'
+      NODE_ENV: '{{N8N_ENVIRONMENT}}'
+      N8N_PROTOCOL: https
+      N8N_HOST: n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
+      N8N_SMTP_PORT: '{{N8N_SMTP_PORT}}'
+      N8N_SMTP_USER: '{{N8N_SMTP_USER}}'
+      N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
+      N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
+      N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
+      WEBHOOK_URL: https://n8n-io-queue-mode-webhooks.{{ROOT_DOMAIN}}
+      N8N_EDITOR_BASE_URL: https://n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      N8N_RUNNERS_ENABLED: true
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
+      N8N_DEFAULT_LOCALE: '{{N8N_DEFAULT_LOCALE}}'
+      N8N_ENCRYPTION_KEY: '{{N8N_ENCRYPTION_KEY}}'
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: n8n-io-queue-mode-redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      N8N_CONCURRENCY_PRODUCTION_LIMIT: '{{N8N_CONCURRENCY_PRODUCTION_LIMIT}}'
+      OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: true
+    volumes:
+    - n8n-io-queue-mode-data:/home/node/.n8n
+    - n8n-io-queue-mode-files:/files
+    depends_on:
+    - n8n-io-queue-mode-postgres
+    - n8n-io-queue-mode-redis
+    ports:
+    - '{{HTTP_PORT}}:5678'
+  n8n-io-queue-mode-workers:
+    image: n8nio/n8n:{{N8N_VERSION}}
+    restart: always
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8n-io-queue-mode-postgres
+      DB_POSTGRESDB_DATABASE: '{{POSTGRES_DB}}'
+      DB_POSTGRESDB_USER: '{{POSTGRES_USER}}'
+      DB_POSTGRESDB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
+      TZ: '{{N8N_TIMEZONE}}'
+      NODE_ENV: '{{N8N_ENVIRONMENT}}'
+      N8N_PROTOCOL: https
+      N8N_HOST: n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
+      N8N_SMTP_PORT: '{{N8N_SMTP_PORT}}'
+      N8N_SMTP_USER: '{{N8N_SMTP_USER}}'
+      N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
+      N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
+      N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
+      WEBHOOK_URL: https://n8n-io-queue-mode-webhooks.{{ROOT_DOMAIN}}
+      N8N_EDITOR_BASE_URL: https://n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      N8N_RUNNERS_ENABLED: true
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
+      N8N_DEFAULT_LOCALE: '{{N8N_DEFAULT_LOCALE}}'
+      N8N_ENCRYPTION_KEY: '{{N8N_ENCRYPTION_KEY}}'
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: n8n-io-queue-mode-redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      N8N_CONCURRENCY_PRODUCTION_LIMIT: '{{N8N_CONCURRENCY_PRODUCTION_LIMIT}}'
+      OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: true
+    volumes:
+    - n8n-io-queue-mode-data:/home/node/.n8n
+    - n8n-io-queue-mode-files:/files
+    depends_on:
+    - n8n-io-queue-mode-postgres
+    - n8n-io-queue-mode-redis
+    command:
+    - n8n
+    - worker
+  n8n-io-queue-mode-webhooks:
+    image: n8nio/n8n:{{N8N_VERSION}}
+    restart: always
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8n-io-queue-mode-postgres
+      DB_POSTGRESDB_DATABASE: '{{POSTGRES_DB}}'
+      DB_POSTGRESDB_USER: '{{POSTGRES_USER}}'
+      DB_POSTGRESDB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
+      TZ: '{{N8N_TIMEZONE}}'
+      NODE_ENV: '{{N8N_ENVIRONMENT}}'
+      N8N_PROTOCOL: https
+      N8N_HOST: n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
+      N8N_SMTP_PORT: '{{N8N_SMTP_PORT}}'
+      N8N_SMTP_USER: '{{N8N_SMTP_USER}}'
+      N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
+      N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
+      N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
+      WEBHOOK_URL: https://n8n-io-queue-mode-webhooks.{{ROOT_DOMAIN}}
+      N8N_EDITOR_BASE_URL: https://n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      N8N_RUNNERS_ENABLED: true
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
+      N8N_DEFAULT_LOCALE: '{{N8N_DEFAULT_LOCALE}}'
+      N8N_ENCRYPTION_KEY: '{{N8N_ENCRYPTION_KEY}}'
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: n8n-io-queue-mode-redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      N8N_CONCURRENCY_PRODUCTION_LIMIT: '{{N8N_CONCURRENCY_PRODUCTION_LIMIT}}'
+      OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS: true
+    volumes:
+    - n8n-io-queue-mode-data:/home/node/.n8n
+    - n8n-io-queue-mode-files:/files
+    depends_on:
+    - n8n-io-queue-mode-postgres
+    - n8n-io-queue-mode-redis
+    command:
+    - n8n
+    - webhook
+  n8n-io-queue-mode-postgres:
+    image: pgvector/pgvector:{{POSTGRES_VERSION}}
+    restart: always
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      TZ: '{{N8N_TIMEZONE}}'
+    volumes:
+    - n8n-io-queue-mode-postgres-data:/var/lib/postgresql/data
+  n8n-io-queue-mode-redis:
+    image: redis:{{REDIS_VERSION}}
+    restart: always
+    volumes:
+    - n8n-io-queue-mode-redis-data:/data
+volumes:
+  n8n-io-queue-mode-data:
+  n8n-io-queue-mode-files:
+  n8n-io-queue-mode-postgres-data:
+  n8n-io-queue-mode-redis-data:
+'''
+
+[[variables]]
+key = "N8N_CONCURRENCY_PRODUCTION_LIMIT"
+label = "Application | Executions"
+default = "10"
+description = "Set a concurrency limit for production worker concurrency."
+
+[[variables]]
+key = "N8N_DEFAULT_LOCALE"
+label = "Application | Locale"
+default = "en"
+description = "A locale identifier, compatible with the Accept-Language header. n8n doesn't support regional identifiers, such as de-AT."
+
+[[variables]]
+key = "N8N_DIAGNOSTICS_ENABLED"
+label = "Application | Enable Telemetry"
+default = "false"
+description = "Whether to send telemetry data to n8n.io."
+
+[[variables]]
+key = "N8N_ENCRYPTION_KEY"
+label = "Application | Security"
+generate = true
+description = "The encryption key to handle with credentials"
+
+[[variables]]
+key = "N8N_ENVIRONMENT"
+label = "Application | Environment"
+default = "production"
+description = "Application environment."
+
+[[variables]]
+key = "N8N_SMTP_HOST"
+label = "Application | SMTP Host"
+description = "SMTP host used for sending mails."
+
+[[variables]]
+key = "N8N_SMTP_PASS"
+label = "Application | SMTP Password"
+description = "SMTP user password used for sending mails."
+
+[[variables]]
+key = "N8N_SMTP_PORT"
+label = "Application | SMTP Port"
+description = "SMTP port used for sending mails. Usually `465`."
+
+[[variables]]
+key = "N8N_SMTP_SENDER"
+label = "Application | SMTP Sender"
+description = "SMTP sender used for sending mails (e.g. `N8N <n8n@example.com>`)."
+
+[[variables]]
+key = "N8N_SMTP_SSL"
+label = "Application | SMTP SSL"
+default = "true"
+description = "Whether to use SSL for sending mails through SMTP."
+
+[[variables]]
+key = "N8N_SMTP_USER"
+label = "Application | SMTP User"
+description = "SMTP user used for sending mails."
+
+[[variables]]
+key = "N8N_TIMEZONE"
+label = "Application | Timezone"
+default = "UTC"
+description = "Timezone used by the server. Please check out this page for valid time zones: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "N8N_VERSION"
+label = "Application | n8n.io"
+default = "1.106.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/n8nio/n8n/tags"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Postgres | Name"
+default = "n8n_queue"
+description = "Name of the PostgreSQL Postgres."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres | Password"
+generate = true
+description = "Password of the PostgreSQL Postgres user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Postgres | User"
+default = "n8n_queue"
+description = "Username for the PostgreSQL Postgres."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres | Version"
+default = "pg14"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/pgvector/pgvector/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis | Version"
+default = "8.2.0"
+description = "Check out their Docker page for the valid tags: https://hub.docker.com/_/redis?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

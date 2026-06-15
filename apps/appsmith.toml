@@ -1,0 +1,25 @@
+slug = "appsmith"
+name = "Appsmith"
+category = "Database"
+description = "Appsmith is the fastest way to build internal apps over any database or API."
+keywords = ["appsmith"]
+compose = '''
+services:
+  appsmith-appsmith:
+    image: index.docker.io/appsmith/appsmith-ce:{{APPSMITH_VERSION}}
+    volumes:
+    - appsmith-stacks-data:/appsmith-stacks
+    restart: always
+    environment:
+      APPSMITH_MAIL_ENABLED: false
+      APPSMITH_DISABLE_TELEMETRY: true
+      APPSMITH_DISABLE_INTERCOM: true
+volumes:
+  appsmith-stacks-data:
+'''
+
+[[variables]]
+key = "APPSMITH_VERSION"
+label = "Appsmith Version"
+default = "v1.6.5"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/appsmith/appsmith-ce/tags"

@@ -1,0 +1,39 @@
+slug = "homepage"
+name = "Homepage"
+category = "App"
+description = "A modern, fully static, fast, secure fully proxied, highly customizable application dashboard."
+keywords = ["homepage"]
+compose = '''
+services:
+  homepage:
+    image: ghcr.io/gethomepage/homepage:{{HOMEPAGE_VERSION}}
+    environment:
+    - PUID={{PUID}}
+    - PGID={{GUID}}
+    volumes:
+    - homepage-config:/app/config
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  homepage-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $group) in your instance to see the id."
+
+[[variables]]
+key = "HOMEPAGE_VERSION"
+label = "Homepage Version"
+default = "v0.8.7"
+description = "Check out their GitHub packages page for the valid tags https://github.com/gethomepage/homepage/releases"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id."

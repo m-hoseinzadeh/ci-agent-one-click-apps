@@ -1,0 +1,38 @@
+slug = "invidious"
+name = "Invidious"
+category = "App"
+description = "Invidious is an alternative front-end to YouTube."
+keywords = ["invidious"]
+compose = '''
+services:
+  invidious-db:
+    image: postgres:$$db_version
+    restart: always
+    volumes:
+    - invidious-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: invidious
+      POSTGRES_PASSWORD: kemal
+      POSTGRES_USER: kemal
+    healthcheck:
+      test:
+      - CMD
+      - pg_isready
+      - -U
+      - postgres
+  invidious:
+    image: quay.io/invidious/invidious{{VERSION}}
+    restart: always
+    environment:
+      INVIDIOUS_CONFIG: "channel_threads: 1\ncheck_tables: true\nfeed_threads: 1\ndb:\n  user: kemal\n  password: kemal\n  host: invidious-db\n  port: 5432\n  dbname: invidious\nfull_refresh: false\nhttps_only: false\ndomain:\n"
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  invidious-data:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Invidious Version"
+default = "@sha256:38d9630df74d77e9b704c0dbac10c626ef0f8ccb75fa0457e546018e7227b215"
+description = "Check out their Quay.io page for the valid tags https://quay.io/repository/invidious/invidious?tab=tags. If you want to use the latest tag (or a versioned release, if available), start with a colon (e.g. :latest)."

@@ -1,0 +1,46 @@
+slug = "firefox"
+name = "Firefox"
+category = "App"
+description = "get running FireFox browser from your web browser!"
+keywords = ["firefox"]
+compose = '''
+services:
+  firefox:
+    documentation: https://docs.linuxserver.io/images/docker-firefox
+    image: lscr.io/linuxserver/firefox:{{FIREFOX_VERSION}}
+    restart: always
+    volumes:
+    - firefox-config:/config
+    environment:
+      PUID: '{{PUID}}'
+      PGID: '{{PGID}}'
+      TZ: '{{TZ}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  firefox-config:
+'''
+
+[[variables]]
+key = "FIREFOX_VERSION"
+label = "Firefox Version"
+default = "78.13.0"
+description = "firefox Image Version, se more at https://hub.docker.com/r/linuxserver/firefox/tags"
+
+[[variables]]
+key = "PGID"
+label = "PGID"
+default = "1000"
+description = "For GroupID. Ensure any volume directories on the host are owned by the same user you specify. Default to 1000, see more at https://docs.linuxserver.io/images/docker-firefox#user-group-identifiers"
+
+[[variables]]
+key = "PUID"
+label = "PUID"
+default = "1000"
+description = "For UserID. Ensure any volume directories on the host are owned by the same user you specify. Default to 1000 se more at https://docs.linuxserver.io/images/docker-firefox#user-group-identifiers"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "UTC"
+description = "Timezone. Specify a timezone to use EG Europe/London"

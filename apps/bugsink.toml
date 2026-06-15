@@ -1,0 +1,83 @@
+slug = "bugsink"
+name = "Bugsink"
+category = "Monitoring"
+description = "Bugsink is a self-hosted error tracker. Full control over your data. Compatible with Sentry SDKs, easy to set up, scalable & reliable"
+keywords = ["bugsink"]
+compose = '''
+services:
+  bugsink-mysql:
+    image: mysql:{{MYSQL_VERSION}}
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_PASSWORD}}'
+      MYSQL_DATABASE: bugsink
+    volumes:
+    - bugsink-mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - exit | mysql -h localhost -P 3306 -u root -p$$MYSQL_ROOT_PASSWORD
+      interval: 1s
+      timeout: 20s
+      retries: 30
+  bugsink:
+    image: bugsink/bugsink:{{BUGSINK_VERSION}}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:8000'
+    - 8000:8000
+    environment:
+      SECRET_KEY: '{{GEN_RANDOM_HEX}}(50)'
+      CREATE_SUPERUSER: admin:{{SUPERUSER_PASSWORD}}
+      PORT: 8000
+      DATABASE_URL: mysql://root:{{MYSQL_PASSWORD}}@bugsink-mysql:3306/bugsink
+      BASE_URL: https://bugsink.{{ROOT_DOMAIN}}/
+      BEHIND_HTTPS_PROXY: 'true'
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - python -c 'import requests; requests.get("http://localhost:8000/").raise_for_status()'
+      interval: 5s
+      timeout: 20s
+      retries: 10
+volumes:
+  bugsink-mysql-data:
+'''
+
+[[variables]]
+key = "BUGSINK_VERSION"
+label = "Bugsink Version"
+default = "1.7.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/bugsink/bugsink/tags"
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "MYSQL_PASSWORD"
+label = "MySQL Password"
+generate = true
+description = "The password for the MySQL root user."
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "Database | Version"
+default = "8.4.4"
+description = "MySQL version. Check out their valid tags at https://hub.docker.com/_/mysql/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SUPERUSER_PASSWORD"
+label = "Bugsink Admin Password"
+generate = true
+description = "The password for the Bugsink admin user."

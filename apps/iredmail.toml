@@ -1,0 +1,81 @@
+slug = "iredmail"
+name = "iRedMail"
+category = "Communication"
+description = "iRedMail - Open Source Mail Server, built in one container"
+keywords = ["iredmail"]
+compose = '''
+services:
+  iredmail:
+    ports:
+    - '{{HTTP_PORT}}:80'
+    - '25:25'
+    - 110:110
+    - 143:143
+    - 465:465
+    - 587:587
+    - 993:993
+    - 995:995
+    volumes:
+    - /etc/localtime:/etc/localtime
+    - iredmail-data-backup-mysql:/var/vmail/backup/mysql
+    - iredmail-data-mailboxes:/var/vmail/vmail1
+    - iredmail-data-mlmmj:/var/vmail/mlmmj
+    - iredmail-data-mlmmj-archive:/var/vmail/mlmmj-archive
+    - iredmail-data-imapsieve-copy:/var/vmail/imapsieve_copy
+    - iredmail-data-custom:/opt/iredmail/custom
+    - iredmail-data-ssl:/opt/iredmail/ssl
+    - iredmail-data-mysql:/var/lib/mysql
+    - iredmail-data-clamav:/var/lib/clamav
+    - iredmail-data-sa-rules:/var/lib/spamassassin
+    - iredmail-data-postfix-queue:/var/spool/postfix
+    restart: always
+    environment:
+      VERSION: '{{IREDMAIL_VERSION}}'
+      MLMMJADMIN_API_TOKEN: '{{GEN_RANDOM_HEX}}(32)'
+      ROUNDCUBE_DES_KEY: '{{GEN_RANDOM_HEX}}(24)'
+      FIRST_MAIL_DOMAIN: '{{ROOT_DOMAIN}}'
+      HOSTNAME: iredmail.{{ROOT_DOMAIN}}
+      ADMIN_VERSION: '{{IREDMAIL_ADMIN_VERSION}}'
+      FIRST_MAIL_DOMAIN_ADMIN_PASSWORD: '{{IREDMAIL_DEFAULT_PASSWORD}}'
+volumes:
+  iredmail-data-backup-mysql:
+  iredmail-data-mailboxes:
+  iredmail-data-mlmmj:
+  iredmail-data-mlmmj-archive:
+  iredmail-data-imapsieve-copy:
+  iredmail-data-custom:
+  iredmail-data-ssl:
+  iredmail-data-mysql:
+  iredmail-data-clamav:
+  iredmail-data-sa-rules:
+  iredmail-data-postfix-queue:
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "IREDMAIL_ADMIN_VERSION"
+label = "iRedMail Admin version tag"
+default = "NoChange"
+description = "Set 'NoChange' to stay by the docker image version OR Check out their GitHub page for the newest version https://github.com/iredmail/iRedAdmin/tags"
+
+[[variables]]
+key = "IREDMAIL_DEFAULT_PASSWORD"
+label = "First Password"
+generate = true
+description = "Password for the admin login (you can change that later from the admin panel)"
+
+[[variables]]
+key = "IREDMAIL_VERSION"
+label = "iRedMail version tag"
+default = "stable"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/iredmail/mariadb/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

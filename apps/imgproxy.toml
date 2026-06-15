@@ -1,0 +1,32 @@
+slug = "imgproxy"
+name = "imgproxy"
+category = "App"
+description = "Fast and secure standalone server for resizing and converting remote images"
+keywords = ["imgproxy"]
+compose = '''
+services:
+  imgproxy:
+    environment:
+      IMGPROXY_BIND: 0.0.0.0:5000
+      IMGPROXY_KEY: '{{IMGPROXY_KEY}}'
+      IMGPROXY_SALT: '{{IMGPROXY_SALT}}'
+    image: darthsim/imgproxy:v{{IMGPROXY_VERSION}}
+    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:5000'
+'''
+
+[[variables]]
+key = "IMGPROXY_KEY"
+label = "Signature Key"
+generate = true
+
+[[variables]]
+key = "IMGPROXY_SALT"
+label = "Signature Salt"
+generate = true
+
+[[variables]]
+key = "IMGPROXY_VERSION"
+label = "imgproxy Version"
+default = "3.6.0"

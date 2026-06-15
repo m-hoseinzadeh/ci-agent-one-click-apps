@@ -1,0 +1,24 @@
+slug = "node-red"
+name = "Node-Red"
+category = "Automation"
+description = "Low-code programming for event-driven applications"
+keywords = ["node", "red"]
+compose = '''
+services:
+  node-red:
+    image: nodered/node-red:{{NODE}}-red_version
+    volumes:
+    - node-red-data:/data
+    restart: always
+    environment:
+      TZ: '{{NODE}}-red_timezone'
+    ports:
+    - '{{HTTP_PORT}}:1880'
+volumes:
+  node-red-data:
+'''
+
+[[variables]]
+key = "NODE"
+label = "Node"
+default = ""

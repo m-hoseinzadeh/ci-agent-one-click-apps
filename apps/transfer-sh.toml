@@ -1,0 +1,23 @@
+slug = "transfer-sh"
+name = "Transfer.sh"
+category = "App"
+description = "Transfer.sh allows you to upload and download files from the command-line"
+keywords = ["sh", "transfer", "transfer.sh"]
+compose = '''
+services:
+  transfer-sh:
+    image: dutchcoders/transfer.sh:{{TRANSFERSH_VERSION}}
+    environment:
+      LISTENER: '8080'
+      FORCE_HTTPS: 'false'
+      BASEDIR: /tmp
+      PROVIDER: local
+    ports:
+    - '{{HTTP_PORT}}:8080'
+'''
+
+[[variables]]
+key = "TRANSFERSH_VERSION"
+label = "Transfer SH Version"
+default = "v1.4.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/dutchcoders/transfer.sh/tags"

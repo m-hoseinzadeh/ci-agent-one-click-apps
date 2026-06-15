@@ -1,0 +1,28 @@
+slug = "valkey"
+name = "Valkey"
+category = "App"
+description = "Valkey is a flexible distributed key-value datastore that supports both caching and beyond caching workloads."
+keywords = ["valkey"]
+compose = '''
+services:
+  valkey:
+    image: valkey/valkey:{{VALKEY_VERSION}}
+    volumes:
+    - valkey-valkey-data:/data
+    restart: always
+    environment:
+      VALKEY_EXTRA_FLAGS: '{{VALKEY_EXTRA_FLAGS}}'
+volumes:
+  valkey-valkey-data:
+'''
+
+[[variables]]
+key = "VALKEY_EXTRA_FLAGS"
+label = "Valkey extra flags"
+description = "you can pass extra flags to `valkey-server` command using this value For example by passing `--requirepass password` you can set a password for Valkey server"
+
+[[variables]]
+key = "VALKEY_VERSION"
+label = "Valkey Version Tag"
+default = "8.0.1-alpine"
+description = "Check out their Docker page for the valid tags: https://hub.docker.com/r/valkey/valkey/tags"

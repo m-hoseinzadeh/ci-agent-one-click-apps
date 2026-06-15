@@ -1,0 +1,23 @@
+slug = "rainloop"
+name = "RainLoop"
+category = "Communication"
+description = "RainLoop Webmail - Simple, modern & fast web-based email client"
+keywords = ["rainloop"]
+compose = '''
+services:
+  rainloop:
+    image: hardware/rainloop:{{RAINLOOP_VERSION}}
+    restart: always
+    volumes:
+    - rainloop-data:/rainloop/data
+    ports:
+    - '{{HTTP_PORT}}:8888'
+volumes:
+  rainloop-data:
+'''
+
+[[variables]]
+key = "RAINLOOP_VERSION"
+label = "Rainloop Version"
+default = "1.12.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/hardware/rainloop/tags"

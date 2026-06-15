@@ -1,0 +1,34 @@
+slug = "dragonflydb"
+name = "Dragonfly"
+category = "App"
+description = "Dragonfly is a simple, performant, and cost-efficient in-memory data store."
+keywords = ["dragonfly", "dragonflydb"]
+compose = '''
+services:
+  dragonflydb:
+    image: docker.dragonflydb.io/dragonflydb/dragonfly:{{DRAGONFLYDB_VERSION}}
+    volumes:
+    - dragonflydb-dragonflydb-data:/data
+    restart: always
+    environment:
+      DFLY_requirepass: '{{DRAGONFLYDB_PASSWORD}}'
+      DFLY_maxmemory: '{{DRAGONFLYDB_MAXMEM}}'
+volumes:
+  dragonflydb-dragonflydb-data:
+'''
+
+[[variables]]
+key = "DRAGONFLYDB_MAXMEM"
+label = "Dragonfly Max Memory"
+default = "4GB"
+description = "Dragonfly recommends at least 4GB to take advantage of its full power, however you can run with smaller amounts if necessary."
+
+[[variables]]
+key = "DRAGONFLYDB_PASSWORD"
+label = "Dragonfly Password"
+
+[[variables]]
+key = "DRAGONFLYDB_VERSION"
+label = "Dragonfly Version Tag"
+default = "v1.14.0"
+description = "Check out their Github page for the valid tags: https://github.com/dragonflydb/dragonfly/releases"

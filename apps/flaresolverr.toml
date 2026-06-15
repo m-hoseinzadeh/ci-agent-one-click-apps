@@ -1,0 +1,90 @@
+slug = "flaresolverr"
+name = "FlareSolverr"
+category = "App"
+description = "FlareSolverr - A proxy server to bypass Cloudflare and DDoS-GUARD protection"
+keywords = ["flaresolverr"]
+compose = '''
+services:
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:{{FLARESOLVERR_VERSION}}
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: '{{LOG_LEVEL}}'
+      LOG_HTML: '{{LOG_HTML}}'
+      CAPTCHA_SOLVER: '{{CAPTCHA_SOLVER}}'
+      TZ: '{{TZ}}'
+      LANG: '{{LANG}}'
+      HEADLESS: '{{HEADLESS}}'
+      BROWSER_TIMEOUT: '{{BROWSER_TIMEOUT}}'
+      TEST_URL: '{{TEST_URL}}'
+      PROMETHEUS_ENABLED: '{{PROMETHEUS_ENABLED}}'
+      PROMETHEUS_PORT: '{{PROMETHEUS_PORT}}'
+    ports:
+    - '{{HTTP_PORT}}:8191'
+'''
+
+[[variables]]
+key = "BROWSER_TIMEOUT"
+label = "Browser Timeout"
+default = "40000"
+description = "If you are experiencing errors/timeouts because your system is slow, you can try to increase this value."
+
+[[variables]]
+key = "CAPTCHA_SOLVER"
+label = "CAPTCHA Solver"
+default = "none"
+description = "Captcha solving method. It is used when a captcha is encountered."
+
+[[variables]]
+key = "FLARESOLVERR_VERSION"
+label = "FlareSolverr Version"
+default = "v3.3.21"
+description = "Specify the version of FlareSolverr to use. Check out their Docker page for other valid tags https://github.com/FlareSolverr/FlareSolverr/pkgs/container/flaresolverr"
+
+[[variables]]
+key = "HEADLESS"
+label = "Headless Mode"
+default = "true"
+description = "To run the web browser in headless mode or visible."
+
+[[variables]]
+key = "LANG"
+label = "Language"
+default = "en_US"
+description = "Language used in the web browser. Example LANG=en_GB"
+
+[[variables]]
+key = "LOG_HTML"
+label = "Log HTML"
+default = "false"
+description = "If true, all HTML that passes through the proxy will be logged to the console in debug level."
+
+[[variables]]
+key = "LOG_LEVEL"
+label = "Log Level"
+default = "info"
+description = "Verbosity of the logging. Use 'debug' for more information."
+
+[[variables]]
+key = "PROMETHEUS_ENABLED"
+label = "Enable Prometheus"
+default = "false"
+description = "Enable Prometheus exporter."
+
+[[variables]]
+key = "PROMETHEUS_PORT"
+label = "Prometheus Port"
+default = "8192"
+description = "Listening port for Prometheus exporter."
+
+[[variables]]
+key = "TEST_URL"
+label = "Test URL"
+default = "https://www.google.com"
+description = "FlareSolverr makes a request on start to make sure the web browser is working."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "UTC"
+description = "Set the timezone. Example TZ=Europe/London"

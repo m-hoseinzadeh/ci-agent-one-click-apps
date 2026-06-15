@@ -1,0 +1,50 @@
+slug = "minio"
+name = "MinIO"
+category = "Storage"
+description = "MinIO is a cloud storage server compatible with Amazon S3"
+keywords = ["minio"]
+compose = '''
+services:
+  minio:
+    volumes:
+    - minio-db-data:/data
+    - minio-config-data:/root/.minio
+    restart: always
+    environment:
+      MINIO_ROOT_USER: '{{ACCESS_KEY}}'
+      MINIO_ROOT_PASSWORD: '{{SECRET_KEY}}'
+      MINIO_REGION_NAME: eu-east-1
+      MINIO_BROWSER_REDIRECT_URL: https://minio.{{ROOT_DOMAIN}}
+      MINIO_SERVER_URL: https://minio-api.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:9001'
+  minio-api:
+    image: caprover/nginx-reverse-proxy:1-ef5ffcb
+    restart: always
+    depends_on:
+    - minio
+    environment:
+      UPSTREAM_HTTP_ADDRESS: http://minio:9000
+      CLIENT_MAX_BODY_SIZE: '0'
+volumes:
+  minio-db-data:
+  minio-config-data:
+'''
+
+[[variables]]
+key = "ACCESS_KEY"
+label = "MinIO Root User Access Key"
+generate = true
+description = "Access key for `MINIO_ROOT_USER`. If unset, minio defaults to `minioadmin`. MinIO strongly recommends specifying a unique, long, and random value for all environments."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET_KEY"
+label = "Minio Secret Key"
+generate = true
+description = "Secret key for `MINIO_ROOT_PASSWORD`. If unset, minio defaults to `minioadmin`. MinIO strongly recommends specifying a unique, long, and random value for all environments."

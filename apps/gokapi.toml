@@ -1,0 +1,28 @@
+slug = "gokapi"
+name = "Gokapi"
+category = "Storage"
+description = "Lightweight selfhosted Firefox Send alternative without public upload. AWS S3 supported."
+keywords = ["gokapi"]
+compose = '''
+services:
+  gokapi:
+    image: f0rc3/gokapi:{{GOKAPI_VERSION}}
+    container_name: gokapi
+    restart: always
+    volumes:
+    - gokapi-gokapi-data:/app/data
+    - gokapi-config-data:/app/config
+    env_file:
+    - ./.env
+    ports:
+    - '{{HTTP_PORT}}:53842'
+volumes:
+  gokapi-gokapi-data:
+  gokapi-config-data:
+'''
+
+[[variables]]
+key = "GOKAPI_VERSION"
+label = "Version"
+default = "v2.2.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/f0rc3/gokapi/tags"

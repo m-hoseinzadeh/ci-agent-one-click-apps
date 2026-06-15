@@ -1,0 +1,59 @@
+slug = "pyload"
+name = "Pyload"
+category = "App"
+description = "The free and open-source Download Manager written in pure Python"
+keywords = ["pyload"]
+compose = '''
+services:
+  pyload:
+    image: lscr.io/linuxserver/pyload-ng:{{PYLOAD_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    hostname: pyload.{{ROOT_DOMAIN}}
+    volumes:
+    - pyload-config:/config
+    - '{{PATH_TO_DOWNLOADS}}:/downloads'
+    ports:
+    - '{{HTTP_PORT}}:8000'
+    - 9666:9666
+volumes:
+  pyload-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "PATH_TO_DOWNLOADS"
+label = "Path to downloads folder"
+default = "pyload-downloads"
+description = "Path to pictures folder where u want to save the downloaded files. You can mention an existing directory here too. Eg. /home/user/downloads/"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "PYLOAD_VERSION"
+label = "Pyload Version"
+default = "0.5.0"
+description = "Check out their Docker page for the valid tags https://github.com/linuxserver/docker-pyload-ng/pkgs/container/pyload-ng"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Brussels"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

@@ -1,0 +1,25 @@
+slug = "grafana"
+name = "Grafana"
+category = "Monitoring"
+description = "Grafana allows you to query, visualize, alert on and understand your metrics no matter where they are stored."
+keywords = ["grafana"]
+compose = '''
+services:
+  grafana:
+    image: grafana/grafana:{{VERSION}}
+    restart: always
+    volumes:
+    - grafana-config:/etc/grafana
+    - grafana-data:/var/lib/grafana
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  grafana-config:
+  grafana-data:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Grafana Docker Hash"
+default = "7.4.3"
+description = "Find versions on DockerHub https://hub.docker.com/r/grafana/grafana/tags"

@@ -1,0 +1,48 @@
+slug = "maildev"
+name = "Maildev"
+category = "Communication"
+description = "MailDev is a simple way to test your project's generated email during development."
+keywords = ["maildev"]
+compose = '''
+services:
+  maildev:
+    image: maildev/maildev:{{MAILDEV_VERSION}}
+    ports:
+    - '{{HTTP_PORT}}:1080'
+    - '{{MAILDEV_SMTP_PORT}}:1025'
+    volumes:
+    - maildev-data:/data
+    restart: always
+    environment:
+      MAILDEV_SMTP_PORT: '{{MAILDEV_SMTP_PORT}}'
+      MAILDEV_MAIL_DIRECTORY: /data
+      MAILDEV_WEB_USER: '{{MAILDEV_WEB_USER}}'
+      MAILDEV_WEB_PASS: '{{MAILDEV_WEB_PASS}}'
+      MAILDEV_IP: '::'
+volumes:
+  maildev-data:
+'''
+
+[[variables]]
+key = "MAILDEV_SMTP_PORT"
+label = "Maildev SMTP Port"
+default = "1025"
+description = "Maildev SMTP Port. Defaults to 1025."
+
+[[variables]]
+key = "MAILDEV_VERSION"
+label = "MailDev Version"
+default = "2.1.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/maildev/maildev/tags"
+
+[[variables]]
+key = "MAILDEV_WEB_PASS"
+label = "Web Pass"
+generate = true
+description = "HTTP password for GUI."
+
+[[variables]]
+key = "MAILDEV_WEB_USER"
+label = "Web User"
+default = "admin"
+description = "Maildev HTTP user for GUI."

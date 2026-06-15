@@ -1,0 +1,20 @@
+slug = "keydb"
+name = "KeyDB"
+category = "Database"
+description = "KeyDB is a high-performance fork of Redis, fully compatible with Redis and includes additional features such as multithreading"
+keywords = ["keydb"]
+compose = '''
+services:
+  keydb:
+    volumes:
+    - keydb-keydb-data:/data
+    restart: always
+    environment:
+      KEYDB_PASSWORD: '{{KEYDB_PASSWORD}}'
+volumes:
+  keydb-keydb-data:
+'''
+
+[[variables]]
+key = "KEYDB_PASSWORD"
+label = "KeyDB Password"

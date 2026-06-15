@@ -1,0 +1,329 @@
+slug = "crater"
+name = "Crater"
+category = "App"
+description = "Open Source Invoicing Solution for Individuals & Businesses"
+keywords = ["crater"]
+compose = '''
+services:
+  crater:
+    environment:
+      CRATER_PHP_VERSION: '{{PHP_VERSION}}'
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{PGID}}'
+      CRATER_AUTO_OPTIMIZE: '{{CRATER_AUTO_OPTIMIZE}}'
+      CRATER_LINK_STORAGE: '{{CRATER_LINK_STORAGE}}'
+      CRATER_AUTO_MIGRATION: '{{CRATER_AUTO_MIGRATION}}'
+      CRATER_QUEUE_ENABLED: '{{CRATER_QUEUE_ENABLED}}'
+      CRATER_QUEUE_OPTIONS: '{{CRATER_QUEUE_OPTIONS}}'
+      CRATER_SCHEDULE_ENABLED: '{{CRATER_SCHEDULE_ENABLED}}'
+      CRATER_SCHEDULE_OPTIONS: '{{CRATER_SCHEDULE_OPTIONS}}'
+      APP_ENV: '{{APP_ENV}}'
+      APP_KEY: '{{APP_KEY}}'
+      APP_DEBUG: '{{APP_DEBUG}}'
+      APP_LOG_LEVEL: '{{APP_LOG_LEVEL}}'
+      APP_URL: '{{APP_URL}}'
+      DB_CONNECTION: '{{DB_CONNECTION}}'
+      DB_HOST: crater-db
+      DB_PORT: '{{DB_PORT}}'
+      DB_DATABASE: '{{DB_DATABASE}}'
+      DB_USERNAME: '{{DB_USERNAME}}'
+      DB_PASSWORD: '{{DB_PASSWORD}}'
+      BROADCAST_DRIVER: '{{BROADCAST_DRIVER}}'
+      CACHE_DRIVER: '{{CACHE_DRIVER}}'
+      QUEUE_DRIVER: '{{QUEUE_DRIVER}}'
+      SESSION_DRIVER: '{{SESSION_DRIVER}}'
+      SESSION_LIFETIME: '{{SESSION_LIFETIME}}'
+      REDIS_HOST: crater-queue
+      REDIS_PORT: '{{REDIS_PORT}}'
+      MAIL_DRIVER: '{{MAIL_DRIVER}}'
+      MAIL_HOST: '{{MAIL_HOST}}'
+      MAIL_PORT: '{{MAIL_PORT}}'
+      MAIL_USERNAME: '{{MAIL_USERNAME}}'
+      MAIL_PASSWORD: '{{MAIL_PASSWORD}}'
+      MAIL_ENCRYPTION: '{{MAIL_ENCRYPTION}}'
+      MAIL_FROM_ADDRESS: '{{MAIL_FROM_ADDRESS}}'
+      MAIL_FROM_NAME: '{{MAIL_FROM_NAME}}'
+      PUSHER_APP_ID: '{{PUSHER_APP_ID}}'
+      PUSHER_KEY: '{{PUSHER_KEY}}'
+      PUSHER_SECRET: '{{PUSHER_SECRET}}'
+      SANCTUM_STATEFUL_DOMAINS: crater.{{ROOT_DOMAIN}}
+      SESSION_DOMAIN: crater.{{ROOT_DOMAIN}}
+      TRUSTED_PROXIES: '{{TRUSTED_PROXIES}}'
+      CRON_JOB_AUTH_TOKEN: '{{CRON_JOB_AUTH_TOKEN}}'
+    volumes:
+    - crater-web:/var/www/html
+  crater-db:
+    image: mysql:{{MYSQL_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      MYSQL_USER: '{{DB_USERNAME}}'
+      MYSQL_PASSWORD: '{{DB_PASSWORD}}'
+      MYSQL_DATABASE: '{{DB_DATABASE}}'
+      MYSQL_ROOT_PASSWORD: '{{DB_ROOT_PASSWORD}}'
+    volumes:
+    - crater-db-data:/var/lib/mysql
+    - crater-db-dump:/docker-entrypoint-initdb.d
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  crater-queue:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - crater-queue:/data
+volumes:
+  crater-web:
+  crater-db-data:
+  crater-db-dump:
+  crater-queue:
+'''
+
+[[variables]]
+key = "APP_DEBUG"
+label = "Debugging Mode"
+default = "false"
+description = "Whether debugging information should be shown."
+
+[[variables]]
+key = "APP_ENV"
+label = "Environment"
+default = "production"
+description = "Application environment."
+
+[[variables]]
+key = "APP_KEY"
+label = "Key"
+description = "Base64 encoded application key for encryption. Run `openssl rand -base64 32` in the terminal to generate a key. Prepend `base64:` and paste it here. Example: `base64:cUNxR6ZmeVIj2zd7Q9z0OmHy+DpDB8wv+15OA9AVHKY=`"
+
+[[variables]]
+key = "APP_LOG_LEVEL"
+label = "Log Level"
+default = "error"
+description = "Level of information shown in the logging console."
+
+[[variables]]
+key = "APP_URL"
+label = "Application URL"
+description = "URL of user-facing service. (e.g. http://crater.example.com)"
+
+[[variables]]
+key = "BROADCAST_DRIVER"
+label = "Broadcast Driver"
+default = "log"
+description = "Driver for broadcasting."
+
+[[variables]]
+key = "CACHE_DRIVER"
+label = "Cache Driver"
+default = "file"
+description = "Driver for caching."
+
+[[variables]]
+key = "CRATER_AUTO_MIGRATION"
+label = "Automatic Migrations"
+default = "false"
+description = "Run Crater migrations for development purposes."
+
+[[variables]]
+key = "CRATER_AUTO_OPTIMIZE"
+label = "Automatic Optimizations"
+default = "false"
+description = "Optimization and caching of all configs, views and routes."
+
+[[variables]]
+key = "CRATER_LINK_STORAGE"
+label = "Link Storage"
+default = "false"
+description = "Symlinks to the storage folder."
+
+[[variables]]
+key = "CRATER_QUEUE_ENABLED"
+label = "Enable Queue Worker"
+default = "true"
+description = "Start queue worker when the container is up."
+
+[[variables]]
+key = "CRATER_QUEUE_OPTIONS"
+label = "Queue Worker Options"
+description = "Extra arguments for queue worker."
+
+[[variables]]
+key = "CRATER_SCHEDULE_ENABLED"
+label = "Enable Schedule Worker"
+default = "true"
+description = "Start schedule worker when container is up."
+
+[[variables]]
+key = "CRATER_SCHEDULE_OPTIONS"
+label = "Schedule Worker Options"
+description = "Extra arguments for schedule worker."
+
+[[variables]]
+key = "CRON_JOB_AUTH_TOKEN"
+label = "Cronjob Authentication Token"
+description = "Authentication token for cronjob executions."
+
+[[variables]]
+key = "DB_CONNECTION"
+label = "Database Type"
+default = "mysql"
+description = "Type of database (e.g. mysql, sqlite, pgsql)"
+
+[[variables]]
+key = "DB_DATABASE"
+label = "Database Name"
+default = "crater"
+description = "Name of database."
+
+[[variables]]
+key = "DB_PASSWORD"
+label = "Database User Password"
+generate = true
+description = "Password of database user."
+
+[[variables]]
+key = "DB_PORT"
+label = "Database Port"
+default = "3306"
+description = "Port of database host."
+
+[[variables]]
+key = "DB_ROOT_PASSWORD"
+label = "Database Root User Password"
+generate = true
+description = "Password of database root user."
+
+[[variables]]
+key = "DB_USERNAME"
+label = "Database User Name"
+default = "crater"
+description = "Name of database user."
+
+[[variables]]
+key = "MAIL_DRIVER"
+label = "Mail Driver"
+default = "smtp"
+description = "Driver for email delivery."
+
+[[variables]]
+key = "MAIL_ENCRYPTION"
+label = "Mail Server Encryption"
+description = "Mail server's encryption type (e.g. ssl or tls)."
+
+[[variables]]
+key = "MAIL_FROM_ADDRESS"
+label = "Mail From Address"
+default = "admin@crater.in"
+description = "Sender mail address for system mails."
+
+[[variables]]
+key = "MAIL_FROM_NAME"
+label = "Mail From Name"
+default = "Crater"
+description = "Sender name for system mails."
+
+[[variables]]
+key = "MAIL_HOST"
+label = "Mail Host"
+description = "Host of mail server."
+
+[[variables]]
+key = "MAIL_PASSWORD"
+label = "Mail User Password"
+description = "Password of mail server user."
+
+[[variables]]
+key = "MAIL_PORT"
+label = "Mail Port"
+description = "Port of mail server."
+
+[[variables]]
+key = "MAIL_USERNAME"
+label = "Mail User Name"
+description = "Name of mail server user."
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Image Version Tag"
+default = "8.0.30"
+description = "Check out their valid tags at https://hub.docker.com/_/mysql/tags"
+
+[[variables]]
+key = "PGID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) on your instance to see the ID"
+
+[[variables]]
+key = "PHP_VERSION"
+label = "PHP Image Version Tag"
+default = "8.1"
+description = "Without \"php\" prefix. Check out their valid tags at https://hub.docker.com/r/shinsenter/crater/tags"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) on your instance to see the ID"
+
+[[variables]]
+key = "PUSHER_APP_ID"
+label = "Pusher Application ID"
+description = "If using Pusher, insert application ID here."
+
+[[variables]]
+key = "PUSHER_KEY"
+label = "Pusher Key"
+description = "If using Pusher, insert key here."
+
+[[variables]]
+key = "PUSHER_SECRET"
+label = "Pusher Secret"
+description = "If using Pusher, insert secret here."
+
+[[variables]]
+key = "QUEUE_DRIVER"
+label = "Queue Driver"
+default = "sync"
+description = "Driver for queue."
+
+[[variables]]
+key = "REDIS_PORT"
+label = "Redis Port"
+default = "6379"
+description = "Port of Redis host."
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Image Version Tag"
+default = "7.0.5"
+description = "Check out their valid tags at https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SESSION_DRIVER"
+label = "Session Driver"
+default = "cookie"
+description = "Driver for sessions."
+
+[[variables]]
+key = "SESSION_LIFETIME"
+label = "Session Lifetime"
+default = "1440"
+description = "Duration of a valid session in minutes."
+
+[[variables]]
+key = "TRUSTED_PROXIES"
+label = "Trusted Proxies"
+default = "*"
+description = "Restrict proxy access."
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "UTC"
+description = "Timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

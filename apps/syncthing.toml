@@ -1,0 +1,30 @@
+slug = "syncthing"
+name = "Syncthing"
+category = "App"
+description = "Open Source Continuous File Synchronization."
+keywords = ["syncthing"]
+compose = '''
+services:
+  syncthing:
+    ports:
+    - '{{HTTP_PORT}}:8384'
+    - '{{PORT_SYNC}}:22000'
+    image: syncthing/syncthing:{{VERSION}}
+    restart: always
+    volumes:
+    - syncthing-data:/var/syncthing
+volumes:
+  syncthing-data:
+'''
+
+[[variables]]
+key = "PORT_SYNC"
+label = "Sync Protocol Listening Port"
+default = "22000"
+description = "Port that Syncthing listens on for data synchronization (TCP)."
+
+[[variables]]
+key = "VERSION"
+label = "Syncthing Docker Version"
+default = "1.5.0"
+description = "It's highly recommended that you don't use the latest tag but instead the major version you need."

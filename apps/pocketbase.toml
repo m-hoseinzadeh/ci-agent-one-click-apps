@@ -1,0 +1,15 @@
+slug = "pocketbase"
+name = "PocketBase"
+category = "Database"
+description = "PocketBase is an open source Go backend: - embedded database (SQLite) with realtime subscriptions - built-in files and users management - convenient Admin dashboard UI - and simple REST-ish API"
+keywords = ["pocketbase"]
+compose = '''
+services:
+  pocketbase:
+    volumes:
+    - pocketbase-data:/pb
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  pocketbase-data:
+'''

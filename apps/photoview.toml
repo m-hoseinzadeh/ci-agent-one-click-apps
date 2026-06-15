@@ -1,0 +1,76 @@
+slug = "photoview"
+name = "Photoview"
+category = "App"
+description = "Photo gallery for self-hosted personal servers."
+keywords = ["photoview"]
+compose = '''
+services:
+  photoview-mariadb:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: '{{MARIADB_DB}}'
+      MYSQL_USER: '{{MARIADB_USER}}'
+      MYSQL_PASSWORD: '{{MARIADB_PASS}}'
+    volumes:
+    - photoview-mariadb-data:/var/lib/mysql
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  photoview:
+    image: viktorstrate/photoview:{{PHOTOVIEW_VERSION}}
+    depends_on:
+    - photoview-mariadb
+    environment:
+      PHOTOVIEW_DATABASE_DRIVER: mysql
+      PHOTOVIEW_MYSQL_URL: '{{MARIADB_USER}}:{{MARIADB_PASS}}@tcp(photoview-mariadb)/{{MARIADB_DB}}'
+      PHOTOVIEW_LISTEN_IP: 0.0.0.0
+      PHOTOVIEW_LISTEN_PORT: 80
+      PHOTOVIEW_MEDIA_CACHE: /app/cache
+      MAPBOX_TOKEN: '{{MAPBOX_TOKEN}}'
+    volumes:
+    - photoview-media-cache:/app/cache
+    - '{{PHOTOS_PATH}}:/photos'
+volumes:
+  photoview-mariadb-data:
+  photoview-media-cache:
+'''
+
+[[variables]]
+key = "MAPBOX_TOKEN"
+label = "Mapbox Token (Optional)"
+description = "To enable map related features, you need to create a mapbox token.  A token can be generated for free here https://account.mapbox.com/access-tokens/  It's a good idea to limit the scope of the token to your own domain, to prevent others from using it.  Leave empty to disable map related features."
+
+[[variables]]
+key = "MARIADB_DB"
+label = "MariaDB Database"
+default = "photoview"
+description = "Name of the Database used by Photoview"
+
+[[variables]]
+key = "MARIADB_PASS"
+label = "MariaDB Password"
+generate = true
+description = "Password for the Database used by Photoview"
+
+[[variables]]
+key = "MARIADB_USER"
+label = "MariaDB Username"
+default = "photoview"
+description = "Username for the Database used by Photoview"
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.5"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags"
+
+[[variables]]
+key = "PHOTOS_PATH"
+label = "Location of your photos"
+description = "Change this to the directory where your photos are located on your server."
+
+[[variables]]
+key = "PHOTOVIEW_VERSION"
+label = "Photoview Version"
+default = "2.3.9"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/viktorstrate/photoview/tags"

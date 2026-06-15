@@ -1,0 +1,21 @@
+slug = "pairdrop"
+name = "PairDrop"
+category = "App"
+description = "PairDrop - Transfer Files Cross-Platform. No Setup, No Signup."
+keywords = ["pairdrop"]
+compose = '''
+services:
+  pairdrop:
+    image: lscr.io/linuxserver/pairdrop:v1.11.2-ls126
+    restart: unless-stopped
+    environment:
+    - PUID=1000
+    - PGID=1000
+    - WS_FALLBACK=false
+    - RATE_LIMIT=false
+    - RTC_CONFIG=false
+    - DEBUG_MODE=false
+    - TZ=Etc/UTC
+    ports:
+    - '{{HTTP_PORT}}:3000'
+'''

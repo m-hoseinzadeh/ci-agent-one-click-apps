@@ -1,0 +1,23 @@
+slug = "jenkins"
+name = "Jenkins"
+category = "Dev tools"
+description = "Jenkins helps to automate the non-human part of the software development process, with continuous integration and facilitating technical aspects of continuous delivery"
+keywords = ["jenkins"]
+compose = '''
+services:
+  jenkins:
+    image: jenkins/jenkins:{{JENKINS_VERSION}}
+    restart: always
+    volumes:
+    - jenkins-jenkins-home:/var/jenkins_home
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  jenkins-jenkins-home:
+'''
+
+[[variables]]
+key = "JENKINS_VERSION"
+label = "Jenkins Version"
+default = "lts-jdk11"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/jenkins/jenkins/tags"

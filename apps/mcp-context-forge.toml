@@ -1,0 +1,37 @@
+slug = "mcp-context-forge"
+name = "MCP Context Forge"
+category = "App"
+description = "A gateway for managing context in applications."
+keywords = ["context", "forge", "mcp"]
+compose = '''
+services:
+  mcp-context-forge:
+    image: ghcr.io/ibm/mcp-context-forge:0.2.0
+    environment:
+      HOST: 0.0.0.0
+      JWT_SECRET_KEY: '{{JWT_SECRET_KEY}}'
+      BASIC_AUTH_USER: '{{BASIC_AUTH_USER}}'
+      BASIC_AUTH_PASSWORD: '{{BASIC_AUTH_PASSWORD}}'
+      AUTH_REQUIRED: 'true'
+      DATABASE_URL: sqlite:///./mcp.db
+    ports:
+    - '{{HTTP_PORT}}:4444'
+'''
+
+[[variables]]
+key = "BASIC_AUTH_PASSWORD"
+label = "Basic Auth Password"
+default = "changeme"
+description = "Password for basic authentication."
+
+[[variables]]
+key = "BASIC_AUTH_USER"
+label = "Basic Auth User"
+default = "admin"
+description = "Username for basic authentication."
+
+[[variables]]
+key = "JWT_SECRET_KEY"
+label = "JWT Secret Key"
+generate = true
+description = "Secret key for JWT authentication."

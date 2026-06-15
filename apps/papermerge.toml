@@ -1,0 +1,42 @@
+slug = "papermerge"
+name = "Papermerge"
+category = "App"
+description = "Papermerge is an open source document management system (DMS) primarily designed for archiving and retrieving your digital documents."
+keywords = ["papermerge"]
+compose = '''
+services:
+  papermerge:
+    image: linuxserver/papermerge:{{PAPERMERGE_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '1000'
+      PGID: '1000'
+      REDIS_URL: '{{REDIS_URL}}'
+    restart: unless-stopped
+    volumes:
+    - papermerge-config:/config
+    - papermerge-data:/data
+    ports:
+    - '{{HTTP_PORT}}:8000'
+volumes:
+  papermerge-config:
+  papermerge-data:
+'''
+
+[[variables]]
+key = "PAPERMERGE_VERSION"
+label = "Paper Merge Version"
+default = "v2.0.1-ls10"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/papermerge/tags."
+
+[[variables]]
+key = "REDIS_URL"
+label = "Redis URL"
+default = ""
+description = "Specify an external redis instance to use. Can optionally include a port (redis:6379) and/or db (redis/foo). If left blank or not included, will use a built-in redis instance. If changed after initial setup will also require manual modification of /config/settings.py"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Asia/Kolkata"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

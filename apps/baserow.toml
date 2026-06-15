@@ -1,0 +1,76 @@
+slug = "baserow"
+name = "Baserow"
+category = "Database"
+description = "Open Source No-Code Database And Airtable Alternative"
+keywords = ["baserow"]
+compose = '''
+services:
+  baserow:
+    image: baserow/baserow:{{BASEROW_VERSION}}
+    environment:
+      BASEROW_PUBLIC_URL: http://baserow.{{ROOT_DOMAIN}}
+      FROM_EMAIL: '{{BASEROW_FROM_EMAIL}}'
+      EMAIL_SMTP: '{{BASEROW_EMAIL_SMTP_ENABLED}}'
+      EMAIL_SMTP_HOST: '{{BASEROW_EMAIL_SMTP_HOST}}'
+      EMAIL_SMTP_PORT: '{{BASEROW_EMAIL_SMTP_PORT}}'
+      EMAIL_SMTP_USER: '{{BASEROW_EMAIL_SMTP_USER}}'
+      EMAIL_SMTP_PASSWORD: '{{BASEROW_EMAIL_SMTP_PASSWORD}}'
+      EMAIL_SMTP_USE_TLS: '{{BASEROW_EMAIL_SMTP_USE_TLS}}'
+      EMAIL_SMTP_USE_SSL: '{{BASEROW_EMAIL_SMTP_USE_SSL}}'
+    volumes:
+    - baserow-data:/baserow/data
+volumes:
+  baserow-data:
+'''
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_ENABLED"
+label = "SMTP | Enabled"
+description = "If set to any non empty value then Baserow will start sending emails using the configuration options below. If not set then Baserow will not send emails and just print them to the logs instead"
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_HOST"
+label = "SMTP | Host"
+description = "The host of the external SMTP server that Baserow should use to send emails"
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_PASSWORD"
+label = "SMTP | Password"
+description = "The password to authenticate with the external SMTP server when sending emails"
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_PORT"
+label = "SMTP | Port"
+description = "The host's port of the external SMTP server"
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_USER"
+label = "SMTP | User"
+description = "The username to authenticate with the external SMTP server when sending emails"
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_USE_SSL"
+label = "SMTP | Use SSL"
+description = "If set to any non empty value then an implicit TLS (secure) connection will be used when talking to the SMTP server. In most email documentation this type of TLS connection is referred to as SSL. It is generally used on port 465. If you are experiencing problems, see the explicit TLS setting `EMAIL_SMTP_USE_TLS`. Note that `EMAIL_SMTP_USE_TLS` / `EMAIL_SMTP_USE_SSL` are mutually exclusive, so only set one of those settings"
+
+[[variables]]
+key = "BASEROW_EMAIL_SMTP_USE_TLS"
+label = "SMTP | Use TLS"
+description = "If set to any non empty value then Baserow will attempt to send emails using TLS. Whether to use a TLS (secure) connection when talking to the SMTP server. This is used for explicit TLS connections, generally on port 587. If you are experiencing hanging connections, see the implicit TLS setting `EMAIL_SMTP_USE_SSL`"
+
+[[variables]]
+key = "BASEROW_FROM_EMAIL"
+label = "Mail | From"
+description = "The email address Baserow will send emails from"
+
+[[variables]]
+key = "BASEROW_VERSION"
+label = "Version"
+default = "1.18.0"
+description = "Check out their valid tags at https://hub.docker.com/r/baserow/baserow/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

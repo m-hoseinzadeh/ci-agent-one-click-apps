@@ -1,0 +1,41 @@
+slug = "prerender"
+name = "Prerender"
+category = "App"
+description = "Prerender uses Headless Chrome to render HTML, screenshots, PDFs, and HAR files out of any web page, in order to serve them to crawlers."
+keywords = ["prerender"]
+compose = '''
+services:
+  prerender:
+    image: tvanro/prerender-alpine:6.4.0
+    restart: always
+    environment:
+      MEMORY_CACHE: '{{MEMORY_CACHE}}'
+      CACHE_MAXSIZE: '{{CACHE_MAX_SIZE}}'
+      CACHE_TTL: '{{CACHE_TTL}}'
+      BLACKLISTED_DOMAINS: '{{BLACKLISTED_DOMAINS}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+'''
+
+[[variables]]
+key = "BLACKLISTED_DOMAINS"
+label = "Optional: Blacklisted domains, separated by \",\". Leave empty if none."
+description = "Blacklisted domains which will not be pre rendered. E.g: yahoo.com,www.google.com"
+
+[[variables]]
+key = "CACHE_MAX_SIZE"
+label = "Cache Max Size"
+default = "10000"
+description = "Max number of objects(pages) in cache."
+
+[[variables]]
+key = "CACHE_TTL"
+label = "Cache time to live in (seconds)"
+default = "7200"
+description = "Maximum time to live in seconds of objects(pages)."
+
+[[variables]]
+key = "MEMORY_CACHE"
+label = "Enable memory cache?"
+default = "1"
+description = "Serve cache responses in memory."

@@ -1,0 +1,47 @@
+slug = "matomo"
+name = "Matomo analytics"
+category = "Analytics"
+description = "Matomo tracks online visits to one or more websites and displays reports on these visits for analysis"
+keywords = ["analytics", "matomo"]
+compose = '''
+services:
+  matomo-db:
+    volumes:
+    - matomo-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: matomo
+      MYSQL_USER: matomo
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+      MYSQL_RANDOM_ROOT_PASSWORD: true
+  matomo:
+    depends_on:
+    - matomo-db
+    image: matomo:{{MATOMO_VERSION}}
+    restart: always
+    volumes:
+    - matomo-data:/var/www/html
+    documentation: taken from https://github.com/matomo-org/docker/blob/master/.examples/apache/docker-compose.yml example
+    environment:
+      MATOMO_DATABASE_HOST: matomo-db
+      MATOMO_DATABASE_ADAPTER: mysql
+      MATOMO_DATABASE_TABLES_PREFIX: matomo_
+      MATOMO_DATABASE_USERNAME: matomo
+      MATOMO_DATABASE_PASSWORD: '{{DB_PASS}}'
+      MATOMO_DATABASE_DBNAME: matomo
+volumes:
+  matomo-db-data:
+  matomo-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "MariaDB Root Password"
+generate = true
+description = "The root password to use for the MariaDB instance"
+
+[[variables]]
+key = "MATOMO_VERSION"
+label = "Matomo Version"
+default = "4.2.1"
+description = "Check out their docker page for the valid tags https://hub.docker.com/_/matomo?tab=tags"

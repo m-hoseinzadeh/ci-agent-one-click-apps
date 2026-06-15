@@ -1,0 +1,26 @@
+slug = "dokuwiki"
+name = "DokuWiki"
+category = "Database"
+description = "Dokuwiki is a simple to use and highly versatile Open Source wiki software that doesn't require a database."
+keywords = ["dokuwiki"]
+compose = '''
+services:
+  dokuwiki:
+    image: lscr.io/linuxserver/dokuwiki:{{DOKUWIKI_VERSION}}
+    environment:
+      PUID: 1000
+      PGID: 1000
+      TZ: America/New_York
+    volumes:
+    - dokuwiki-config:/config
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  dokuwiki-config:
+'''
+
+[[variables]]
+key = "DOKUWIKI_VERSION"
+label = "DokuWiki Version"
+default = "version-2025-05-14a"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/dokuwiki/tags"

@@ -1,0 +1,24 @@
+slug = "checkmk"
+name = "CheckMK RAW"
+category = "Monitoring"
+description = "Quickly gain a complete view of your IT infrastructure, no matter how complex. Checkmk provides powerful monitoring of networks, servers, clouds, containers and applications. Fast. Effective."
+keywords = ["checkmk", "raw"]
+compose = '''
+services:
+  checkmk:
+    image: checkmk/check-mk-raw:{{VERSION}}
+    volumes:
+    - checkmk-data:/omd/sites
+    - /etc/localtime:/etc/localtime
+    ports:
+    - '{{HTTP_PORT}}:5000'
+    - 8000:8000
+volumes:
+  checkmk-data:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "CheckMK Version"
+default = "2.4.0p22"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/checkmk/check-mk-raw/tags"

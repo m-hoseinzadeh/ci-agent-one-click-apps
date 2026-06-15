@@ -1,0 +1,61 @@
+slug = "limesurvey"
+name = "Limesurvey"
+category = "App"
+description = "Limesurvey is an open source online survey tool."
+keywords = ["limesurvey"]
+compose = '''
+services:
+  limesurvey-db:
+    documentation: Taken from https://hub.docker.com/_/mariadb
+    image: mariadb:{{MARIADB_VERSION}}
+    volumes:
+    - limesurvey-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: '{{DB_NAME}}'
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  limesurvey:
+    documentation: Taken from https://registry.hub.docker.com/r/crramirez/limesurvey
+    depends_on:
+    - limesurvey-db
+    image: crramirez/limesurvey:{{LIMESURVEY_VERSION}}
+    volumes:
+    - limesurvey-data:/app/upload
+    restart: always
+volumes:
+  limesurvey-db-data:
+  limesurvey-data:
+'''
+
+[[variables]]
+key = "DB_NAME"
+label = "database name"
+default = "limesurvey"
+description = "name for the database."
+
+[[variables]]
+key = "DB_PASS"
+label = "database password"
+description = "Password for the database user and root using mysql."
+
+[[variables]]
+key = "DB_USER"
+label = "database user"
+default = "limesurvey"
+description = "Username for the database using mysql."
+
+[[variables]]
+key = "LIMESURVEY_VERSION"
+label = "Limesurvey Version"
+default = "3"
+description = "https://registry.hub.docker.com/r/crramirez/limesurvey/tags"
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB (database) version"
+default = "10.5.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"

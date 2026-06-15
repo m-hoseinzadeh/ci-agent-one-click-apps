@@ -1,0 +1,65 @@
+slug = "spigot"
+name = "Spigot"
+category = "App"
+description = "Spigot is a performance optimized server for Minecraft with plugin support."
+keywords = ["spigot"]
+compose = '''
+services:
+  spigot:
+    ports:
+    - '{{PORT}}:25565'
+    environment:
+      EULA: '{{EULA}}'
+      SPIGOT_VER: '{{SPIGOT_VERSION}}'
+      MC_MAXMEM: '{{MAXMEM}}'
+      MC_MINMEM: '{{MINMEM}}'
+      SPIGOT_AUTORESTART: '{{AUTORESTART}}'
+    image: nimmis/spigot@{{VERSION}}
+    restart: always
+    volumes:
+    - spigot-data:/minecraft
+volumes:
+  spigot-data:
+'''
+
+[[variables]]
+key = "AUTORESTART"
+label = "Autorestart"
+default = "yes"
+description = "Define if container should automatically restart after issuing a stop command within the server (yes or no)"
+
+[[variables]]
+key = "EULA"
+label = "EULA"
+default = ""
+description = "IMPORTANT: Read the EULA at https://account.mojang.com/documents/minecraft_eula and set this field to true if you agree. This is a prerequisite to use this software."
+
+[[variables]]
+key = "MAXMEM"
+label = "Maximum Memory"
+default = "1g"
+description = "Define maximum memory to be used by the server (e.g. 512m or 2g)"
+
+[[variables]]
+key = "MINMEM"
+label = "Initial Memory"
+default = "512m"
+description = "Define initial memory reservation to be used by the server (e.g. 512m or 2g)"
+
+[[variables]]
+key = "PORT"
+label = "Game Server Port (TCP/UDP)"
+default = "25565"
+description = "This is the port the server will expose for players to join."
+
+[[variables]]
+key = "SPIGOT_VERSION"
+label = "Spigot Version"
+default = "latest"
+description = "Versions as available on https://www.spigotmc.org/wiki/buildtools/#versions (e.g. 1.15.2 or latest)"
+
+[[variables]]
+key = "VERSION"
+label = "Docker Image Version"
+default = "sha256:b968685fadb79e6dacca8efc030ee53f695441b8d6dfde4b86e027ba1f6796db"
+description = "The Docker image used does not offer version tags. Since the use of the latest tag is not recommended, refer to the image version by SHA tag."

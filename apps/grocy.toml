@@ -1,0 +1,42 @@
+slug = "grocy"
+name = "Grocy"
+category = "App"
+description = "Grocy is an ERP system for your kitchen and groceries! Cut down on food waste, and manage your chores with this brilliant utility."
+keywords = ["grocy"]
+compose = '''
+services:
+  grocy:
+    image: linuxserver/grocy:{{GROCY_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    volumes:
+    - grocy-config:/config
+volumes:
+  grocy-config:
+'''
+
+[[variables]]
+key = "GROCY_VERSION"
+label = "Grocy Version"
+default = "v2.7.1-ls58"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/grocy/tags"
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/New_York"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

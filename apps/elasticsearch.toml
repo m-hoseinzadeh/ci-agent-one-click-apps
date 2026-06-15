@@ -1,0 +1,54 @@
+slug = "elasticsearch"
+name = "elasticsearch"
+category = "App"
+description = "Elasticsearch is a search engine based on the Lucene library"
+keywords = ["elasticsearch"]
+compose = '''
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:{{ELASTICSEARCH_VERSION}}
+    volumes:
+    - elasticsearch-elasticsearch-data:/usr/share/elasticsearch/data
+    restart: always
+    environment:
+      CLI_JAVA_OPTS: -Xms512m -Xmx512m
+      cluster.name: '{{ELASTICSEARCH_CLUSTER_NAME}}'
+      discovery.type: '{{ELASTICSEARCH_DISCOVERY_TYPE}}'
+      http.port: '{{CONTAINER_PORT}}'
+      node.name: elasticsearch
+      xpack.security.enabled: '{{ELASTICSEARCH_SECURITY_ENABLED}}'
+    ports:
+    - '{{HTTP_PORT}}:$$cap_container_port'
+volumes:
+  elasticsearch-elasticsearch-data:
+'''
+
+[[variables]]
+key = "CONTAINER_PORT"
+label = "Container TCP Port"
+default = "9200"
+description = "Internal port for Elasticsearch the container listens to."
+
+[[variables]]
+key = "ELASTICSEARCH_CLUSTER_NAME"
+label = "Cluster Name"
+default = "elasticsearch-cluster"
+description = "Only nodes within the same cluster name can be combined"
+
+[[variables]]
+key = "ELASTICSEARCH_DISCOVERY_TYPE"
+label = "Discovery Type"
+default = "single-node"
+description = "Discovery type, for a single node cluster use `single-node`, otherwise `multi-node`"
+
+[[variables]]
+key = "ELASTICSEARCH_SECURITY_ENABLED"
+label = "Security Enabled"
+default = "false"
+description = "When you enable this option, Elasticsearch will create a random password (see startup logs) for the `elastic` user and create SSL certificates required for authentication. It is recommended to leave this off for a quick setup. Warning: make sure to enable HTTP Basic Auth in CapRover!"
+
+[[variables]]
+key = "ELASTICSEARCH_VERSION"
+label = "Elasticsearch Version Tag"
+default = "8.4.1"
+description = "Check out the releases overview: https://hub.docker.com/_/elasticsearch"

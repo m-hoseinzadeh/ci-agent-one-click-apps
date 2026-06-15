@@ -1,0 +1,18 @@
+slug = "request-baskets"
+name = "Request Baskets"
+category = "App"
+description = "Request Baskets is a web service to collect arbitrary HTTP requests, similar to RequestBin or Webhook.site"
+keywords = ["baskets", "request"]
+compose = '''
+services:
+  request-baskets:
+    image: darklynx/request-baskets:{{VERSION}}
+    ports:
+    - '{{HTTP_PORT}}:55555'
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Request Baskets Version Tag"
+default = "v1.1.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/darklynx/request-baskets/tags/"

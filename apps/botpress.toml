@@ -1,0 +1,120 @@
+slug = "botpress"
+name = "Botpress"
+category = "App"
+description = "Open Source Platform For Developers To Build High-Quality Digital Assistants"
+keywords = ["botpress"]
+compose = '''
+services:
+  botpress:
+    environment:
+      DATABASE_URL: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@botpress-db/{{POSTGRES_DB}}
+      REDIS_URL: redis://botpress-cache?password={{REDIS_PASSWORD}}
+      EXTERNAL_URL: http://botpress.{{ROOT_DOMAIN}}
+      BP_MODULE_NLU_DUCKLINGURL: http://botpress-lang:8000
+      BP_MODULE_NLU_LANGUAGESOURCES: '[{"endpoint": "http://botpress-lang:3100"}]'
+      BP_PRODUCTION: '{{BOTPRESS_PRODUCTION}}'
+      BPFS_STORAGE: '{{BOTPRESS_STORAGE}}'
+      VERBOSITY_LEVEL: '{{BOTPRESS_VERBOSITY_LEVEL}}'
+      BP_DECISION_MIN_CONFIDENCE: '{{BOTPRESS_DECISION_MIN_CONFIDENCE}}'
+      FAST_TEXT_VERBOSITY: '{{BOTPRESS_FAST_TEXT_VERBOSITY}}'
+      FAST_TEXT_CLEANUP_MS: '{{BOTPRESS_FAST_TEXT_CLEANUP_MS}}'
+    depends_on:
+    - botpress-lang
+    - botpress-db
+    - botpress-cache
+    volumes:
+    - botpress:/botpress/data
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  botpress-lang:
+    volumes:
+    - botpress-lang:/botpress/lang
+  botpress-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+    volumes:
+    - botpress-db:/var/lib/postgresql/data
+  botpress-cache:
+    volumes:
+    - botpress-cache:/data
+volumes:
+  botpress:
+  botpress-lang:
+  botpress-db:
+  botpress-cache:
+'''
+
+[[variables]]
+key = "BOTPRESS_DECISION_MIN_CONFIDENCE"
+label = "General | Decision Minimum Confidence"
+default = "0.5"
+description = "Minimum threshold required for the Decision Engine to elect a suggestion."
+
+[[variables]]
+key = "BOTPRESS_FAST_TEXT_CLEANUP_MS"
+label = "General | Fast Text Clean-Up"
+default = "60000"
+description = "Model will be kept in memory until it receives no messages to process for that duration. Defined in milliseconds."
+
+[[variables]]
+key = "BOTPRESS_FAST_TEXT_VERBOSITY"
+label = "General | Fast Text Verbosity"
+default = "0"
+description = "Level of verbosity that FastText will use when training models."
+
+[[variables]]
+key = "BOTPRESS_PRODUCTION"
+label = "General | Production Mode"
+default = "true"
+description = "Whether to enable production mode."
+
+[[variables]]
+key = "BOTPRESS_STORAGE"
+label = "General | Storage"
+default = "database"
+description = "Storage destination used by BPFS to read and write files (global and bots). Either `disk` or `database`."
+
+[[variables]]
+key = "BOTPRESS_VERBOSITY_LEVEL"
+label = "General | Verbosity Level"
+default = "0"
+description = "When set higher than `0`, Botpress will be more chatty when processing requests."
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "PostgreSQL | Name"
+default = "botpress"
+description = "Name of the database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL | Password"
+generate = true
+description = "Password of the database user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "PostgreSQL | User"
+default = "botpress"
+description = "Name of the database user."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Version | PostgreSQL"
+default = "11.2-alpine"
+description = "Version of PostgreSQL. Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis | Password"
+generate = true
+description = "Password for Redis."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

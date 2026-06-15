@@ -1,0 +1,58 @@
+slug = "tubesync"
+name = "TubeSync"
+category = "App"
+description = "Syncs YouTube channels and playlists to a locally hosted media server"
+keywords = ["tubesync"]
+compose = '''
+services:
+  tubesync:
+    image: ghcr.io/meeb/tubesync:{{TUBESYNC_VERSION}}
+    volumes:
+    - tubesync-config:/config
+    - tubesync-downloads:/downloads
+    restart: always
+    environment:
+      PUID: '{{PUID}}'
+      PGID: '{{PGID}}'
+      TZ: '{{TIMEZONE}}'
+      HTTP_USER: '{{USERNAME}}'
+      HTTP_PASS: '{{PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:4848'
+volumes:
+  tubesync-config:
+  tubesync-downloads:
+'''
+
+[[variables]]
+key = "PASSWORD"
+label = "Password"
+generate = true
+description = "Your password for TubeSync"
+
+[[variables]]
+key = "PGID"
+label = "PGID"
+default = "1000"
+
+[[variables]]
+key = "PUID"
+label = "PUID"
+default = "1000"
+
+[[variables]]
+key = "TIMEZONE"
+label = "Timezone"
+default = "America/Chicago"
+
+[[variables]]
+key = "TUBESYNC_VERSION"
+label = "TubeSync Version"
+default = "v0.12.0"
+description = "Check out their docker page for the valid tags https://github.com/meeb/tubesync/tags"
+
+[[variables]]
+key = "USERNAME"
+label = "TubeSync User"
+default = "admin"
+description = "Username for TubeSync"

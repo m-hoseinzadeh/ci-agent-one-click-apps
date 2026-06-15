@@ -1,0 +1,97 @@
+slug = "drone-gitea"
+name = "Drone.io"
+category = "Dev tools"
+description = "Drone is a self-service Continuous Delivery platform for busy development teams"
+keywords = ["drone", "drone.io", "gitea"]
+compose = '''
+services:
+  drone-gitea-agent:
+    image: drone/drone-runner-docker:{{DRONE_RUNNER_VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+    environment:
+      DRONE_RPC_HOST: drone-gitea:80
+      DRONE_RPC_SECRET: '{{DRONE_SECRET}}'
+      DRONE_RPC_PROTO: http
+      DRONE_RUNNER_CAPACITY: '{{DRONE_RUNNER_CAPACITY}}'
+  drone-gitea:
+    depends_on:
+    - drone-gitea-agent
+    image: drone/drone:{{DRONE_VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - drone-gitea-server:/data
+    restart: always
+    environment:
+      DRONE_GITEA_SERVER: '{{DRONE_GITEA_SERVER}}'
+      DRONE_GIT_ALWAYS_AUTH: '{{DRONE_GITEA_ALWAYS_AUTH}}'
+      DRONE_RUNNER_CAPACITY: '{{DRONE_RUNNER_CAPACITY}}'
+      DRONE_SERVER_PROTO: '{{DRONE_SERVER_PROTO}}'
+      DRONE_SERVER_HOST: '{{DRONE_SERVER_HOST}}'
+      DRONE_GITEA_CLIENT_ID: '{{DRONE_GITEA_CLIENT_ID}}'
+      DRONE_GITEA_CLIENT_SECRET: '{{DRONE_GITEA_CLIENT_SECRET}}'
+      DRONE_RPC_SECRET: '{{DRONE_SECRET}}'
+volumes:
+  drone-gitea-server:
+'''
+
+[[variables]]
+key = "DRONE_GITEA_ALWAYS_AUTH"
+label = "DRONE_GIT_ALWAYS_AUTH"
+default = "false"
+description = "Boolean value configures Drone to authenticate when cloning public repositories. This is only required when your source code management system (e.g. GitHub Enterprise) has private mode enabled."
+
+[[variables]]
+key = "DRONE_GITEA_CLIENT_ID"
+label = "client ID created previously in Gitea"
+default = ""
+description = "Get from gitea settings -> Applications -> Oauth2 Applications"
+
+[[variables]]
+key = "DRONE_GITEA_CLIENT_SECRET"
+label = "Client Secret created previously in Gitea"
+default = ""
+description = "Get from gitea settings -> Applications -> Oauth2 Applications"
+
+[[variables]]
+key = "DRONE_GITEA_SERVER"
+label = "DRONE_GITEA_SERVER"
+default = "https://git.your.server"
+description = "A string containing your Gitea server address."
+
+[[variables]]
+key = "DRONE_RUNNER_CAPACITY"
+label = "DRONE_RUNNER_CAPACITY"
+default = "4"
+description = "An integer defining the maximum number of pipelines the agent should execute concurrently. The default value is two pipelines."
+
+[[variables]]
+key = "DRONE_RUNNER_VERSION"
+label = "Drone Docker runner Version"
+default = "1.5.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/drone/drone-runner-docker/tags"
+
+[[variables]]
+key = "DRONE_SECRET"
+label = "secret for linking drone and agent"
+default = ""
+description = "some random secret here (min 10 characters)"
+
+[[variables]]
+key = "DRONE_SERVER_HOST"
+label = "DRONE_SERVER_HOST"
+default = "drone.yourhost.com"
+description = "A string containing your Drone server hostname or IP address."
+
+[[variables]]
+key = "DRONE_SERVER_PROTO"
+label = "DRONE_SERVER_PROTO"
+default = "https"
+description = "A string containing your Drone server protocol scheme. This value should be set to http or https. This field defaults to https if you configure ssl or acme."
+
+[[variables]]
+key = "DRONE_VERSION"
+label = "Drone Version"
+default = "1.9.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/drone/drone/tags"

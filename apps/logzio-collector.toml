@@ -1,0 +1,33 @@
+slug = "logzio-collector"
+name = "Logzio Logs Collector"
+category = "Monitoring"
+description = "With Logz.io you can have the open source monitoring tools on a fully managed cloud service."
+keywords = ["collector", "logs", "logzio"]
+compose = '''
+services:
+  logzio-collector:
+    image: logzio/docker-collector-logs:{{VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /var/lib/docker/containers:/var/lib/docker/containers
+    environment:
+      LOGZIO_TOKEN: '{{TOKEN}}'
+      matchContainerName: '{{MATCHCONTAINERNAME}}'
+'''
+
+[[variables]]
+key = "MATCHCONTAINERNAME"
+label = "matchContainerName env var for logzio"
+default = "no-container-match-hence-no-logs"
+description = "Change the default value to empty if you want all logs to be shipped. This is a comma-separated list of containers you want to collect the logs from. If a container's name partially matches a name on the list, that container's logs are shipped. Otherwise, its logs are ignored. Note: Can't be used with skipContainerName"
+
+[[variables]]
+key = "TOKEN"
+label = "Logzio Token"
+description = "Get yours from https://app.logz.io/#/dashboard/send-your-data/log-sources/docker-swarm"
+
+[[variables]]
+key = "VERSION"
+label = "Logzio collector version"
+default = "0.4.0"
+description = "See https://hub.docker.com/r/logzio/docker-collector-logs/tags for a list of versions."

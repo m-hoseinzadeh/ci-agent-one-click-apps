@@ -1,0 +1,18 @@
+slug = "jupyter-lab"
+name = "JupyterLab"
+category = "App"
+description = "JupyterLab is the next-generation user interface for Project Jupyter. It offers all the familiar building blocks of the classic Jupyter Notebook in a flexible and powerful user interface."
+keywords = ["jupyter", "jupyterlab", "lab"]
+compose = '''
+services:
+  jupyter-lab:
+    restart: always
+    environment:
+      JUPYTER_ENABLE_LAB: 'yes'
+    volumes:
+    - jupyter-lab:/home/jovyan/
+    ports:
+    - '{{HTTP_PORT}}:8888'
+volumes:
+  jupyter-lab:
+'''

@@ -1,0 +1,64 @@
+slug = "valheim"
+name = "Valheim Dedicated Server"
+category = "App"
+description = "A community maintained Valheim dedicated server with automatic updates and world backups"
+keywords = ["dedicated", "server", "valheim"]
+compose = '''
+services:
+  valheim:
+    image: lloesche/valheim-server:{{VERSION}}
+    cap_add:
+    - SYS_NICE
+    stop_grace_period: 120s
+    ports:
+    - 2456:2456
+    - 2457:2457
+    - 2458:2458
+    volumes:
+    - valheim-config:/config
+    - valheim-data:/opt/valheim
+    environment:
+      SERVER_NAME: '{{SERVER_NAME}}'
+      SERVER_PORT: 2456
+      WORLD_NAME: '{{WORLD_NAME}}'
+      SERVER_PASS: '{{SERVER_PASS}}'
+      SERVER_PUBLIC: 'true'
+      TZ: '{{TIMEZONE}}'
+      UPDATE_CRON: 0 * * * *
+      UPDATE_IF_IDLE: 'true'
+      BACKUPS_CRON: 0 */6 * * *
+      BACKUPS_MAX_AGE: 3
+volumes:
+  valheim-config:
+  valheim-data:
+'''
+
+[[variables]]
+key = "SERVER_NAME"
+label = "Server Name"
+default = "My Valheim Server"
+description = "Public name of your server (visible in server list)"
+
+[[variables]]
+key = "SERVER_PASS"
+label = "Server Password"
+generate = true
+description = "Password for your server (minimum 5 characters)"
+
+[[variables]]
+key = "TIMEZONE"
+label = "Time Zone"
+default = "UTC"
+description = "Server timezone (e.g. Europe/Moscow, America/New_York)"
+
+[[variables]]
+key = "VERSION"
+label = "Valheim Server Version"
+default = "sha-951992b"
+description = "Docker image version (use \"latest\" or specific version tag)"
+
+[[variables]]
+key = "WORLD_NAME"
+label = "World Name"
+default = "Midgard"
+description = "Name of your world (no spaces or special characters)"

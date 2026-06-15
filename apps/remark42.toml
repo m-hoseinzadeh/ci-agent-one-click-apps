@@ -1,0 +1,750 @@
+slug = "remark42"
+name = "Remark42"
+category = "App"
+description = "Self-hosted, lightweight, and simple (yet functional) comment engine, which doesn't spy on users. It can be embedded into blogs, articles or any other place where readers add comments."
+keywords = ["remark42"]
+compose = '''
+services:
+  remark42:
+    image: umputun/remark42:{{TAG_VERSION}}
+    hostname: remark42.{{ROOT_DOMAIN}}
+    restart: always
+    environment:
+      REMARK_URL: https://remark42.{{ROOT_DOMAIN}}
+      SECRET: '{{SECRET}}'
+      SITE: '{{SITE}}'
+      STORE_TYPE: '{{STORE_TYPE}}'
+      STORE_BOLT_PATH: '{{STORE_BOLT_PATH}}'
+      STORE_BOLT_TIMEOUT: '{{STORE_BOLT_TIMEOUT}}'
+      ADMIN_SHARED_ID: '{{ADMIN_SHARED_ID}}'
+      ADMIN_SHARED_EMAIL: '{{ADMIN_SHARED_EMAIL}}'
+      BACKUP_PATH: '{{BACKUP}}'
+      MAX_BACKUP_FILES: '{{MAX_BACK}}'
+      CACHE_TYPE: '{{CACHE_TYPE}}'
+      CACHE_REDIS_ADDR: '{{CACHE_REDIS_ADDR}}'
+      CACHE_MAX_ITEMS: '{{CACHE_MAX_ITEMS}}'
+      CACHE_MAX_VALUE: '{{CACHE_MAX_VALUE}}'
+      CACHE_MAX_SIZE: '{{CACHE_MAX_SIZE}}'
+      AVATAR_TYPE: '{{AVATAR_TYPE}}'
+      AVATAR_FS_PATH: '{{AVATAR_FS_PATH}}'
+      AVATAR_BOLT_FILE: '{{AVATAR_BOLT_FILE}}'
+      AVATAR_URI: '{{AVATAR_URI}}'
+      AVATAR_RSZ_LMT: '{{AVATAR_RSZ_LMT}}'
+      IMAGE_TYPE: '{{IMAGE_TYPE}}'
+      IMAGE_MAX_SIZE: '{{IMAGE_MAX_SIZE}}'
+      IMAGE_FS_PATH: '{{IMAGE_FS_PATH}}'
+      IMAGE_FS_STAGING: '{{IMAGE_FS_STAGING}}'
+      IMAGE_FS_PARTITIONS: '{{IMAGE_FS_PARTITIONS}}'
+      IMAGE_BOLT_FILE: '{{IMAGE_BOLT_FILE}}'
+      IMAGE_RESIZE_WIDTH: '{{IMAGE_RESIZE_WIDTH}}'
+      IMAGE_RESIZE_HEIGHT: '{{IMAGE_RESIZE_HEIGHT}}'
+      AUTH_TTL_JWT: '{{AUTH_TTL_JWT}}'
+      AUTH_TTL_COOKIE: '{{AUTH_TTL_COOKIE}}'
+      AUTH_SEND_JWT_HEADER: '{{AUTH_SEND}}-jwt_header'
+      AUTH_SAME_SITE: '{{AUTH_SAME_SITE}}'
+      AUTH_GOOGLE_CID: '{{AUTH_GOOGLE_CID}}'
+      AUTH_GOOGLE_CSEC: '{{AUTH_GOOGLE_CSEC}}'
+      AUTH_FACEBOOK_CID: '{{AUTH_FACEBOOK_CID}}'
+      AUTH_FACEBOOK_CSEC: '{{AUTH_FACEBOOK_CSEC}}'
+      AUTH_MICROSOFT_CID: '{{AUTH_MICROSOFT_CID}}'
+      AUTH_MICROSOFT_CSEC: '{{AUTH_MICROSOFT_CSEC}}'
+      AUTH_GITHUB_CID: '{{AUTH_GITHUB_CID}}'
+      AUTH_GITHUB_CSEC: '{{AUTH_GITHUB_CSEC}}'
+      AUTH_TWITTER_CID: '{{AUTH_TWITTER_CID}}'
+      AUTH_TWITTER_CSEC: '{{AUTH_TWITTER_CSEC}}'
+      AUTH_PATREON_CID: '{{AUTH_PATREON_CID}}'
+      AUTH_PATREON_CSEC: '{{AUTH_PATREON_CSEC}}'
+      AUTH_TELEGRAM: '{{AUTH_TELEGRAM}}'
+      AUTH_YANDEX_CID: '{{AUTH_YANDEX_CID}}'
+      AUTH_YANDEX_CSEC: '{{AUTH_YANDEX_CSEC}}'
+      AUTH_DEV: '{{AUTH_DEV}}'
+      AUTH_ANON: '{{AUTH_ANON}}'
+      AUTH_EMAIL_ENABLE: '{{AUTH_EMAIL_ENABLE}}'
+      AUTH_EMAIL_FROM: '{{AUTH_EMAIL_FROM}}'
+      AUTH_EMAIL_SUBJ: '{{AUTH_EMAIL_SUBJ}}'
+      AUTH_EMAIL_CONTENT_TYPE: '{{AUTH_EMAIL_CONTENT_TYPE}}'
+      NOTIFY_USERS: '{{NOTIFY_USERS}}'
+      NOTIFY_ADMINS: '{{NOTIFY_ADMINS}}'
+      NOTIFY_QUEUE: '{{NOTIFY_QUEUE}}'
+      NOTIFY_TELEGRAM_CHAN: '{{NOTIFY_TELEGRAM_CHAN}}'
+      NOTIFY_SLACK_TOKEN: '{{NOTIFY_SLACK_TOKEN}}'
+      NOTIFY_SLACK_CHAN: '{{NOTIFY_SLACK_CHAN}}'
+      NOTIFY_WEBHOOK_URL: '{{NOTIFY_WEBHOOK_URL}}'
+      NOTIFY_WEBHOOK_HEADERS: '{{NOTIFY_WEBHOOK_HEADERS}}'
+      NOTIFY_WEBHOOK_TIMEOUT: '{{NOTIFY_WEBHOOK_TIMEOUT}}'
+      NOTIFY_EMAIL_FROM: '{{NOTIFY_EMAIL_FROMADDRESS}}'
+      NOTIFY_EMAIL_VERIFICATION_SUBJ: '{{NOTIFY_EMAIL_VERIFICATION_SUBJ}}'
+      TELEGRAM_TOKEN: '{{TELEGRAM_TOKEN}}'
+      TELEGRAM_TIMEOUT: '{{TELEGRAM_TIMEOUT}}'
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_USERNAME: '{{SMTP_USERNAME}}'
+      SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      SMTP_TLS: '{{SMTP_TLS}}'
+      SMTP_TIMEOUT: '{{SMTP_TIMEOUT}}'
+      SSL_TYPE: '{{SSL_TYPE}}'
+      SSL_PORT: '{{SSL_PORT}}'
+      SSL_CERT: '{{SSL_CERT}}'
+      SSL_KEY: '{{SSL_KEY}}'
+      SSL_ACME_LOCATION: '{{SSL_ACME_LOCATION}}'
+      SSL_ACME_EMAIL: '{{SSL_ACME_EMAIL}}'
+      MAX_COMMENT_SIZE: '{{MAX_COMMENT}}'
+      MAX_VOTES: '{{MAX_VOTES}}'
+      VOTES_IP: '{{VOTES_IP}}'
+      ANON_VOTE: '{{ANON_VOTE}}'
+      VOTES_IP_TIME: '{{VOTES}}-ip_time'
+      LOW_SCORE: '{{LOW_SCORE}}'
+      CRITICAL_SCORE: '{{CRITICAL_SCORE}}'
+      POSITIVE_SCORE: '{{POSITIVE_SCORE}}'
+      RESTRICTED_WORDS: '{{RESTRICTED_WORDS}}'
+      RESTRICTED_NAMES: '{{RESTRICTED_NAMES}}'
+      EDIT_TIME: '{{EDIT_TIME}}'
+      ADMIN_EDIT: '{{ADMIN_EDIT}}'
+      READONLY_AGE: '{{READ_AGE}}'
+      IMAGE_PROXY_HTTP2HTTPS: '{{IMAGE_PROXY_HTTP2HTTPS}}'
+      IMAGE_PROXY_CACHE_EXTERNAL: '{{IMAGE}}-proxy_cache_external'
+      EMOJI: '{{EMOJI}}'
+      SIMPLE_VIEW: '{{SIMPLE_VIEW}}'
+      PROXY_CORS: '{{PROXY_CORS}}'
+      ALLOWED_HOSTS: remark42.{{ROOT_DOMAIN}},{{ALLOWED_HOSTS}}
+      REMARK_ADDRESS: '{{ADDRESS}}'
+      REMARK_PORT: '{{PORT}}'
+      REMARK_WEB_ROOT: '{{WEB_ROOT}}'
+      UPDATE_LIMIT: '{{UPDATE_LIMIT}}'
+      SUBSCRIBERS_ONLY: '{{SUBSCRIBERS_ONLY}}'
+      ADMIN_PASSWD: '{{ADMIN_PASSWD}}'
+      DEBUG: '{{DBG}}'
+    volumes:
+    - remark42-data:/srv/var
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  remark42-data:
+'''
+
+[[variables]]
+key = "ADDRESS"
+label = "REMARK_ADDRESS"
+default = ""
+description = "web server listening address, all interfaces by default"
+
+[[variables]]
+key = "ADMIN_EDIT"
+label = "ADMIN_EDIT"
+default = "false"
+description = "unlimited edit for admins"
+
+[[variables]]
+key = "ADMIN_PASSWD"
+label = "ADMIN_PASSWD"
+default = ""
+description = "password for `admin` basic auth"
+
+[[variables]]
+key = "ADMIN_SHARED_EMAIL"
+label = "ADMIN_SHARED_EMAIL"
+default = ""
+description = "admin emails, _multi_"
+
+[[variables]]
+key = "ADMIN_SHARED_ID"
+label = "ADMIN_SHARED_ID"
+default = ""
+description = "admin IDs (list of user IDs), _multi_"
+
+[[variables]]
+key = "ALLOWED_HOSTS"
+label = "ALLOWED_HOSTS"
+default = ""
+description = "limit hosts/sources allowed to embed comments, enable all by default"
+
+[[variables]]
+key = "ANON_VOTE"
+label = "ANON_VOTE"
+default = "false"
+description = "allow voting for anonymous users, require VOTES_IP to be enabled as well"
+
+[[variables]]
+key = "AUTH_ANON"
+label = "AUTH_ANON"
+default = "false"
+description = "enable anonymous login"
+
+[[variables]]
+key = "AUTH_DEV"
+label = "AUTH_DEV"
+default = "false"
+description = "local OAuth2 server, development mode only"
+
+[[variables]]
+key = "AUTH_EMAIL_CONTENT_TYPE"
+label = "AUTH_EMAIL_CONTENT_TYPE"
+default = "text/html"
+description = "email content type"
+
+[[variables]]
+key = "AUTH_EMAIL_ENABLE"
+label = "AUTH_EMAIL_ENABLE"
+default = "false"
+description = "enable auth via email"
+
+[[variables]]
+key = "AUTH_EMAIL_FROM"
+label = "AUTH_EMAIL_FROM"
+default = ""
+description = "email from"
+
+[[variables]]
+key = "AUTH_EMAIL_SUBJ"
+label = "AUTH_EMAIL_SUBJ"
+default = "remark42 confirmation"
+description = "email subject"
+
+[[variables]]
+key = "AUTH_FACEBOOK_CID"
+label = "AUTH_FACEBOOK_CID"
+default = ""
+description = "Facebook OAuth client ID"
+
+[[variables]]
+key = "AUTH_FACEBOOK_CSEC"
+label = "AUTH_FACEBOOK_CSEC"
+default = ""
+description = "Facebook OAuth client secret"
+
+[[variables]]
+key = "AUTH_GITHUB_CID"
+label = "AUTH_GITHUB_CID"
+default = ""
+description = "GitHub OAuth client ID"
+
+[[variables]]
+key = "AUTH_GITHUB_CSEC"
+label = "AUTH_GITHUB_CSEC"
+default = ""
+description = "GitHub OAuth client secret"
+
+[[variables]]
+key = "AUTH_GOOGLE_CID"
+label = "AUTH_GOOGLE_CID"
+default = ""
+description = "Google OAuth client ID"
+
+[[variables]]
+key = "AUTH_GOOGLE_CSEC"
+label = "AUTH_GOOGLE_CSEC"
+default = ""
+description = "Google OAuth client secret"
+
+[[variables]]
+key = "AUTH_MICROSOFT_CID"
+label = "AUTH_MICROSOFT_CID"
+default = ""
+description = "Microsoft OAuth client ID"
+
+[[variables]]
+key = "AUTH_MICROSOFT_CSEC"
+label = "AUTH_MICROSOFT_CSEC"
+default = ""
+description = "Microsoft OAuth client secret"
+
+[[variables]]
+key = "AUTH_PATREON_CID"
+label = "AUTH_PATREON_CID"
+default = ""
+description = "Patreon OAuth Client ID"
+
+[[variables]]
+key = "AUTH_PATREON_CSEC"
+label = "AUTH_PATREON_CSEC"
+default = ""
+description = "Patreon OAuth Client Secret"
+
+[[variables]]
+key = "AUTH_SAME_SITE"
+label = "AUTH_SAME_SITE"
+default = "default"
+description = "set same site policy for cookies (`default`, `none`, `lax` or `strict`)"
+
+[[variables]]
+key = "AUTH_SEND"
+label = "Auth Send"
+default = ""
+
+[[variables]]
+key = "AUTH_TELEGRAM"
+label = "AUTH_TELEGRAM"
+default = "false"
+description = "Enable Telegram auth (telegram.token must be present)"
+
+[[variables]]
+key = "AUTH_TTL_COOKIE"
+label = "AUTH_TTL_COOKIE"
+default = "200h"
+description = "cookie TTL"
+
+[[variables]]
+key = "AUTH_TTL_JWT"
+label = "AUTH_TTL_JWT"
+default = "5m"
+description = "JWT TTL"
+
+[[variables]]
+key = "AUTH_TWITTER_CID"
+label = "AUTH_TWITTER_CID"
+default = ""
+description = "Twitter Consumer API Key"
+
+[[variables]]
+key = "AUTH_TWITTER_CSEC"
+label = "AUTH_TWITTER_CSEC"
+default = ""
+description = "Twitter Consumer API Secret key"
+
+[[variables]]
+key = "AUTH_YANDEX_CID"
+label = "AUTH_YANDEX_CID"
+default = ""
+description = "Yandex OAuth client ID"
+
+[[variables]]
+key = "AUTH_YANDEX_CSEC"
+label = "AUTH_YANDEX_CSEC"
+default = ""
+description = "Yandex OAuth client secret"
+
+[[variables]]
+key = "AVATAR_BOLT_FILE"
+label = "AVATAR_BOLT_FILE"
+default = "./var/avatars.db"
+description = "avatars bolt file location"
+
+[[variables]]
+key = "AVATAR_FS_PATH"
+label = "AVATAR_FS_PATH"
+default = "./var/avatars"
+description = "avatars location for `fs` store"
+
+[[variables]]
+key = "AVATAR_RSZ_LMT"
+label = "AVATAR_RSZ_LMT"
+default = "0 (disabled)"
+description = "max image size for resizing avatars on save"
+
+[[variables]]
+key = "AVATAR_TYPE"
+label = "AVATAR_TYPE"
+default = "fs"
+description = "type of avatar storage, `fs`, `bolt`, or `uri`"
+
+[[variables]]
+key = "AVATAR_URI"
+label = "AVATAR_URI"
+default = "./var/avatars"
+description = "avatars store URI"
+
+[[variables]]
+key = "BACKUP"
+label = "BACKUP_PATH"
+default = "./var/backup"
+description = "backups location"
+
+[[variables]]
+key = "CACHE_MAX_ITEMS"
+label = "CACHE_MAX_ITEMS"
+default = "1000"
+description = "max number of cached items, `0` - unlimited"
+
+[[variables]]
+key = "CACHE_MAX_SIZE"
+label = "CACHE_MAX_SIZE"
+default = "50000000"
+description = "max size of all cached values, `0` - unlimited"
+
+[[variables]]
+key = "CACHE_MAX_VALUE"
+label = "CACHE_MAX_VALUE"
+default = "65536"
+description = "max size of the cached value, `0` - unlimited"
+
+[[variables]]
+key = "CACHE_REDIS_ADDR"
+label = "CACHE_REDIS_ADDR"
+default = "127.0.0.1:6379"
+description = "address of Redis PubSub instance, turn `redis_pub_sub` cache on for distributed cache"
+
+[[variables]]
+key = "CACHE_TYPE"
+label = "CACHE_TYPE"
+default = "mem"
+description = "type of cache, `redis_pub_sub` or `mem` or `none`"
+
+[[variables]]
+key = "CRITICAL_SCORE"
+label = "CRITICAL_SCORE"
+default = "-10"
+description = "critical score threshold"
+
+[[variables]]
+key = "DBG"
+label = "DEBUG"
+default = "false"
+description = "debug mode"
+
+[[variables]]
+key = "EDIT_TIME"
+label = "EDIT_TIME"
+default = "5m"
+description = "edit window"
+
+[[variables]]
+key = "EMOJI"
+label = "EMOJI"
+default = "false"
+description = "enable emoji support"
+
+[[variables]]
+key = "IMAGE"
+label = "Image"
+default = ""
+
+[[variables]]
+key = "IMAGE_BOLT_FILE"
+label = "IMAGE_BOLT_FILE"
+default = "/var/pictures.db"
+description = "images bolt file location"
+
+[[variables]]
+key = "IMAGE_FS_PARTITIONS"
+label = "IMAGE_FS_PARTITIONS"
+default = "100"
+description = "number of image partitions"
+
+[[variables]]
+key = "IMAGE_FS_PATH"
+label = "IMAGE_FS_PATH"
+default = "./var/pictures"
+description = "permanent location of images"
+
+[[variables]]
+key = "IMAGE_FS_STAGING"
+label = "IMAGE_FS_STAGING"
+default = "./var/pictures.staging"
+description = "staging location of images"
+
+[[variables]]
+key = "IMAGE_MAX_SIZE"
+label = "IMAGE_MAX_SIZE"
+default = "5000000"
+description = "max size of image file"
+
+[[variables]]
+key = "IMAGE_PROXY_HTTP2HTTPS"
+label = "IMAGE_PROXY_HTTP2HTTPS"
+default = "false"
+description = "enable HTTP->HTTPS proxy for images"
+
+[[variables]]
+key = "IMAGE_RESIZE_HEIGHT"
+label = "IMAGE_RESIZE_HEIGHT"
+default = "900"
+description = "height of a resized image"
+
+[[variables]]
+key = "IMAGE_RESIZE_WIDTH"
+label = "IMAGE_RESIZE_WIDTH"
+default = "2400"
+description = "width of a resized image"
+
+[[variables]]
+key = "IMAGE_TYPE"
+label = "IMAGE_TYPE"
+default = "fs"
+description = "type of image storage, `fs`, `bolt`"
+
+[[variables]]
+key = "LOW_SCORE"
+label = "LOW_SCORE"
+default = "-5"
+description = "low score threshold"
+
+[[variables]]
+key = "MAX_BACK"
+label = "MAX_BACKUP_FILES"
+default = "10"
+description = "max backup files to keep"
+
+[[variables]]
+key = "MAX_COMMENT"
+label = "MAX_COMMENT_SIZE"
+default = "2048"
+description = "comment's size limit"
+
+[[variables]]
+key = "MAX_VOTES"
+label = "MAX_VOTES"
+default = "-1"
+description = "votes limit per comment, `-1` - unlimited"
+
+[[variables]]
+key = "NOTIFY_ADMINS"
+label = "NOTIFY_ADMINS"
+default = "none"
+description = "type of admin notifications (Telegram, Slack, webhook and/or email)"
+
+[[variables]]
+key = "NOTIFY_EMAIL_FROMADDRESS"
+label = "NOTIFY_EMAIL_FROM"
+default = ""
+description = "from email address"
+
+[[variables]]
+key = "NOTIFY_EMAIL_VERIFICATION_SUBJ"
+label = "NOTIFY_EMAIL_VERIFICATION_SUBJ"
+default = "Email verification"
+description = "verification message subject"
+
+[[variables]]
+key = "NOTIFY_QUEUE"
+label = "NOTIFY_QUEUE"
+default = "100"
+description = "size of notification queue"
+
+[[variables]]
+key = "NOTIFY_SLACK_CHAN"
+label = "NOTIFY_SLACK_CHAN"
+default = "general"
+description = "Slack channel for admin notifications"
+
+[[variables]]
+key = "NOTIFY_SLACK_TOKEN"
+label = "NOTIFY_SLACK_TOKEN"
+default = ""
+description = "Slack token"
+
+[[variables]]
+key = "NOTIFY_TELEGRAM_CHAN"
+label = "NOTIFY_TELEGRAM_CHAN"
+default = ""
+description = "the ID of telegram channel for admin notifications"
+
+[[variables]]
+key = "NOTIFY_USERS"
+label = "NOTIFY_USERS"
+default = "none"
+description = "type of user notifications (Telegram, email)"
+
+[[variables]]
+key = "NOTIFY_WEBHOOK_HEADERS"
+label = "NOTIFY_WEBHOOK_HEADERS"
+default = ""
+description = "HTTP header in format Header1:Value1,Header2:Value2,..."
+
+[[variables]]
+key = "NOTIFY_WEBHOOK_TIMEOUT"
+label = "NOTIFY_WEBHOOK_TIMEOUT"
+default = "5s"
+description = "Webhook connection timeout"
+
+[[variables]]
+key = "NOTIFY_WEBHOOK_URL"
+label = "NOTIFY_WEBHOOK_URL"
+default = ""
+description = "Webhook notification URL for admin notifications"
+
+[[variables]]
+key = "PORT"
+label = "REMARK_PORT"
+default = "8080"
+description = "web server port"
+
+[[variables]]
+key = "POSITIVE_SCORE"
+label = "POSITIVE_SCORE"
+default = "false"
+description = "restricts comment's score to be only positive"
+
+[[variables]]
+key = "PROXY_CORS"
+label = "PROXY_CORS"
+default = "false"
+description = "disable internal CORS and delegate it to proxy"
+
+[[variables]]
+key = "READ_AGE"
+label = "READONLY_AGE"
+default = ""
+description = "read-only age of comments, days"
+
+[[variables]]
+key = "RESTRICTED_NAMES"
+label = "RESTRICTED_NAMES"
+default = ""
+description = "names prohibited to use by the user, _multi_"
+
+[[variables]]
+key = "RESTRICTED_WORDS"
+label = "RESTRICTED_WORDS"
+default = ""
+description = "words banned in comments (can use `*`), _multi_"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET"
+label = "SECRET"
+generate = true
+description = "the shared secret key used to sign JWT, should be a random, long, hard-to-guess string"
+
+[[variables]]
+key = "SIMPLE_VIEW"
+label = "SIMPLE_VIEW"
+default = "false"
+description = "minimized UI with basic info only"
+
+[[variables]]
+key = "SITE"
+label = "SITE"
+default = "remark"
+description = "site name(s), _multi_"
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMTP_HOST"
+default = ""
+description = "SMTP host"
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP_PASSWORD"
+default = ""
+description = "SMTP password"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP_PORT"
+default = ""
+description = "SMTP port"
+
+[[variables]]
+key = "SMTP_TIMEOUT"
+label = "SMTP_TIMEOUT"
+default = "10s"
+description = "SMTP TCP connection timeout"
+
+[[variables]]
+key = "SMTP_TLS"
+label = "SMTP_TLS"
+default = "false"
+description = "enable TLS for SMTP"
+
+[[variables]]
+key = "SMTP_USERNAME"
+label = "SMTP_USERNAME"
+default = ""
+description = "SMTP user name"
+
+[[variables]]
+key = "SSL_ACME_EMAIL"
+label = "SSL_ACME_EMAIL"
+default = ""
+description = "admin email for receiving notifications from LE"
+
+[[variables]]
+key = "SSL_ACME_LOCATION"
+label = "SSL_ACME_LOCATION"
+default = "./var/acme"
+description = "dir where obtained le-certs will be stored"
+
+[[variables]]
+key = "SSL_CERT"
+label = "SSL_CERT"
+default = ""
+description = "path to the cert.pem file"
+
+[[variables]]
+key = "SSL_KEY"
+label = "SSL_KEY"
+default = ""
+description = "path to the key.pem file"
+
+[[variables]]
+key = "SSL_PORT"
+label = "SSL_PORT"
+default = "8443"
+description = "port for HTTPS server"
+
+[[variables]]
+key = "SSL_TYPE"
+label = "SSL_TYPE"
+default = "none"
+description = "`none`-HTTP, `static`-HTTPS, `auto`-HTTPS + le"
+
+[[variables]]
+key = "STORE_BOLT_PATH"
+label = "STORE_BOLT_PATH"
+default = "./var"
+description = "parent directory for the bolt files"
+
+[[variables]]
+key = "STORE_BOLT_TIMEOUT"
+label = "STORE_BOLT_TIMEOUT"
+default = "30s"
+description = "boltdb access timeout"
+
+[[variables]]
+key = "STORE_TYPE"
+label = "STORE_TYPE"
+default = "bolt"
+description = "type of storage, `bolt` or `rpc`"
+
+[[variables]]
+key = "SUBSCRIBERS_ONLY"
+label = "SUBSCRIBERS_ONLY"
+default = "false"
+description = "enable commenting only for Patreon subscribers"
+
+[[variables]]
+key = "TAG_VERSION"
+label = "Remark42 docker image tag"
+default = "v1.9.0"
+description = "Valid tag from https://hub.docker.com/r/umputun/remark42/tags"
+
+[[variables]]
+key = "TELEGRAM_TIMEOUT"
+label = "TELEGRAM_TIMEOUT"
+default = "5s"
+description = "Telegram connection timeout"
+
+[[variables]]
+key = "TELEGRAM_TOKEN"
+label = "TELEGRAM_TOKEN"
+default = ""
+description = "Telegram token (used for auth and Telegram notifications)"
+
+[[variables]]
+key = "UPDATE_LIMIT"
+label = "UPDATE_LIMIT"
+default = "0.5"
+description = "updates/sec limit"
+
+[[variables]]
+key = "VOTES"
+label = "Votes"
+default = ""
+
+[[variables]]
+key = "VOTES_IP"
+label = "VOTES_IP"
+default = "false"
+description = "restrict votes from the same IP"
+
+[[variables]]
+key = "WEB_ROOT"
+label = "REMARK_WEB_ROOT"
+default = "./web"
+description = "web server root directory"

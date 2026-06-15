@@ -1,0 +1,22 @@
+slug = "actual"
+name = "Actual"
+category = "App"
+description = "Actual Budget is a super fast and privacy-focused app for managing your finances. At its heart is the well proven and much loved Envelope Budgeting methodology."
+keywords = ["actual"]
+compose = '''
+services:
+  actual:
+    image: actualbudget/actual-server:{{VERSION}}
+    volumes:
+    - actual-data:/data
+    ports:
+    - '{{HTTP_PORT}}:5006'
+volumes:
+  actual-data:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Actual Version"
+default = "23.8.1-alpine"
+description = "Paste version from release notes https://actualbudget.org/blog/tags/release or check out their Docker page for the list of all valid tags https://hub.docker.com/r/actualbudget/actual-server/tags"

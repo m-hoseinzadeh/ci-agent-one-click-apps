@@ -1,0 +1,55 @@
+slug = "wordpress-only"
+name = "WordPress - No Database"
+category = "Database"
+description = "This will create a WordPress only. You will need to create and configure the database information manually. Intended for advanced users."
+keywords = ["database", "no", "only", "wordpress"]
+compose = '''
+services:
+  wordpress-only-wordpress:
+    image: wordpress:{{WP_VERSION}}
+    volumes:
+    - wordpress-only-wp-data:/var/www/html
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: '{{DB_HOST}}:3306'
+      WORDPRESS_DB_NAME: '{{DB_NAME}}'
+      WORDPRESS_TABLE_PREFIX: '{{DB_PREFIX}}'
+      WORDPRESS_DB_USER: '{{DB_USER}}'
+      WORDPRESS_DB_PASSWORD: '{{DB_PASS}}'
+volumes:
+  wordpress-only-wp-data:
+'''
+
+[[variables]]
+key = "DB_HOST"
+label = "Database Host"
+default = "srv-captain--xxx"
+description = "Database host"
+
+[[variables]]
+key = "DB_NAME"
+label = "DB Name"
+default = "wordpress"
+description = "Database name"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_PREFIX"
+label = "Table Prefix"
+default = "WP_"
+description = "Table prefix used by this Wordpress"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "wordpressuser"
+
+[[variables]]
+key = "WP_VERSION"
+label = "WordPress Version"
+default = "5.4.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/wordpress/tags/"

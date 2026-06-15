@@ -1,0 +1,137 @@
+slug = "directus-mysql-redis"
+name = "Directus + MySQL + Redis"
+category = "Database"
+description = "Directus is an open-source headless CMS and an Open Data Platform built to democratize the database. It provides a dynamic API and intuitive Admin Panel App."
+keywords = ["directus", "mysql", "redis"]
+compose = '''
+services:
+  directus-mysql-redis-mysql:
+    image: mysql:{{MYSQL_TAG}}
+    volumes:
+    - directus-mysql-redis-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_ROOT_PASSWORD}}'
+      MYSQL_USER: '{{MYSQL_USER}}'
+      MYSQL_PASSWORD: '{{MYSQL_PASSWORD}}'
+      MYSQL_DATABASE: '{{MYSQL_DATABASE_NAME}}'
+  directus-mysql-redis-redis:
+    image: redis:{{REDIS_TAG}}
+  directus-mysql-redis:
+    depends_on:
+    - directus-mysql-redis-mysql
+    - directus-mysql-redis-redis
+    image: directus/directus:{{DIRECTUS_TAG}}
+    volumes:
+    - directus-mysql-redis-uploads:/directus/uploads
+    - directus-mysql-redis-extensions:/directus/extensions
+    restart: always
+    environment:
+      KEY: '{{DIRECTUS_AUTH_PUBLIC_KEY}}'
+      SECRET: '{{DIRECTUS_AUTH_SECRET_KEY}}'
+      PUBLIC_URL: https://directus-mysql-redis.{{ROOT_DOMAIN}}
+      DB_CLIENT: mysql
+      DB_HOST: directus-mysql-redis-mysql
+      DB_PORT: '3306'
+      DB_DATABASE: '{{MYSQL_DATABASE_NAME}}'
+      DB_USER: '{{MYSQL_USER}}'
+      DB_PASSWORD: '{{MYSQL_PASSWORD}}'
+      CACHE_ENABLED: 'true'
+      CACHE_STORE: redis
+      CACHE_AUTO_PURGE: '{{REDIS_AUTO_PURGE}}'
+      CACHE_TTL: '{{REDIS_TTL}}'
+      CACHE_REDIS: redis://directus-mysql-redis-redis:6379
+      REDIS: redis://directus-mysql-redis-redis:6379
+      ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
+      TELEMETRY: 'false'
+    ports:
+    - '{{HTTP_PORT}}:8055'
+volumes:
+  directus-mysql-redis-data:
+  directus-mysql-redis-uploads:
+  directus-mysql-redis-extensions:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Directus admin user email"
+default = "admin@example.com"
+description = "Directus admin user email"
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Directus admin user password"
+generate = true
+description = "Directus admin user password"
+
+[[variables]]
+key = "DIRECTUS_AUTH_PUBLIC_KEY"
+label = "Directus Auth Public Key"
+generate = true
+description = "Directus Auth Public Key (must not be the same as Directus Auth Secret Key)"
+
+[[variables]]
+key = "DIRECTUS_AUTH_SECRET_KEY"
+label = "Directus Auth Secret Key"
+generate = true
+description = "Directus Auth Secret Key (must not be the same as Directus Auth Public Key)"
+
+[[variables]]
+key = "DIRECTUS_TAG"
+label = "Directus image tag"
+default = "9.22.1"
+description = "Tag of Directus image on https://hub.docker.com/r/directus/directus/tags"
+
+[[variables]]
+key = "MYSQL_DATABASE_NAME"
+label = "MySQL database name"
+default = "directus"
+description = "Name of the Directus database instance."
+
+[[variables]]
+key = "MYSQL_PASSWORD"
+label = "MySQL user password"
+generate = true
+description = "User password for the Directus database instance."
+
+[[variables]]
+key = "MYSQL_ROOT_PASSWORD"
+label = "MySQL root password"
+generate = true
+description = "Root password for the MySQL database instance."
+
+[[variables]]
+key = "MYSQL_TAG"
+label = "MySQL image tag"
+default = "5.7"
+description = "Tag of MySQL image on https://hub.docker.com/_/mysql/tags. NOTE: Not working with MySQL version 8 or higher!"
+
+[[variables]]
+key = "MYSQL_USER"
+label = "MySQL user name"
+default = "directus"
+description = "User for the Directus database instance."
+
+[[variables]]
+key = "REDIS_AUTO_PURGE"
+label = "Redis CACHE_AUTO_PURGE (true or false)"
+default = "true"
+description = "Automatically purge the data cache on create, update, and delete actions. (https://docs.directus.io/self-hosted/config-options.html#cache)"
+
+[[variables]]
+key = "REDIS_TAG"
+label = "Redis image tag"
+default = "7.0-alpine"
+description = "Tag of redis image on https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "REDIS_TTL"
+label = "Redis CACHE_TTL"
+default = "1d"
+description = "How long the data cache is persisted. (https://docs.directus.io/self-hosted/config-options.html#cache)"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

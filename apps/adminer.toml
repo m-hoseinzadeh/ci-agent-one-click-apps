@@ -1,0 +1,32 @@
+slug = "adminer"
+name = "Adminer"
+category = "Database"
+description = "Adminer (formerly phpMinAdmin) is a full-featured database management tool written in PHP"
+keywords = ["adminer"]
+compose = '''
+services:
+  adminer:
+    image: adminer:{{ADMINER_VERSION}}
+    restart: always
+    environment:
+      ADMINER_PLUGINS: '{{ADMINER_PLUGINS}}'
+      ADMINER_DESIGN: '{{ADMINER_DESIGN}}'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+'''
+
+[[variables]]
+key = "ADMINER_DESIGN"
+label = "OPTIONAL: Adminer Design"
+description = "List of designs: https://github.com/vrana/adminer/tree/master/designs"
+
+[[variables]]
+key = "ADMINER_PLUGINS"
+label = "OPTIONAL: Adminer plugins (space separated)"
+default = ""
+
+[[variables]]
+key = "ADMINER_VERSION"
+label = "Adminer Version Tag"
+default = "4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/adminer/tags/"

@@ -1,0 +1,135 @@
+slug = "sentry"
+name = "Sentry"
+category = "Monitoring"
+description = "Open-source error tracking with full stacktraces & asynchronous context"
+keywords = ["sentry"]
+compose = '''
+services:
+  sentry-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - sentry-postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: sentry
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: sentry
+  sentry-redis:
+    volumes:
+    - sentry-redis-data:/data
+    restart: always
+  sentry-cron:
+    depends_on:
+    - sentry
+    restart: always
+    environment:
+      SENTRY_SECRET_KEY: '{{SENTRY_SECRET}}'
+      SENTRY_REDIS_HOST: sentry-redis
+  sentry-worker:
+    depends_on:
+    - sentry-cron
+    restart: always
+    environment:
+      SENTRY_SECRET_KEY: '{{SENTRY_SECRET}}'
+      SENTRY_REDIS_HOST: sentry-redis
+      SENTRY_REDIS_PORT: '6379'
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_DB_NAME: sentry
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: '{{PG_PASS}}'
+  sentry:
+    depends_on:
+    - sentry-postgres
+    - sentry-redis
+    volumes:
+    - sentry-data:/var/lib/sentry/files
+    restart: always
+    environment:
+      CAP_SENTRY_VERSION: '{{SENTRY_VERSION}}'
+      CAP_SENTRY_SUPERUSER_EMAIL: '{{SENTRY_SUPERUSER_EMAIL}}'
+      CAP_SENTRY_SUPERUSER_PASSWORD: '{{SENTRY_SUPERUSER_PASSWORD}}'
+      SENTRY_POSTGRES_HOST: sentry-postgres
+      SENTRY_REDIS_HOST: sentry-redis
+      SENTRY_REDIS_PORT: '6379'
+      SENTRY_DB_NAME: sentry
+      SENTRY_DB_USER: sentry
+      SENTRY_DB_PASSWORD: '{{PG_PASS}}'
+      SENTRY_SECRET_KEY: '{{SENTRY_SECRET}}'
+      SENTRY_MAILGUN_API_KEY: '{{MAILGUN_APIKEY}}'
+      SENTRY_SERVER_EMAIL: '{{SENTRY_SERVER_MAIL}}'
+      SENTRY_EMAIL_HOST: '{{SENTRY_EMAIL_HOST}}'
+      SENTRY_EMAIL_PORT: '{{SENTRY_EMAIL_PORT}}'
+      SENTRY_EMAIL_USER: '{{SENTRY_EMAIL_USER}}'
+      SENTRY_EMAIL_PASSWORD: '{{SENTRY_EMAIL_PASSWORD}}'
+      SENTRY_EMAIL_USE_TLS: '{{SENTRY_EMAIL_USE_TLS}}'
+    ports:
+    - '{{HTTP_PORT}}:9000'
+volumes:
+  sentry-postgres-data:
+  sentry-redis-data:
+  sentry-data:
+'''
+
+[[variables]]
+key = "MAILGUN_APIKEY"
+label = "Mailgun Api key (optional)"
+description = "If you're using Mailgun for inbound mail, set your API key and configure a route to forward to /api/hooks/mailgun/inbound/"
+
+[[variables]]
+key = "PG_PASS"
+label = "Postgres Password"
+description = "Password strength minimal requeriments: Should contain at least one digit, one lower case, one upper case, one special character and at least 12 from the mentioned characters."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version Tag"
+default = "9.6"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
+
+[[variables]]
+key = "SENTRY_EMAIL_HOST"
+label = "SMTP email host (optional)"
+
+[[variables]]
+key = "SENTRY_EMAIL_PASSWORD"
+label = "SMTP email password (optional)"
+
+[[variables]]
+key = "SENTRY_EMAIL_PORT"
+label = "SMTP email port (optional)"
+default = "465"
+
+[[variables]]
+key = "SENTRY_EMAIL_USER"
+label = "SMTP email user (optional)"
+
+[[variables]]
+key = "SENTRY_EMAIL_USE_TLS"
+label = "SMTP use tls (optional)"
+default = "True"
+
+[[variables]]
+key = "SENTRY_SECRET"
+label = "Sentry Secret"
+description = "A secret key used for cryptographic functions within Sentry. This key should be unique and consistent across all running instances. Password strength minimal requeriments: Should contain at least one digit, one lower case, one special character and at least 50 from the mentioned characters. You can generate a new secret key doing something like: docker run --rm sentry config generate-secret-key"
+
+[[variables]]
+key = "SENTRY_SERVER_MAIL"
+label = "Sentry Server Email (optional)"
+default = "root@localhost"
+description = "The email address used for From: in outbound emails."
+
+[[variables]]
+key = "SENTRY_SUPERUSER_EMAIL"
+label = "Sentry Superuser Email"
+
+[[variables]]
+key = "SENTRY_SUPERUSER_PASSWORD"
+label = "Sentry Superuser Password"
+description = "Password strength minimal requeriments: Should contain at least one digit, one lower case, one upper case, one special character and at least 12 from the mentioned characters."
+
+[[variables]]
+key = "SENTRY_VERSION"
+label = "Sentry Version Tag"
+default = "9.1.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/sentry/"

@@ -1,0 +1,59 @@
+slug = "plex-arm"
+name = "Plex Media Server (ARM)"
+category = "App"
+description = "Plex organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices."
+keywords = ["(arm)", "arm", "media", "plex", "server"]
+compose = '''
+services:
+  plex-arm:
+    image: linuxserver/plex:{{PLEX_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PLEX_CLAIM: '{{PLEX_TOKEN}}'
+      ADVERTISE_IP: http://plex-arm.{{ROOT_DOMAIN}}/
+    ports:
+    - '{{HTTP_PORT}}:32400'
+    - 32400:32400
+    - 3005:3005
+    - 8324:8324
+    - 32469:32469
+    - 1900:1900
+    - 32410:32410
+    - 32412:32412
+    - 32413:32413
+    - 32414:32414
+    hostname: plex-arm.{{ROOT_DOMAIN}}
+    volumes:
+    - plex-arm-config:/config
+    - plex-arm-transcode:/transcode
+    - plex-arm-movies:/movies
+    - plex-arm-tv:/tv
+volumes:
+  plex-arm-config:
+  plex-arm-transcode:
+  plex-arm-movies:
+  plex-arm-tv:
+'''
+
+[[variables]]
+key = "PLEX_TOKEN"
+label = "Plex Claim Token"
+description = "Get your token from https://www.plex.tv/claim"
+
+[[variables]]
+key = "PLEX_VERSION"
+label = "Plex Version"
+default = "1.25.8"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/plex/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Copenhagen"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

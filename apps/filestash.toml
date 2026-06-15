@@ -1,0 +1,23 @@
+slug = "filestash"
+name = "Filestash"
+category = "Database"
+description = "A modern web client for SFTP, S3, FTP, WebDAV, Git, Minio, LDAP, CalDAV, CardDAV, Mysql, Backblaze..."
+keywords = ["filestash"]
+compose = '''
+services:
+  filestash:
+    image: machines/filestash:{{FILESTASH_VERSION}}
+    volumes:
+    - filestash-app-data-state:/app/data/state
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8334'
+volumes:
+  filestash-app-data-state:
+'''
+
+[[variables]]
+key = "FILESTASH_VERSION"
+label = "Filestash Version"
+default = "b7b45f2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/machines/filestash/tags"

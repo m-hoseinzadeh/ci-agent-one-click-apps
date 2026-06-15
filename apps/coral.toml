@@ -1,0 +1,42 @@
+slug = "coral"
+name = "Coral Talk"
+category = "App"
+description = "Coral is an open-source commenting platform with a full suite of tools helps moderators easily identify disruptive comments."
+keywords = ["coral", "talk"]
+compose = '''
+services:
+  coral-mongo:
+    image: mongo:4.2
+    volumes:
+    - coral-mongo:/data/db
+  coral-redis:
+    image: redis:3.2
+    volumes:
+    - coral-redis:/data
+  coral-talk:
+    depends_on:
+    - coral-mongo
+    - coral-redis
+    image: coralproject/talk:{{TALK_VERSION}}
+    restart: always
+    environment:
+      MONGODB_URI: mongodb://coral-mongo:27017/coral
+      REDIS_URI: redis://coral-redis:6379
+      SIGNING_SECRET: '{{SIGNING_SECRET}}'
+    ports:
+    - '{{HTTP_PORT}}:5000'
+volumes:
+  coral-mongo:
+  coral-redis:
+'''
+
+[[variables]]
+key = "SIGNING_SECRET"
+label = "Signing Secret"
+generate = true
+
+[[variables]]
+key = "TALK_VERSION"
+label = "Coral Talk Version"
+default = "6"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/coralproject/talk/tags"

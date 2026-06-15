@@ -1,0 +1,66 @@
+slug = "excalidraw"
+name = "Excalidraw"
+category = "App"
+description = "Virtual whiteboard for sketching hand-drawn like diagrams or normal ones. Collaborative and end-to-end encrypted."
+keywords = ["excalidraw"]
+compose = '''
+services:
+  excalidraw:
+    image: kiliandeca/excalidraw@{{EXCALIDRAW_VERSION}}
+    restart: always
+    environment:
+      BACKEND_V2_GET_URL: https://excalidraw-storage.{{ROOT_DOMAIN}}/api/v2/scenes/
+      BACKEND_V2_POST_URL: https://excalidraw-storage.{{ROOT_DOMAIN}}/api/v2/scenes/
+      LIBRARY_URL: https://libraries.excalidraw.com
+      LIBRARY_BACKEND: https://us-central1-excalidraw-room-persistence.cloudfunctions.net/libraries
+      SOCKET_SERVER_URL: https://excalidraw-room.{{ROOT_DOMAIN}}/
+      STORAGE_BACKEND: https
+      HTTP_STORAGE_BACKEND_URL: https://excalidraw-storage.{{ROOT_DOMAIN}}/api/v2
+    depends_on:
+    - excalidraw-room
+    - excalidraw-storage-backend
+  excalidraw-room:
+    image: excalidraw/excalidraw-room
+    restart: always
+  excalidraw-storage-backend:
+    image: kiliandeca/excalidraw-storage-backend@{{STORAGE_BACKEND_VERSION}}
+    restart: always
+    environment:
+      STORAGE_URI: redis://excalidraw-redis:6379
+      STORAGE_TTL: 2592000000
+    depends_on:
+    - excalidraw-redis
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  excalidraw-redis:
+    image: redis:{{REDIS_VERSION}}
+    restart: always
+    volumes:
+    - excalidraw-redis-data:/data
+volumes:
+  excalidraw-redis-data:
+'''
+
+[[variables]]
+key = "EXCALIDRAW_VERSION"
+label = "Excalidraw version"
+default = "sha256:2fe5a14cc0aab940dcf6144a6a5e73b9d044bdf0148762f9c7bc0ceea424c872"
+description = "Check out this Docker page for any valid tags https://hub.docker.com/r/kiliandeca/excalidraw/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "7.0.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redis?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "STORAGE_BACKEND_VERSION"
+label = "Excalidraw storage backend adapter version"
+default = "sha256:dd01b5214ad2e24970bdc255e28b2921ab59b1db14dbb826979d1fdea1c5c20b"
+description = "Check out this Docker page for any valid tags https://hub.docker.com/r/kiliandeca/excalidraw-storage-backend/tags"

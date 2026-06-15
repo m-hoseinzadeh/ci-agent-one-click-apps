@@ -1,0 +1,41 @@
+slug = "rabbitmq"
+name = "RabbitMQ"
+category = "App"
+description = "RabbitMQ is an open-source message-broker software that originally implemented the Advanced Message Queuing Protocol"
+keywords = ["rabbitmq"]
+compose = '''
+services:
+  rabbitmq:
+    image: rabbitmq:{{RABBITMQ_VERSION}}
+    volumes:
+    - rabbitmq-rabbitmq-data:/var/lib/rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: '{{RABBITMQ_USER}}'
+      RABBITMQ_DEFAULT_PASS: '{{RABBITMQ_PASSWORD}}'
+      RABBITMQ_NODENAME: '{{RABBITMQ_NODENAME}}'
+    ports:
+    - '{{HTTP_PORT}}:5672'
+volumes:
+  rabbitmq-rabbitmq-data:
+'''
+
+[[variables]]
+key = "RABBITMQ_NODENAME"
+label = "RabbitMQ Nodename"
+default = "rabbit@localhost"
+description = "Nodename is appended to the end of the database directory."
+
+[[variables]]
+key = "RABBITMQ_PASSWORD"
+label = "RabbitMQ Default Password"
+
+[[variables]]
+key = "RABBITMQ_USER"
+label = "RabbitMQ Default User"
+
+[[variables]]
+key = "RABBITMQ_VERSION"
+label = "RabbitMQ Version Tag"
+default = "3.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/rabbitmq/tags/"

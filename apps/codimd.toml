@@ -1,0 +1,51 @@
+slug = "codimd"
+name = "CodiMD"
+category = "App"
+description = "Realtime collaborative Markdown notes on all platforms"
+keywords = ["codimd"]
+compose = '''
+services:
+  codimd-mariadb:
+    image: linuxserver/mariadb:110.4.14mariabionic-ls77
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: codimd
+      MYSQL_USER: codimd
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+      PGID: 1000
+      PUID: 1000
+      TZ: '{{TIMEZONE}}'
+    volumes:
+    - codimd-mariadb-config:/config
+  codimd:
+    environment:
+      DB_HOST: codimd-mariadb
+      DB_USER: codimd
+      DB_PASS: '{{DB_PASS}}'
+      DB_NAME: codimd
+      DB_PORT: 3306
+      PGID: 1000
+      PUID: 1000
+      TZ: '{{TIMEZONE}}'
+    image: linuxserver/codimd:1.6.0-ls44
+    restart: always
+    volumes:
+    - codimd-config:/config
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  codimd-mariadb-config:
+  codimd-config:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+generate = true
+description = "Password to connect to the database"
+
+[[variables]]
+key = "TIMEZONE"
+label = "Timezone"
+default = "Europe/London"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

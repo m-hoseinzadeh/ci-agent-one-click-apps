@@ -1,0 +1,110 @@
+slug = "ghostfolio"
+name = "Ghostfolio"
+category = "CMS"
+description = "Open Source Wealth Management Software"
+keywords = ["ghostfolio"]
+compose = '''
+services:
+  ghostfolio:
+    image: ghostfolio/ghostfolio:{{GHOSTFOLIO_VERSION}}
+    hostname: ghostfolio.{{ROOT_DOMAIN}}
+    environment:
+      NODE_ENV: '{{NODE_ENV}}'
+      ACCESS_TOKEN_SALT: '{{ACCESS_TOKEN_SALT}}'
+      BASE_CURRENCY: '{{BASE_CURRENCY}}'
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@ghostfolio-db:5432/{{POSTGRES_DB}}?sslmode=prefer
+      HOST: ghostfolio.{{ROOT_DOMAIN}}
+      JWT_SECRET_KEY: '{{JWT_SECRET_KEY}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      REDIS_HOST: ghostfolio-cache
+      REDIS_PORT: 6379
+    ports:
+    - '{{HTTP_PORT}}:3333'
+  ghostfolio-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_ROOT_PASSWORD: '{{POSTGRES_ROOT_PASSWORD}}'
+    volumes:
+    - ghostfolio-db:/var/lib/postgresql/data
+  ghostfolio-cache:
+    image: redis:{{REDIS_VERSION}}
+volumes:
+  ghostfolio-db:
+'''
+
+[[variables]]
+key = "ACCESS_TOKEN_SALT"
+label = "Access Token Salt"
+generate = true
+description = "A random string used as salt for access tokens."
+
+[[variables]]
+key = "BASE_CURRENCY"
+label = "Base Currency"
+default = "USD"
+description = "The base currency of the Ghostfolio application. This can **not** be changed later!"
+
+[[variables]]
+key = "GHOSTFOLIO_VERSION"
+label = "Ghostfolio Version"
+default = "1.205.1"
+description = "Check out their valid tags at https://hub.docker.com/r/ghostfolio/ghostfolio/tags"
+
+[[variables]]
+key = "JWT_SECRET_KEY"
+label = "JWT Secret Key"
+generate = true
+description = "A random string used for JSON Web Tokens (JWT)."
+
+[[variables]]
+key = "NODE_ENV"
+label = "Application Environment"
+default = "production"
+description = "Configure the environment."
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database"
+default = "ghostfolio"
+description = "The name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database Password"
+generate = true
+description = "The password of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_ROOT_PASSWORD"
+label = "Database Root User Password"
+generate = true
+description = "The password of the PostgreSQL database root user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database User"
+default = "ghostfolio"
+description = "The user of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "15.0-alpine"
+description = "Check out their valid tags at https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "7.0-alpine"
+description = "Check out their valid tags at https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

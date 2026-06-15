@@ -1,0 +1,63 @@
+slug = "corteza"
+name = "Corteza"
+category = "App"
+description = "Corteza is a free, open-source, Low Code platform for building your organisation key applications, growing its productivity and protecting its data and the privacy of all those concerned."
+keywords = ["corteza"]
+compose = '''
+services:
+  corteza:
+    image: cortezaproject/corteza:$$corteza_version
+    restart: always
+    depends_on:
+    - corteza-db
+    volumes:
+    - corteza-data:/data
+    environment:
+      VIRTUAL_HOST: corteza.{{ROOT_DOMAIN}}
+      DB_DSN: postgres://{{POSTGRE_USERNAME}}:{{POSTGRE_PASSWORD}}@corteza-db:5432/{{POSTGRE_DB_NAME}}?sslmode=disable
+      HTTP_WEBAPP_ENABLED: true
+      DOMAIN: corteza.{{ROOT_DOMAIN}}
+      VERSION: $$corteza_version
+      LETSENCRYPT_HOST: '{{LETS_ENCRYPT}}'
+  corteza-db:
+    image: postgres:13
+    restart: always
+    volumes:
+    - corteza-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: '{{POSTGRE_USERNAME}}'
+      POSTGRES_PASSWORD: '{{POSTGRE_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRE_DB_NAME}}'
+    ports:
+    - '{{HTTP_PORT}}:5432'
+volumes:
+  corteza-data:
+  corteza-postgres-data:
+'''
+
+[[variables]]
+key = "LETS_ENCRYPT"
+label = "Lets Encrypt Host for SSL."
+default = "$$cap_appname.$$cap_root_domain"
+description = "Set your root domain if you are going to use SSL (https://). Leave empty otherwise."
+
+[[variables]]
+key = "POSTGRE_DB_NAME"
+label = "PostgreSQL Database name"
+default = "corteza"
+
+[[variables]]
+key = "POSTGRE_PASSWORD"
+label = "PostgreSQL Password"
+generate = true
+
+[[variables]]
+key = "POSTGRE_USERNAME"
+label = "PostgreSQL username"
+default = "cortezaUser"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

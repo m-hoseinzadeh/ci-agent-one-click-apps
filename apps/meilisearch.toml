@@ -1,0 +1,99 @@
+slug = "meilisearch"
+name = "MeiliSearch"
+category = "App"
+description = "MeiliSearch is a lightning Fast, Ultra Relevant, and Typo-Tolerant Search Engine"
+keywords = ["meilisearch"]
+compose = '''
+services:
+  meilisearch:
+    image: getmeili/meilisearch:{{APP_VERSION}}
+    volumes:
+    - meilisearch-data:/data.ms
+    - meilisearch-snapshot:/snapshot
+    - meilisearch-dump:/dumps
+    - meilisearch-meili-data:/meili_data
+    restart: always
+    environment:
+      MEILI_MASTER_KEY: '{{MASTER_KEY}}'
+      MEILI_NO_ANALYTICS: '{{NO_ANALYTICS}}'
+      MEILI_ENV: '{{ENV}}'
+      MEILI_HTTP_PAYLOAD_SIZE_LIMIT: '{{PAYLOAD_SIZE}}'
+      MEILI_MAX_MDB_SIZE: '{{MAX_MDB_SIZE}}'
+      MEILI_MAX_UDB_SIZE: '{{MAX_UDB_SIZE}}'
+      MEILI_NO_SENTRY: '{{NO_SENTRY}}'
+      MEILI_SCHEDULE_SNAPSHOT: '{{SCHEDULE_SNAPSHOT}}'
+      MEILI_SNAPSHOT_INTERVAL_SEC: '{{SNAPSHOT_INTERVAL}}'
+      MEILI_DUMP_BATCH_SIZE: '{{DUMP_BATCHSIZE}}'
+    ports:
+    - '{{HTTP_PORT}}:7700'
+volumes:
+  meilisearch-data:
+  meilisearch-snapshot:
+  meilisearch-dump:
+  meilisearch-meili-data:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "MeiliSearch Version"
+default = "v1.1"
+description = "Check out their Docker page for the valid tags: https://hub.docker.com/r/getmeili/meilisearch/tags"
+
+[[variables]]
+key = "DUMP_BATCHSIZE"
+label = "Dump Batch Size"
+default = "1024"
+description = "Sets the batch size used in the dump importation process."
+
+[[variables]]
+key = "ENV"
+label = "MeiliSearch Environment (development/production)"
+default = "development"
+description = "In production mode, the web interface is disabled. (https://docs.meilisearch.com/reference/features/configuration.html#environment)"
+
+[[variables]]
+key = "MASTER_KEY"
+label = "MeiliSearch Master Key"
+generate = true
+description = "The master key allowing you to do everything on the server. If no master key is provided all routes will be accessible without keys. (https://docs.meilisearch.com/reference/features/configuration.html#master-key)"
+
+[[variables]]
+key = "MAX_MDB_SIZE"
+label = "Max MDB Size"
+default = "107374182400"
+description = "The maximum size, in bytes, of the main database. The main database stores the processed data. (https://docs.meilisearch.com/reference/features/configuration.html#max-mdb-size)"
+
+[[variables]]
+key = "MAX_UDB_SIZE"
+label = "Max UDB Size"
+default = "107374182400"
+description = "The maximum size, in bytes, of the update database. The update database stores the pending updates."
+
+[[variables]]
+key = "NO_ANALYTICS"
+label = "Disable MeiliSearch Analytics"
+default = "false"
+description = "Analytics allow us to know how many users are using MeiliSearch and the following (https://docs.meilisearch.com/reference/features/configuration.html#analytics)"
+
+[[variables]]
+key = "NO_SENTRY"
+label = "Disable Sentry"
+default = "true"
+description = "MeiliSearch use Sentry to get bug reports and diagnostics, and improve MeiliSearch experience. To deactivate Sentry, set this value to true."
+
+[[variables]]
+key = "PAYLOAD_SIZE"
+label = "Payload Limit Size"
+default = "104857600"
+description = "The maximum size, in bytes, of accepted JSON payloads."
+
+[[variables]]
+key = "SCHEDULE_SNAPSHOT"
+label = "Schedule Snapshot Creation"
+default = ""
+description = "Defines the time gap in seconds between each snapshot creation in seconds. Disabled if empty."
+
+[[variables]]
+key = "SNAPSHOT_INTERVAL"
+label = "Snapshot Interval"
+default = ""

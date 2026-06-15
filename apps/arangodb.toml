@@ -1,0 +1,31 @@
+slug = "arangodb"
+name = "ArangoDB"
+category = "Database"
+description = "ArangoDB is native multi-model database for using and combining graph, document and key/value models"
+keywords = ["arangodb"]
+compose = '''
+services:
+  arangodb-db:
+    image: arangodb:{{ARANGO_VERSION}}
+    volumes:
+    - arangodb-db-data:/var/lib/arangodb3
+    - arangodb-db-apps-data:/var/lib/arangodb3-apps
+    restart: always
+    environment:
+      ARANGO_ROOT_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:8529'
+volumes:
+  arangodb-db-data:
+  arangodb-db-apps-data:
+'''
+
+[[variables]]
+key = "ARANGO_VERSION"
+label = "ArangoDB Version"
+default = "3.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/arangodb/tags/"
+
+[[variables]]
+key = "DB_PASS"
+label = "ArangoDB Root password"

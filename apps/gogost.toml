@@ -1,0 +1,23 @@
+slug = "gogost"
+name = "GOST - GO Simple Tunnel"
+category = "App"
+description = "A simple security tunnel written in Go lang"
+keywords = ["go", "gogost", "gost", "simple", "tunnel"]
+compose = '''
+services:
+  gogost:
+    image: gogost/gost:{{GOST_VERSION}}
+    restart: always
+    volumes:
+    - gogost-data:/etc/gost
+    ports:
+    - '{{HTTP_PORT}}:$$cap_gost_api_port'
+volumes:
+  gogost-data:
+'''
+
+[[variables]]
+key = "GOST_VERSION"
+label = "GOST Version"
+default = "3.2.6"
+description = "Check out https://hub.docker.com/r/gogost/gost/tags for versions."

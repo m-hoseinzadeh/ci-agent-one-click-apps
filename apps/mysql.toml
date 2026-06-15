@@ -1,0 +1,29 @@
+slug = "mysql"
+name = "MySQL"
+category = "Database"
+description = "MySQL is a relational database management system based on SQL"
+keywords = ["mysql"]
+compose = '''
+services:
+  mysql-db:
+    image: mysql:{{MYSQL_VERSION}}
+    volumes:
+    - mysql-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3306'
+volumes:
+  mysql-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "MySQL Root password"
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "8.4.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mysql/tags/"

@@ -1,0 +1,30 @@
+slug = "resilio-sync"
+name = "Resilio Sync"
+category = "App"
+description = "File synchronization and sharing solution based on BitTorrent technology."
+keywords = ["resilio", "sync"]
+compose = '''
+services:
+  resilio-sync:
+    ports:
+    - '{{HTTP_PORT}}:8888'
+    - '{{PORT_SYNC}}:55555'
+    image: resilio/sync:{{VERSION}}
+    restart: always
+    volumes:
+    - resilio-sync-data:/mnt/sync
+volumes:
+  resilio-sync-data:
+'''
+
+[[variables]]
+key = "PORT_SYNC"
+label = "Listening port for Sync traffic"
+default = "55555"
+description = "Port that Sync listens on for data synchronization (TCP & UDP)."
+
+[[variables]]
+key = "VERSION"
+label = "Resilio Sync Docker Version"
+default = "2.6.4"
+description = "It's highly recommended that you don't use the latest tag but instead the major version you need."

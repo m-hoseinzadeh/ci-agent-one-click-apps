@@ -1,0 +1,23 @@
+slug = "databasus"
+name = "Databasus"
+category = "Database"
+description = "Web UI for automated backups of PostgreSQL, MySQL and MongoDB."
+keywords = ["databasus"]
+compose = '''
+services:
+  databasus:
+    image: databasus/databasus:{{DATABASUS_TAG}}
+    restart: always
+    volumes:
+    - databasus-data:/databasus-data
+    ports:
+    - '{{HTTP_PORT}}:4005'
+volumes:
+  databasus-data:
+'''
+
+[[variables]]
+key = "DATABASUS_TAG"
+label = "Databasus image tag"
+default = "v3.4.0"
+description = "Check available tags at https://hub.docker.com/r/databasus/databasus/tags"

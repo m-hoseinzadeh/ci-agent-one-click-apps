@@ -1,0 +1,23 @@
+slug = "docuseal"
+name = "Docuseal"
+category = "App"
+description = "DocuSeal is an open source platform that provides secure and efficient digital document signing and processing."
+keywords = ["docuseal"]
+compose = '''
+services:
+  docuseal:
+    image: index.docker.io/docuseal/docuseal:{{DOCUSEAL_VERSION}}
+    volumes:
+    - docuseal-data:/data
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  docuseal-data:
+'''
+
+[[variables]]
+key = "DOCUSEAL_VERSION"
+label = "Docuseal Version"
+default = "1.2.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/docuseal/docuseal/tags"

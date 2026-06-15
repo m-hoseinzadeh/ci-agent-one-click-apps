@@ -1,0 +1,75 @@
+slug = "windmill"
+name = "Windmill"
+category = "Automation"
+description = "Windmill is an open-source alternative to Retool, Airplane and n8n."
+keywords = ["windmill"]
+compose = '''
+services:
+  windmill-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - windmill-postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: windmill
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '{{POSTGRES_PASS}}'
+  windmill:
+    image: ghcr.io/windmill-labs/windmill:{{APP_VERSION}}
+    expose:
+    - 8000
+    environment:
+      DATABASE_URL: postgres://postgres:{{POSTGRES_PASS}}@windmill-postgres/windmill?sslmode=disable
+      MODE: server
+    depends_on:
+    - windmill-postgres
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  windmill-worker:
+    image: ghcr.io/windmill-labs/windmill:{{APP_VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - windmill-worker-dependency-cache:/tmp/windmill/cache
+    environment:
+      DATABASE_URL: postgres://postgres:{{POSTGRES_PASS}}@windmill-postgres/windmill?sslmode=disable
+      MODE: worker
+      WORKER_GROUP: default
+    depends_on:
+    - windmill-postgres
+  windmill-worker-native:
+    image: ghcr.io/windmill-labs/windmill:{{APP_VERSION}}
+    environment:
+      DATABASE_URL: postgres://postgres:{{POSTGRES_PASS}}@windmill-postgres/windmill?sslmode=disable
+      MODE: worker
+      WORKER_GROUP: native
+    depends_on:
+    - windmill-postgres
+  windmill-lsp:
+    image: ghcr.io/windmill-labs/windmill-lsp:{{APP_VERSION}}
+    volumes:
+    - windmill-lsp-cache:/root/.cache
+    expose:
+    - 3001
+volumes:
+  windmill-postgres-data:
+  windmill-worker-dependency-cache:
+  windmill-lsp-cache:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "Windmill Version"
+default = "1.434.1"
+description = "Checkout their github page for the valid tags https://github.com/windmill-labs/windmill/releases"
+
+[[variables]]
+key = "POSTGRES_PASS"
+label = "Potgress Database password"
+generate = true
+description = "Password for postgres"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "16-alpine"
+description = "Checkout their page for the valid tags https://hub.docker.com/_/postgres"

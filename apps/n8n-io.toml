@@ -1,0 +1,143 @@
+slug = "n8n-io"
+name = "n8n.io"
+category = "Automation"
+description = "Node based workflow automation tool"
+keywords = ["io", "n8n", "n8n.io"]
+compose = '''
+services:
+  n8n-io-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - n8n-io-db:/var/lib/postgresql/data
+  n8n-io:
+    image: n8nio/n8n:{{N8N_VERSION}}
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8n-io-db
+      DB_POSTGRESDB_DATABASE: '{{POSTGRES_DB}}'
+      DB_POSTGRESDB_USER: '{{POSTGRES_USER}}'
+      DB_POSTGRESDB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
+      TZ: '{{N8N_TIMEZONE}}'
+      NODE_ENV: '{{N8N_ENVIRONMENT}}'
+      N8N_PROTOCOL: https
+      N8N_HOST: n8n-io.{{ROOT_DOMAIN}}
+      N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
+      N8N_EMAIL_MODE: smtp
+      N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
+      N8N_SMTP_PORT: '{{N8N_SMTP_PORT}}'
+      N8N_SMTP_USER: '{{N8N_SMTP_USER}}'
+      N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
+      N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
+      N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
+      WEBHOOK_URL: https://n8n-io.{{ROOT_DOMAIN}}
+      N8N_EDITOR_BASE_URL: https://n8n-io.{{ROOT_DOMAIN}}
+      N8N_ENCRYPTION_KEY: '{{N8N_ENCRYPTION_KEY}}'
+      N8N_RUNNERS_ENABLED: true
+    volumes:
+    - n8n-io:/home/node/.n8n
+    - n8n-io-files:/files
+    depends_on:
+    - n8n-io-db
+    ports:
+    - '{{HTTP_PORT}}:5678'
+volumes:
+  n8n-io-db:
+  n8n-io:
+  n8n-io-files:
+'''
+
+[[variables]]
+key = "N8N_DIAGNOSTICS_ENABLED"
+label = "Application | Enable Telemetry"
+default = "false"
+description = "Whether to send telemetry data to n8n.io."
+
+[[variables]]
+key = "N8N_ENCRYPTION_KEY"
+label = "Application | Encryption key for credentials"
+generate = true
+description = "Password of the PostgreSQL database user."
+
+[[variables]]
+key = "N8N_ENVIRONMENT"
+label = "Application | Environment"
+default = "production"
+description = "Application environment."
+
+[[variables]]
+key = "N8N_SMTP_HOST"
+label = "Application | SMTP Host"
+description = "SMTP host used for sending mails."
+
+[[variables]]
+key = "N8N_SMTP_PASS"
+label = "Application | SMTP Password"
+description = "SMTP user password used for sending mails."
+
+[[variables]]
+key = "N8N_SMTP_PORT"
+label = "Application | SMTP Port"
+description = "SMTP port used for sending mails. Usually `465`."
+
+[[variables]]
+key = "N8N_SMTP_SENDER"
+label = "Application | SMTP Sender"
+description = "SMTP sender used for sending mails (e.g. `N8N <n8n@example.com>`)."
+
+[[variables]]
+key = "N8N_SMTP_SSL"
+label = "Application | SMTP SSL"
+default = "true"
+description = "Whether to use SSL for sending mails through SMTP."
+
+[[variables]]
+key = "N8N_SMTP_USER"
+label = "Application | SMTP User"
+description = "SMTP user used for sending mails."
+
+[[variables]]
+key = "N8N_TIMEZONE"
+label = "Application | Timezone"
+default = "UTC"
+description = "Timezone used by the server. Please check out this page for valid time zones: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "N8N_VERSION"
+label = "Application | n8n.io"
+default = "1.106.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/n8nio/n8n/tags"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database | Name"
+default = "n8n"
+description = "Name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database | Password"
+generate = true
+description = "Password of the PostgreSQL database user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User"
+default = "n8n"
+description = "Username for the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Database | Version"
+default = "15.0-alpine"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

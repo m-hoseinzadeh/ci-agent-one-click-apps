@@ -1,0 +1,49 @@
+slug = "nightscout"
+name = "Nightscout"
+category = "Monitoring"
+description = "Nightscout is a free and open-source project, and associated social movement, that enables accessing and working with continuous glucose monitor data"
+keywords = ["nightscout"]
+compose = '''
+services:
+  nightscout-mongodb:
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - nightscout-db-data:/data/db
+    - nightscout-db-config:/data/configdb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
+  nightscout-nightscout:
+    depends_on:
+    - nightscout-mongodb
+    restart: always
+    environment:
+      PORT: '1337'
+      INSECURE_USE_HTTP: 'true'
+      MONGO_CONNECTION: mongodb://root:{{MONGO_PASSWORD}}@nightscout-mongodb:27017/nightscout?authSource=admin
+      API_SECRET: '{{API_SECRET}}'
+      BASE_URL: https://replace.me.in.settings.of.website.com
+      DISPLAY_UNITS: mg/dl
+    ports:
+    - '{{HTTP_PORT}}:1337'
+volumes:
+  nightscout-db-data:
+  nightscout-db-config:
+'''
+
+[[variables]]
+key = "API_SECRET"
+label = "API key"
+description = "Use a random string (alphanumberic) - minimum 12 characters. See documentation for more details."
+
+[[variables]]
+key = "MONGO_PASSWORD"
+label = "MongoDB password"
+description = "Only use alphanumeric chars."
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "MongoDB Version"
+default = "4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"

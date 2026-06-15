@@ -1,0 +1,71 @@
+slug = "hedgedoc"
+name = "HedgeDoc"
+category = "App"
+description = "HedgeDoc lets you create real-time collaborative markdown notes"
+keywords = ["hedgedoc"]
+compose = '''
+services:
+  hedgedoc:
+    depends_on:
+    - hedgedoc-db
+    image: quay.io/hedgedoc/hedgedoc:{{VERSION}}
+    environment:
+      CMD_DB_URL: postgres://{{DBUSER}}:{{DBPASS}}@hedgedoc-db:5432/{{DBNAME}}
+      CMD_DOMAIN: hedgedoc.{{ROOT_DOMAIN}}
+      CMD_URL_ADDPORT: false
+      PLUGIN_INSTALLER: '{{PLUGIN_INSTALLER}}'
+    volumes:
+    - hedgedoc-uploads:/hedgedoc/public/uploads
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  hedgedoc-db:
+    image: postgres:{{PGVERSION}}
+    volumes:
+    - hedgedoc-db:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: '{{DBNAME}}'
+      POSTGRES_USER: '{{DBUSER}}'
+      POSTGRES_PASSWORD: '{{DBPASS}}'
+volumes:
+  hedgedoc-uploads:
+  hedgedoc-db:
+'''
+
+[[variables]]
+key = "DBNAME"
+label = "Database Name"
+default = "joplin"
+
+[[variables]]
+key = "DBPASS"
+label = "Database Password"
+generate = true
+
+[[variables]]
+key = "DBUSER"
+label = "Database User"
+default = "joplin"
+
+[[variables]]
+key = "PGVERSION"
+label = "Postgresql Version"
+default = "9.6-alpine"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
+
+[[variables]]
+key = "PLUGIN_INSTALLER"
+label = "Plugin Installer"
+default = ""
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "VERSION"
+label = "HedgeDoc Version"
+default = "1.7.2"
+description = "Make sure to use the latest release from https://hedgedoc.org/latest-release"

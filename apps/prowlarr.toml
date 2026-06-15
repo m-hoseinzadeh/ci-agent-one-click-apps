@@ -1,0 +1,45 @@
+slug = "prowlarr"
+name = "Prowlarr"
+category = "App"
+description = "Prowlarr is a indexer manager/proxy built on the popular arr .net/reactjs base stack to integrate with your various PVR apps. A Jackett alternative."
+keywords = ["prowlarr"]
+compose = '''
+services:
+  prowlarr:
+    image: ghcr.io/linuxserver/prowlarr:{{PR_VERSION}}
+    restart: unless-stopped
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    volumes:
+    - prowlarr-config:/config
+    ports:
+    - '{{HTTP_PORT}}:9696'
+volumes:
+  prowlarr-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "PR_VERSION"
+label = "Prowlarr Version"
+default = "amd64-nightly-version-0.1.0.718"
+description = "Check out their Docker page for the valid tags https://github.com/linuxserver/docker-prowlarr/pkgs/container/prowlarr/versions"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "Europe/Brussels"
+description = "Specify a timezone to use EG Europe/London, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

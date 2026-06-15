@@ -1,0 +1,103 @@
+slug = "imagor-s3"
+name = "Imagor (S3 storage)"
+category = "Storage"
+description = "Imagor is a fast, Docker-ready image processing server written in Go. (Stores images in S3 bucket)"
+keywords = ["(s3", "imagor", "s3", "storage)"]
+compose = '''
+services:
+  imagor-s3:
+    image: shumc/imagor:{{IMAGOR_VERSION}}
+    environment:
+      PORT: 80
+      IMAGOR_UNSAFE: '{{ENV_IMAGOR_UNSAFE}}'
+      IMAGOR_SECRET: '{{ENV_IMAGOR_SECRET}}'
+      AWS_ACCESS_KEY_ID: '{{ENV_AWS_KEY_ID}}'
+      AWS_SECRET_ACCESS_KEY: '{{ENV_AWS_SECRET_ACCESS_KEY}}'
+      AWS_REGION: '{{ENV_AWS_REGION}}'
+      S3_ENDPOINT: '{{ENV_S3_ENDPOINT}}'
+      S3_LOADER_BUCKET: '{{ENV_S3_LOADER_BUCKET}}'
+      S3_LOADER_BASE_DIR: '{{ENV_S3_LOADER_BUCKET_DIR}}'
+      S3_STORAGE_BUCKET: '{{ENV_S3_STORAGE_BUCKET}}'
+      S3_STORAGE_BASE_DIR: '{{ENV_S3_STORAGE_BUCKET_DIR}}'
+      S3_RESULT_STORAGE_BUCKET: '{{ENV_S3_RESULT_STORAGE_BUCKET}}'
+      S3_RESULT_STORAGE_BASE_DIR: '{{ENV_S3_RESULT_STORAGE_BUCKET_DIR}}'
+    restart: always
+'''
+
+[[variables]]
+key = "ENV_AWS_KEY_ID"
+label = "AWS Key ID"
+default = ""
+description = "AWS Access Key Id"
+
+[[variables]]
+key = "ENV_AWS_REGION"
+label = "AWS Region"
+default = ""
+description = "AWS region"
+
+[[variables]]
+key = "ENV_AWS_SECRET_ACCESS_KEY"
+label = "AWS Key Secret Access Key"
+default = ""
+description = "AWS key secret access key"
+
+[[variables]]
+key = "ENV_IMAGOR_SECRET"
+label = "Imagor Secret"
+generate = true
+description = "Secret key for URL signature"
+
+[[variables]]
+key = "ENV_IMAGOR_UNSAFE"
+label = "Imagor Undafe"
+default = "1"
+description = "unsafe URL for testing (valid value 1 or 0)"
+
+[[variables]]
+key = "ENV_S3_ENDPOINT"
+label = "AWS S3 Endpoint"
+default = ""
+description = "Here you can override the default S3 endpoint (for S3-compatible storage, leave empty for AWS)"
+
+[[variables]]
+key = "ENV_S3_LOADER_BUCKET"
+label = "AWS S3 Loader Bucket"
+default = "mybucket"
+description = "enable S3 loader by specifying bucket"
+
+[[variables]]
+key = "ENV_S3_LOADER_BUCKET_DIR"
+label = "AWS S3 Loader Bucket Directory"
+default = "images"
+description = "optional"
+
+[[variables]]
+key = "ENV_S3_RESULT_STORAGE_BUCKET"
+label = "AWS S3 Result Storage Bucket"
+default = "mybucket"
+description = "enable S3 result storage by specifying bucket"
+
+[[variables]]
+key = "ENV_S3_RESULT_STORAGE_BUCKET_DIR"
+label = "AWS S3 Result Storage Bucket Directory"
+default = "images/result"
+description = "optional"
+
+[[variables]]
+key = "ENV_S3_STORAGE_BUCKET"
+label = "AWS S3 Storage Bucket"
+default = "mybucket"
+description = "enable S3 storage by specifying bucket"
+
+[[variables]]
+key = "ENV_S3_STORAGE_BUCKET_DIR"
+label = "AWS S3 Storage Bucket Directory"
+default = "images"
+description = "optional"
+
+[[variables]]
+key = "IMAGOR_VERSION"
+label = "App Version"
+default = "1.9.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/shumc/imagor/tags"

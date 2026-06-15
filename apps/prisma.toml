@@ -1,0 +1,48 @@
+slug = "prisma"
+name = "Prisma"
+category = "Database"
+description = "Prisma 1 is a database abstraction layer that turns your databases into GraphQL APIs with CRUD operations and realtime capabilities"
+keywords = ["prisma"]
+compose = '''
+services:
+  prisma-db:
+    image: mysql:{{MYSQL_VERSION}}
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+    volumes:
+    - prisma-db-data:/var/lib/mysql
+  prisma:
+    image: prismagraphql/prisma:{{PRISMA_VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:4466'
+    - 4466:4466
+    depends_on:
+    - prisma-db
+    environment:
+      PRISMA_CONFIG: "managementApiSecret: {{MANAGEMENT_SECRET}}\nport: 4466\ndatabases:\n  default:\n    connector: mysql\n    host: prisma-db\n    port: 3306\n    user: root\n    password: {{DB_PASS}}\n    migrations: true\n"
+volumes:
+  prisma-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+
+[[variables]]
+key = "MANAGEMENT_SECRET"
+label = "Prisma 1 Management API secret"
+description = "To ensure only entitled users are able to perform actions through the Management API. Minimum 10 characters, at least one letter and one number."
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "5.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mysql/tags/"
+
+[[variables]]
+key = "PRISMA_VERSION"
+label = "Prisma 1 Version"
+default = "1.29"
+description = "Check out their GitHub page for their latest version https://github.com/prisma/prisma1"

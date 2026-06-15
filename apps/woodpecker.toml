@@ -1,0 +1,550 @@
+slug = "woodpecker"
+name = "Woodpecker"
+category = "App"
+description = "Simple CI engine with great extensibility. It runs your pipelines inside Docker containers."
+keywords = ["woodpecker"]
+compose = '''
+services:
+  woodpecker:
+    image: woodpeckerci/woodpecker-server:{{WOODPECKER_VERSION}}
+    hostname: woodpecker.{{ROOT_DOMAIN}}
+    volumes:
+    - woodpecker-server:/var/lib/woodpecker
+    environment:
+      WOODPECKER_LOG_LEVEL: '{{WOODPECKER_LOG_LEVEL}}'
+      WOODPECKER_DEBUG_PRETTY: '{{WOODPECKER_DEBUG_PRETTY}}'
+      WOODPECKER_DEBUG_NOCOLOR: '{{WOODPECKER_DEBUG_NOCOLOR}}'
+      WOODPECKER_HOST: '{{WOODPECKER_HOST}}'
+      WOODPECKER_ADMIN: '{{WOODPECKER_ADMIN}}'
+      WOODPECKER_ORGS: '{{WOODPECKER_ORGS}}'
+      WOODPECKER_REPO_OWNERS: '{{WOODPECKER_REPO_OWNERS}}'
+      WOODPECKER_OPEN: '{{WOODPECKER_OPEN}}'
+      WOODPECKER_DOCS: '{{WOODPECKER_DOCS}}'
+      WOODPECKER_AUTHENTICATE_PUBLIC_REPOS: '{{WOODPECKER_AUTHENTICATE_PUBLIC_REPOS}}'
+      WOODPECKER_DEFAULT_CLONE_IMAGE: '{{WOODPECKER_DEFAULT_CLONE_IMAGE}}'
+      WOODPECKER_SESSION_EXPIRES: '{{WOODPECKER_SESSION_EXPIRES}}'
+      WOODPECKER_ESCALATE: '{{WOODPECKER_ESCALATE}}'
+      WOODPECKER_DOCKER_CONFIG: '{{WOODPECKER_DOCKER_CONFIG}}'
+      WOODPECKER_AGENT_SECRET: '{{WOODPECKER_AGENT_SECRET}}'
+      WOODPECKER_KEEPALIVE_MIN_TIME: '{{WOODPECKER_KEEPALIVE_MIN_TIME}}'
+      WOODPECKER_DATABASE_DRIVER: '{{WOODPECKER_DATABASE_DRIVER}}'
+      WOODPECKER_DATABASE_DATASOURCE: '{{WOODPECKER_DATABASE_DATASOURCE}}'
+      WOODPECKER_PROMETHEUS_AUTH_TOKEN: '{{WOODPECKER_PROMETHEUS_AUTH_TOKEN}}'
+      WOODPECKER_STATUS_CONTEXT: '{{WOODPECKER_STATUS_CONTEXT}}'
+      WOODPECKER_LIMIT_MEM_SWAP: '{{WOODPECKER_LIMIT_MEM_SWAP}}'
+      WOODPECKER_LIMIT_MEM: '{{WOODPECKER_LIMIT_MEM_USED}}'
+      WOODPECKER_LIMIT_SHM_SIZE: '{{WOODPECKER_LIMIT_SHM_SIZE}}'
+      WOODPECKER_LIMIT_CPU_QUOTA: '{{WOODPECKER_LIMIT_CPU_QUOTA}}'
+      WOODPECKER_LIMIT_CPU_SHARES: '{{WOODPECKER_LIMIT_CPU_SHARES}}'
+      WOODPECKER_LIMIT_CPU_SET: '{{WOODPECKER_LIMIT_CPU_SET}}'
+      WOODPECKER_GITHUB: '{{WOODPECKER_GITHUB_ENABLED}}'
+      WOODPECKER_GITHUB_URL: '{{WOODPECKER_GITHUB_URL}}'
+      WOODPECKER_GITHUB_CLIENT: '{{WOODPECKER_GITHUB_CLIENT}}'
+      WOODPECKER_GITHUB_SECRET: '{{WOODPECKER_GITHUB_SECRET}}'
+      WOODPECKER_GITHUB_MERGE_REF: '{{WOODPECKER_GITHUB_MERGE_REF}}'
+      WOODPECKER_GITHUB_SKIP_VERIFY: '{{WOODPECKER_GITHUB_SKIP_VERIFY}}'
+      WOODPECKER_GOGS: '{{WOODPECKER_GOGS_ENABLED}}'
+      WOODPECKER_GOGS_URL: '{{WOODPECKER_GOGS_URL}}'
+      WOODPECKER_GOGS_GIT_USERNAME: '{{WOODPECKER_GOGS_GIT_USERNAME}}'
+      WOODPECKER_GOGS_GIT_PASSWORD: '{{WOODPECKER_GOGS_GIT_PASSWORD}}'
+      WOODPECKER_GOGS_PRIVATE_MODE: '{{WOODPECKER_GOGS_PRIVATE_MODE}}'
+      WOODPECKER_GOGS_SKIP_VERIFY: '{{WOODPECKER_GOGS_SKIP_VERIFY}}'
+      WOODPECKER_GITEA: '{{WOODPECKER_GITEA_ENABLED}}'
+      WOODPECKER_GITEA_URL: '{{WOODPECKER_GITEA_URL}}'
+      WOODPECKER_GITEA_CLIENT: '{{WOODPECKER_GITEA_CLIENT}}'
+      WOODPECKER_GITEA_SECRET: '{{WOODPECKER_GITEA_SECRET}}'
+      WOODPECKER_GITEA_SKIP_VERIFY: '{{WOODPECKER_GITEA_SKIP_VERIFY}}'
+      WOODPECKER_BITBUCKET: '{{WOODPECKER_BITBUCKET_ENABLED}}'
+      WOODPECKER_BITBUCKET_CLIENT: '{{WOODPECKER_BITBUCKET_CLIENT}}'
+      WOODPECKER_BITBUCKET_SECRET: '{{WOODPECKER_BITBUCKET_SECRET}}'
+      WOODPECKER_STASH: '{{WOODPECKER_STASH_ENABLED}}'
+      WOODPECKER_STASH_URL: '{{WOODPECKER_STASH_URL}}'
+      WOODPECKER_STASH_CONSUMER_KEY: '{{WOODPECKER_STASH_CONSUMER_KEY}}'
+      WOODPECKER_STASH_CONSUMER_RSA: '{{WOODPECKER_STASH_CONSUMER_RSA_PATH}}'
+      WOODPECKER_STASH_CONSUMER_RSA_STRING: '{{WOODPECKER_STASH_CONSUMER_RSA_STRING}}'
+      WOODPECKER_STASH_GIT_USERNAME: '{{WOODPECKER_STASH_GIT_USERNAME}}'
+      WOODPECKER_STASH_GIT_PASSWORD: '{{WOODPECKER_STASH_GIT_PASSWORD}}'
+      WOODPECKER_STASH_SKIP_VERIFY: '{{WOODPECKER_STASH_SKIP_VERIFY}}'
+      WOODPECKER_GITLAB: '{{WOODPECKER_GITLAB_ENABLED}}'
+      WOODPECKER_GITLAB_URL: '{{WOODPECKER_GITLAB_URL}}'
+      WOODPECKER_GITLAB_CLIENT: '{{WOODPECKER_GITLAB_CLIENT}}'
+      WOODPECKER_GITLAB_SECRET: '{{WOODPECKER_GITLAB_SECRET}}'
+      WOODPECKER_GITLAB_SKIP_VERIFY: '{{WOODPECKER_GITLAB_SKIP_VERIFY}}'
+      WOODPECKER_CODING: '{{WOODPECKER_CODING_ENABLED}}'
+      WOODPECKER_CODING_URL: '{{WOODPECKER_CODING_URL}}'
+      WOODPECKER_CODING_CLIENT: '{{WOODPECKER_CODING_CLIENT}}'
+      WOODPECKER_CODING_SECRET: '{{WOODPECKER_CODING_SECRET}}'
+      WOODPECKER_CODING_SCOPE: '{{WOODPECKER_CODING_SCOPE}}'
+      WOODPECKER_CODING_GIT_MACHINE: '{{WOODPECKER_CODING_GIT_MACHINE}}'
+      WOODPECKER_CODING_GIT_USERNAME: '{{WOODPECKER_CODING_GIT_USERNAME}}'
+      WOODPECKER_CODING_GIT_PASSWORD: '{{WOODPECKER_CODING_GIT_PASSWORD}}'
+      WOODPECKER_CODING_SKIP_VERIFY: '{{WOODPECKER_CODING_SKIP_VERIFY}}'
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  woodpecker-agent:
+    depends_on:
+    - woodpecker
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      WOODPECKER_SERVER: woodpecker:9000
+      WOODPECKER_USERNAME: '{{WOODPECKER_USERNAME}}'
+      WOODPECKER_AGENT_SECRET: '{{WOODPECKER_AGENT_SECRET}}'
+      WOODPECKER_LOG_LEVEL: '{{WOODPECKER_LOG_LEVEL}}'
+      WOODPECKER_DEBUG_PRETTY: '{{WOODPECKER_DEBUG_PRETTY}}'
+      WOODPECKER_DEBUG_NOCOLOR: '{{WOODPECKER_DEBUG_NOCOLOR}}'
+      WOODPECKER_HOSTNAME: '{{WOODPECKER_AGENT_HOSTNAME}}'
+      WOODPECKER_MAX_PROCS: '{{WOODPECKER_MAX_PROCS}}'
+      WOODPECKER_HEALTHCHECK: '{{WOODPECKER_HEALTHCHECK}}'
+      WOODPECKER_KEEPALIVE_TIME: '{{WOODPECKER_KEEPALIVE_TIME_SETTING}}'
+      WOODPECKER_KEEPALIVE_TIMEOUT: '{{WOODPECKER_KEEPALIVE_TIMEOUT}}'
+      WOODPECKER_GRPC_SECURE: '{{WOODPECKER_GRPC_SECURE}}'
+      WOODPECKER_GRPC_VERIFY: '{{WOODPECKER_GRPC_VERIFY}}'
+      WOODPECKER_BACKEND: '{{WOODPECKER_BACKEND}}'
+volumes:
+  woodpecker-server:
+'''
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "WOODPECKER_ADMIN"
+label = "Admin Accounts"
+description = "Comma-separated list of admin accounts. Example: user1,user2"
+
+[[variables]]
+key = "WOODPECKER_AGENT_HOSTNAME"
+label = "Agent Hostname"
+description = "Configures the agent hostname."
+
+[[variables]]
+key = "WOODPECKER_AGENT_SECRET"
+label = "Shared Secret Used By Server And Agents"
+generate = true
+description = "A shared secret used by server and agents to authenticate communication."
+
+[[variables]]
+key = "WOODPECKER_AUTHENTICATE_PUBLIC_REPOS"
+label = "Authenticate Cloning Of Public Repositories"
+default = "false"
+description = "Always use authentication to clone repositories even if they are public. Needed if the SCM requires to always authenticate as used by many companies."
+
+[[variables]]
+key = "WOODPECKER_BACKEND"
+label = "Backend Engine"
+default = "docker"
+description = "Configures the backend engine to run pipelines on. Possible values are auto-detect or docker."
+
+[[variables]]
+key = "WOODPECKER_BITBUCKET_CLIENT"
+label = "Bitbucket Client"
+description = "Configures the Bitbucket OAuth client id. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_BITBUCKET_ENABLED"
+label = "Enable Bitbucket"
+default = "false"
+description = "Enables the Bitbucket driver."
+
+[[variables]]
+key = "WOODPECKER_BITBUCKET_SECRET"
+label = "Bitbucket Secret"
+description = "Configures the Bitbucket OAuth client secret. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_CODING_CLIENT"
+label = "Coding Client"
+description = "Configures the Coding OAuth client id. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_CODING_ENABLED"
+label = "Enable Coding"
+default = "false"
+description = "Enables the Coding driver."
+
+[[variables]]
+key = "WOODPECKER_CODING_GIT_MACHINE"
+label = "Coding Git Host"
+default = "git.coding.net"
+description = "Configures the Git host."
+
+[[variables]]
+key = "WOODPECKER_CODING_GIT_PASSWORD"
+label = "Coding Git User Password"
+description = "The password is used to authenticate and clone all private repositories."
+
+[[variables]]
+key = "WOODPECKER_CODING_GIT_USERNAME"
+label = "Coding Git User Name"
+description = "This username is used to authenticate and clone all private repositories."
+
+[[variables]]
+key = "WOODPECKER_CODING_SCOPE"
+label = "Coding Scope"
+default = "user, project, project:depot"
+description = "Comma-separated list of OAuth scopes."
+
+[[variables]]
+key = "WOODPECKER_CODING_SECRET"
+label = "Coding Secret"
+description = "Configures the Coding OAuth client secret. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_CODING_SKIP_VERIFY"
+label = "Skip SSL Verification"
+default = "false"
+description = "Configure if SSL verification should be skipped."
+
+[[variables]]
+key = "WOODPECKER_CODING_URL"
+label = "Coding URL"
+default = "https://coding.net"
+description = "Configures the Coding server address."
+
+[[variables]]
+key = "WOODPECKER_DATABASE_DATASOURCE"
+label = "Database Connection String"
+default = "woodpecker.sqlite"
+description = "The database connection string. The default value is the path of the embedded SQLite database file. Example for MySQL: root:password@tcp(1.2.3.4:3306)/woodpecker?parseTime=true Example for PostgreSQL: postgres://root:password@1.2.3.4:5432/woodpecker?sslmode=disable"
+
+[[variables]]
+key = "WOODPECKER_DATABASE_DRIVER"
+label = "Database Driver"
+default = "sqlite3"
+description = "The database driver name. Possible values are sqlite3, mysql or postgres."
+
+[[variables]]
+key = "WOODPECKER_DEBUG_NOCOLOR"
+label = "Colored Debug Output"
+default = "true"
+description = "Disable colored debug output."
+
+[[variables]]
+key = "WOODPECKER_DEBUG_PRETTY"
+label = "Pretty-Printed Debug Output"
+default = "false"
+description = "Enable pretty-printed debug output."
+
+[[variables]]
+key = "WOODPECKER_DEFAULT_CLONE_IMAGE"
+label = "Repository Cloning Docker Image"
+default = "woodpeckerci/plugin-git:latest"
+description = "The default docker image to be used when cloning the repo"
+
+[[variables]]
+key = "WOODPECKER_DOCKER_CONFIG"
+label = "Private Registry Configuration"
+description = "Configures a specific private registry config for all pipelines. Example: /home/user/.docker/config.json"
+
+[[variables]]
+key = "WOODPECKER_DOCS"
+label = "Link To Documentation"
+default = "https://woodpecker-ci.org/"
+description = "Link to documentation in the UI."
+
+[[variables]]
+key = "WOODPECKER_ESCALATE"
+label = "Privileged Mode Images"
+default = "plugins/docker,plugins/gcr,plugins/ecr,woodpeckerci/plugin-docker,woodpeckerci/plugin-docker-buildx"
+description = "Docker images to run in privileged mode. Only change if you are sure what you do!"
+
+[[variables]]
+key = "WOODPECKER_GITEA_CLIENT"
+label = "Gitea Client"
+description = "Configures the Gitea OAuth client id. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_GITEA_ENABLED"
+label = "Enable Gitea"
+default = "false"
+description = "Enables the Gitea driver."
+
+[[variables]]
+key = "WOODPECKER_GITEA_SECRET"
+label = "Gitea Secret"
+description = "Configures the Gitea OAuth client secret. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_GITEA_SKIP_VERIFY"
+label = "Skip SSL Verification"
+default = "false"
+description = "Configure if SSL verification should be skipped."
+
+[[variables]]
+key = "WOODPECKER_GITEA_URL"
+label = "Gitea URL"
+default = "https://try.gitea.io"
+description = "Configures the Gitea server address."
+
+[[variables]]
+key = "WOODPECKER_GITHUB_CLIENT"
+label = "GitHub Client"
+description = "Configures the GitHub OAuth client id. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_GITHUB_ENABLED"
+label = "Enable GitHub"
+default = "false"
+description = "Enables the GitHub driver."
+
+[[variables]]
+key = "WOODPECKER_GITHUB_MERGE_REF"
+label = "GitHub Merge Reference Usage"
+default = "true"
+description = "Use GitHub Merge References"
+
+[[variables]]
+key = "WOODPECKER_GITHUB_SECRET"
+label = "GitHub Secret"
+description = "Configures the GitHub OAuth client secret. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_GITHUB_SKIP_VERIFY"
+label = "Skip SSL Verification"
+default = "false"
+description = "Configure if SSL verification should be skipped."
+
+[[variables]]
+key = "WOODPECKER_GITHUB_URL"
+label = "GitHub URL"
+default = "https://github.com"
+description = "Configures the GitHub server address."
+
+[[variables]]
+key = "WOODPECKER_GITLAB_CLIENT"
+label = "GitLab Client"
+description = "Configures the GitLab OAuth client id. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_GITLAB_ENABLED"
+label = "Enable GitLab"
+default = "false"
+description = "Enables the GitLab driver."
+
+[[variables]]
+key = "WOODPECKER_GITLAB_SECRET"
+label = "GitLab Secret"
+description = "Configures the GitLab OAuth client secret. This is used to authorize access."
+
+[[variables]]
+key = "WOODPECKER_GITLAB_SKIP_VERIFY"
+label = "Skip SSL Verification"
+default = "false"
+description = "Configure if SSL verification should be skipped."
+
+[[variables]]
+key = "WOODPECKER_GITLAB_URL"
+label = "GitLab URL"
+default = "https://gitlab.com"
+description = "Configures the GitLab server address."
+
+[[variables]]
+key = "WOODPECKER_GOGS_ENABLED"
+label = "Enable Gogs"
+default = "false"
+description = "Enables the Gogs driver."
+
+[[variables]]
+key = "WOODPECKER_GOGS_GIT_PASSWORD"
+label = "Gogs User Password."
+description = "The password is used to authenticate and clone all private repositories."
+
+[[variables]]
+key = "WOODPECKER_GOGS_GIT_USERNAME"
+label = "Gogs User Name."
+description = "This username is used to authenticate and clone all private repositories."
+
+[[variables]]
+key = "WOODPECKER_GOGS_PRIVATE_MODE"
+label = "Enable Gogs Private Module"
+default = "false"
+description = "Enables the Gogs private mode."
+
+[[variables]]
+key = "WOODPECKER_GOGS_SKIP_VERIFY"
+label = "Skip SSL Verification"
+default = "false"
+description = "Configure if SSL verification should be skipped."
+
+[[variables]]
+key = "WOODPECKER_GOGS_URL"
+label = "Gogs URL"
+default = "https://github.com"
+description = "Configures the Gogs server address."
+
+[[variables]]
+key = "WOODPECKER_GRPC_SECURE"
+label = "Secure gRPC Connection"
+default = "false"
+description = "Configures if the connection to WOODPECKER_SERVER should be made using a secure transport."
+
+[[variables]]
+key = "WOODPECKER_GRPC_VERIFY"
+label = "Verify gRPC Server Certificate"
+default = "true"
+description = "Configures if the gRPC server certificate should be verified, only valid when WOODPECKER_GRPC_SECURE is true."
+
+[[variables]]
+key = "WOODPECKER_HEALTHCHECK"
+label = "Health Check"
+default = "true"
+description = "Enable healthcheck endpoint."
+
+[[variables]]
+key = "WOODPECKER_HOST"
+label = "Host"
+description = "Server fully qualified url of the user-facing hostname. Example: http://woodpecker.example.org"
+
+[[variables]]
+key = "WOODPECKER_KEEPALIVE_MIN_TIME"
+label = "Time Before Sending A Keep-Alive Ping"
+description = "Server-side enforcement policy on the minimum amount of time a client should wait before sending a keep-alive ping. Example: 10s"
+
+[[variables]]
+key = "WOODPECKER_KEEPALIVE_TIMEOUT"
+label = "Keep-Alive Timeout"
+default = "20s"
+description = "After pinging for a keepalive check, the agent waits for a duration of this time before closing the connection if no activity."
+
+[[variables]]
+key = "WOODPECKER_KEEPALIVE_TIME_SETTING"
+label = "Keep-Alive Time"
+description = "After a duration of this time of no activity, the agent pings the server to check if the transport is still alive."
+
+[[variables]]
+key = "WOODPECKER_LIMIT_CPU_QUOTA"
+label = "CPU Quota Limit"
+default = "0"
+description = "The number of microseconds per CPU period that the container is limited to before throttled. There is no limit if 0."
+
+[[variables]]
+key = "WOODPECKER_LIMIT_CPU_SET"
+label = "Limit CPU Usage"
+description = "Comma-separated list to limit the specific CPUs or cores a pipeline container can use. Example: 1,2"
+
+[[variables]]
+key = "WOODPECKER_LIMIT_CPU_SHARES"
+label = "CPU Weight Against Other Containers"
+default = "0"
+description = "The relative weight vs. other containers."
+
+[[variables]]
+key = "WOODPECKER_LIMIT_MEM_SWAP"
+label = "Maximum Memory Swap Per Pipeline Container"
+default = "0"
+description = "The maximum amount of memory a single pipeline container is allowed to swap to disk, configured in bytes. There is no limit if 0."
+
+[[variables]]
+key = "WOODPECKER_LIMIT_MEM_USED"
+label = "Maximum Memory Used Per Pipeline Container"
+default = "0"
+description = "The maximum amount of memory a single pipeline container can use, configured in bytes. There is no limit if 0."
+
+[[variables]]
+key = "WOODPECKER_LIMIT_SHM_SIZE"
+label = "Maximum Memory Used Of /dev/shm"
+default = "0"
+description = "The maximum amount of memory of /dev/shm allowed in bytes. There is no limit if 0."
+
+[[variables]]
+key = "WOODPECKER_LOG_LEVEL"
+label = "Logging Level"
+default = "error"
+description = "Configures the logging level. Possible values are trace, debug, info, warn, error, fatal, panic, disabled and empty."
+
+[[variables]]
+key = "WOODPECKER_MAX_PROCS"
+label = "Parallel Builds"
+default = "1"
+description = "Configures the number of parallel builds."
+
+[[variables]]
+key = "WOODPECKER_OPEN"
+label = "User Registration"
+default = "false"
+description = "Enable to allow user registration."
+
+[[variables]]
+key = "WOODPECKER_ORGS"
+label = "Approved Organizations"
+description = "Comma-separated list of approved organizations. Example: org1,org2"
+
+[[variables]]
+key = "WOODPECKER_PROMETHEUS_AUTH_TOKEN"
+label = "Prometheus Token"
+description = "Token to secure the Prometheus metrics endpoint."
+
+[[variables]]
+key = "WOODPECKER_REPO_OWNERS"
+label = "Syncable Repository Owners"
+description = "Comma-separated list of syncable repo owners. Example: user1,user2"
+
+[[variables]]
+key = "WOODPECKER_SESSION_EXPIRES"
+label = "Session Expiration Time"
+default = "72h"
+description = "Configures the session expiration time."
+
+[[variables]]
+key = "WOODPECKER_STASH_CONSUMER_KEY"
+label = "Stash Consumer Key"
+description = "Configures your Bitbucket Server consumer key."
+
+[[variables]]
+key = "WOODPECKER_STASH_CONSUMER_RSA_PATH"
+label = "Stash Consumer Private Key Path"
+description = "Configures the path to your Bitbucket Server private key file."
+
+[[variables]]
+key = "WOODPECKER_STASH_CONSUMER_RSA_STRING"
+label = "Stash Consumer Private Key"
+description = "Configures your Bitbucket Server private key."
+
+[[variables]]
+key = "WOODPECKER_STASH_ENABLED"
+label = "Enable Stash"
+default = "false"
+description = "Enables the Stash driver."
+
+[[variables]]
+key = "WOODPECKER_STASH_GIT_PASSWORD"
+label = "Stash Git User Password"
+description = "The password is used to authenticate and clone all private repositories."
+
+[[variables]]
+key = "WOODPECKER_STASH_GIT_USERNAME"
+label = "Stash Git User Name"
+description = "This username is used to authenticate and clone all private repositories."
+
+[[variables]]
+key = "WOODPECKER_STASH_SKIP_VERIFY"
+label = "Skip SSL Verification"
+default = "false"
+description = "Configure if SSL verification should be skipped."
+
+[[variables]]
+key = "WOODPECKER_STASH_URL"
+label = "Stash URL"
+description = "Configures the Stash server address."
+
+[[variables]]
+key = "WOODPECKER_STATUS_CONTEXT"
+label = "SCM Status Message Context Prefix"
+default = "ci/woodpecker"
+description = "Context prefix Woodpecker will use to publish status messages to SCM. You probably will only need to change it if you run multiple Woodpecker instances for a single repository."
+
+[[variables]]
+key = "WOODPECKER_USERNAME"
+label = "gRPC User Name"
+default = "x-oauth-basic"
+description = "The gRPC username."
+
+[[variables]]
+key = "WOODPECKER_VERSION"
+label = "Version Tag"
+default = "pull_1209"
+description = "Check out their Docker Hub page for the valid tags https://hub.docker.com/r/woodpeckerci/woodpecker-server/tags"

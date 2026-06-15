@@ -1,0 +1,275 @@
+slug = "evolution-api"
+name = "Evolution API"
+category = "App"
+description = "Evolution API is a powerful WhatsApp API that allows you to create bots and automate your WhatsApp communication."
+keywords = ["api", "evolution"]
+compose = '''
+services:
+  evolution-api:
+    image: evoapicloud/evolution-api:{{ANT_VERSION}}
+    restart: always
+    environment:
+      SERVER_TYPE: http
+      SERVER_PORT: '80'
+      SERVER_URL: https://evolution-api.{{ROOT_DOMAIN}}
+      SENTRY_DSN: ''
+      CORS_ORIGIN: '*'
+      CORS_METHODS: POST,GET,PUT,DELETE
+      CORS_CREDENTIALS: 'true'
+      LOG_LEVEL: info
+      LOG_COLOR: 'true'
+      LOG_BAILEYS: error
+      EVENT_EMITTER_MAX_LISTENERS: '100'
+      DEL_INSTANCE: 'false'
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@evolution-api-postgres:5432/{{POSTGRES_DB}}
+      DATABASE_CONNECTION_CLIENT_NAME: evolution-api
+      DATABASE_SAVE_DATA_INSTANCE: 'true'
+      DATABASE_SAVE_DATA_NEW_MESSAGE: 'true'
+      DATABASE_SAVE_MESSAGE_UPDATE: 'true'
+      DATABASE_SAVE_DATA_CONTACTS: 'true'
+      DATABASE_SAVE_DATA_CHATS: 'true'
+      DATABASE_SAVE_DATA_LABELS: 'true'
+      DATABASE_SAVE_DATA_HISTORIC: 'true'
+      DATABASE_SAVE_IS_ON_WHATSAPP: 'true'
+      DATABASE_SAVE_IS_ON_WHATSAPP_DAYS: '30'
+      DATABASE_DELETE_MESSAGE: 'false'
+      RABBITMQ_ENABLED: 'true'
+      RABBITMQ_URI: amqp://{{RABBITMQ_USER}}:{{RABBITMQ_PASSWORD}}@evolution-api-rabbitmq:5672
+      RABBITMQ_EXCHANGE_NAME: evolution-api
+      RABBITMQ_GLOBAL_ENABLED: 'true'
+      RABBITMQ_EVENTS_APPLICATION_STARTUP: 'true'
+      RABBITMQ_EVENTS_INSTANCE_CREATE: 'true'
+      RABBITMQ_EVENTS_INSTANCE_DELETE: 'true'
+      RABBITMQ_EVENTS_QRCODE_UPDATED: 'true'
+      RABBITMQ_EVENTS_MESSAGES_SET: 'true'
+      RABBITMQ_EVENTS_MESSAGES_UPSERT: 'true'
+      RABBITMQ_EVENTS_MESSAGES_EDITED: 'true'
+      RABBITMQ_EVENTS_MESSAGES_UPDATE: 'true'
+      RABBITMQ_EVENTS_MESSAGES_DELETE: 'true'
+      RABBITMQ_EVENTS_SEND_MESSAGE: 'true'
+      RABBITMQ_EVENTS_CONTACTS_SET: 'true'
+      RABBITMQ_EVENTS_CONTACTS_UPSERT: 'true'
+      RABBITMQ_EVENTS_CONTACTS_UPDATE: 'true'
+      RABBITMQ_EVENTS_PRESENCE_UPDATE: 'true'
+      RABBITMQ_EVENTS_CHATS_SET: 'true'
+      RABBITMQ_EVENTS_CHATS_UPSERT: 'true'
+      RABBITMQ_EVENTS_CHATS_UPDATE: 'true'
+      RABBITMQ_EVENTS_CHATS_DELETE: 'true'
+      RABBITMQ_EVENTS_GROUPS_UPSERT: 'true'
+      RABBITMQ_EVENTS_GROUP_UPDATE: 'true'
+      RABBITMQ_EVENTS_GROUP_PARTICIPANTS_UPDATE: 'true'
+      RABBITMQ_EVENTS_CONNECTION_UPDATE: 'true'
+      RABBITMQ_EVENTS_REMOVE_INSTANCE: 'true'
+      RABBITMQ_EVENTS_LOGOUT_INSTANCE: 'true'
+      RABBITMQ_EVENTS_CALL: 'true'
+      RABBITMQ_EVENTS_TYPEBOT_START: 'true'
+      RABBITMQ_EVENTS_TYPEBOT_CHANGE_STATUS: 'true'
+      SQS_ENABLED: 'false'
+      SQS_ACCESS_KEY_ID: ''
+      SQS_SECRET_ACCESS_KEY: ''
+      SQS_ACCOUNT_ID: ''
+      SQS_REGION: ''
+      WEBSOCKET_ENABLED: 'false'
+      WEBSOCKET_GLOBAL_EVENTS: 'false'
+      PUSHER_ENABLED: 'false'
+      PUSHER_GLOBAL_ENABLED: 'false'
+      PUSHER_GLOBAL_APP_ID: ''
+      PUSHER_GLOBAL_KEY: ''
+      PUSHER_GLOBAL_SECRET: ''
+      PUSHER_GLOBAL_CLUSTER: ''
+      PUSHER_GLOBAL_USE_TLS: ''
+      PUSHER_EVENTS_APPLICATION_STARTUP: ''
+      PUSHER_EVENTS_QRCODE_UPDATED: ''
+      PUSHER_EVENTS_MESSAGES_SET: ''
+      PUSHER_EVENTS_MESSAGES_UPSERT: ''
+      PUSHER_EVENTS_MESSAGES_EDITED: ''
+      PUSHER_EVENTS_MESSAGES_UPDATE: ''
+      PUSHER_EVENTS_MESSAGES_DELETE: ''
+      PUSHER_EVENTS_SEND_MESSAGE: ''
+      PUSHER_EVENTS_CONTACTS_SET: ''
+      PUSHER_EVENTS_CONTACTS_UPSERT: ''
+      PUSHER_EVENTS_CONTACTS_UPDATE: ''
+      PUSHER_EVENTS_PRESENCE_UPDATE: ''
+      PUSHER_EVENTS_CHATS_SET: ''
+      PUSHER_EVENTS_CHATS_UPSERT: ''
+      PUSHER_EVENTS_CHATS_UPDATE: ''
+      PUSHER_EVENTS_CHATS_DELETE: ''
+      PUSHER_EVENTS_GROUPS_UPSERT: ''
+      PUSHER_EVENTS_GROUPS_UPDATE: ''
+      PUSHER_EVENTS_GROUP_PARTICIPANTS_UPDATE: ''
+      PUSHER_EVENTS_CONNECTION_UPDATE: ''
+      PUSHER_EVENTS_LABELS_EDIT: ''
+      PUSHER_EVENTS_LABELS_ASSOCIATION: ''
+      PUSHER_EVENTS_CALL: ''
+      PUSHER_EVENTS_TYPEBOT_START: ''
+      PUSHER_EVENTS_TYPEBOT_CHANGE_STATUS: ''
+      WA_BUSINESS_TOKEN_WEBHOOK: ''
+      WA_BUSINESS_URL: ''
+      WA_BUSINESS_VERSION: ''
+      WA_BUSINESS_LANGUAGE: ''
+      WEBHOOK_GLOBAL_ENABLED: 'true'
+      WEBHOOK_GLOBAL_URL: https://your-webhook-url.com
+      WEBHOOK_GLOBAL_WEBHOOK_BY_EVENTS: 'true'
+      WEBHOOK_EVENTS_APPLICATION_STARTUP: 'true'
+      WEBHOOK_EVENTS_QRCODE_UPDATED: 'true'
+      WEBHOOK_EVENTS_MESSAGES_SET: 'true'
+      WEBHOOK_EVENTS_MESSAGES_UPSERT: 'true'
+      WEBHOOK_EVENTS_MESSAGES_EDITED: 'true'
+      WEBHOOK_EVENTS_MESSAGES_UPDATE: 'true'
+      WEBHOOK_EVENTS_MESSAGES_DELETE: 'true'
+      WEBHOOK_EVENTS_SEND_MESSAGE: 'true'
+      WEBHOOK_EVENTS_CONTACTS_SET: 'true'
+      WEBHOOK_EVENTS_CONTACTS_UPSERT: 'true'
+      WEBHOOK_EVENTS_CONTACTS_UPDATE: 'true'
+      WEBHOOK_EVENTS_PRESENCE_UPDATE: 'true'
+      WEBHOOK_EVENTS_CHATS_SET: 'true'
+      WEBHOOK_EVENTS_CHATS_UPSERT: 'true'
+      WEBHOOK_EVENTS_CHATS_UPDATE: 'true'
+      WEBHOOK_EVENTS_CHATS_DELETE: 'true'
+      WEBHOOK_EVENTS_GROUPS_UPSERT: 'true'
+      WEBHOOK_EVENTS_GROUPS_UPDATE: 'true'
+      WEBHOOK_EVENTS_GROUP_PARTICIPANTS_UPDATE: 'true'
+      WEBHOOK_EVENTS_CONNECTION_UPDATE: 'true'
+      WEBHOOK_EVENTS_REMOVE_INSTANCE: 'true'
+      WEBHOOK_EVENTS_LOGOUT_INSTANCE: 'true'
+      WEBHOOK_EVENTS_LABELS_EDIT: 'true'
+      WEBHOOK_EVENTS_LABELS_ASSOCIATION: 'true'
+      WEBHOOK_EVENTS_CALL: 'true'
+      WEBHOOK_EVENTS_TYPEBOT_START: 'true'
+      WEBHOOK_EVENTS_TYPEBOT_CHANGE_STATUS: 'true'
+      WEBHOOK_EVENTS_ERRORS: 'true'
+      WEBHOOK_EVENTS_ERRORS_WEBHOOK: 'true'
+      CONFIG_SESSION_PHONE_CLIENT: Evolution API
+      CONFIG_SESSION_PHONE_NAME: Chrome
+      CONFIG_SESSION_PHONE_VERSION: 4.0.0
+      QRCODE_LIMIT: '30'
+      QRCODE_COLOR: '#198754'
+      TYPEBOT_ENABLED: 'false'
+      TYPEBOT_API_VERSION: '1'
+      CHATWOOT_ENABLED: 'false'
+      CHATWOOT_MESSAGE_READ: 'false'
+      CHATWOOT_MESSAGE_DELETE: 'false'
+      CHATWOOT_BOT_CONTACT: 'false'
+      CHATWOOT_IMPORT_DATABASE_CONNECTION_URI: ''
+      CHATWOOT_IMPORT_PLACEHOLDER_MEDIA_MESSAGE: ''
+      OPENAI_ENABLED: 'false'
+      DIFY_ENABLED: 'false'
+      CACHE_REDIS_ENABLED: 'true'
+      CACHE_REDIS_URI: redis://evolution-api-redis:6379
+      CACHE_REDIS_TTL: '3600'
+      CACHE_REDIS_PREFIX_KEY: 'evolution-api:'
+      CACHE_REDIS_SAVE_INSTANCES: 'true'
+      CACHE_LOCAL_ENABLED: 'false'
+      S3_ENABLED: 'false'
+      S3_ACCESS_KEY: ''
+      S3_SECRET_KEY: ''
+      S3_BUCKET: ''
+      S3_PORT: ''
+      S3_ENDPOINT: ''
+      S3_REGION: us-east-1
+      S3_USE_SSL: 'false'
+      AUTHENTICATION_API_KEY: '{{APPNAME_AUTHENTICATION_API_KEY}}'
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: 'false'
+      LANGUAGE: en
+      PROXY_HOST: ''
+      PROXY_PORT: ''
+      PROXY_PROTOCOL: ''
+      PROXY_USERNAME: ''
+      PROXY_PASSWORD: ''
+    volumes:
+    - evolution-api-data:/evolution
+    depends_on:
+    - evolution-api-redis
+    - evolution-api-postgres
+    - evolution-api-rabbitmq
+  evolution-api-redis:
+    image: redis:latest
+    restart: always
+    volumes:
+    - evolution-api-redis-data:/data
+    ports:
+    - '{{HTTP_PORT}}:6379'
+  evolution-api-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    restart: always
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+    volumes:
+    - evolution-api-postgres-data:/var/lib/postgresql/data
+  evolution-api-rabbitmq:
+    image: rabbitmq:{{RABBITMQ_VERSION}}
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: '{{RABBITMQ_USER}}'
+      RABBITMQ_DEFAULT_PASS: '{{RABBITMQ_PASSWORD}}'
+    volumes:
+    - evolution-api-rabbitmq-data:/var/lib/rabbitmq
+volumes:
+  evolution-api-data:
+  evolution-api-redis-data:
+  evolution-api-postgres-data:
+  evolution-api-rabbitmq-data:
+'''
+
+[[variables]]
+key = "ANT_VERSION"
+label = "Evolution API Version"
+default = "v2.2.1"
+description = "Choose the latest version of Evolution API from https://hub.docker.com/r/atendai/evolution-api/tags"
+
+[[variables]]
+key = "APPNAME_AUTHENTICATION_API_KEY"
+label = "Authentication API Key"
+generate = true
+description = "Set a strong API key for authentication"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "PostgreSQL Database Name"
+default = "evolution_db"
+description = "Set the database name for PostgreSQL"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL Password"
+generate = true
+description = "Set a strong password for PostgreSQL"
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "PostgreSQL Username"
+default = "evolution"
+description = "Set the username for PostgreSQL"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "PostgreSQL Version"
+default = "17"
+description = "Choose the latest version of PostgreSQL from https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "RABBITMQ_PASSWORD"
+label = "RabbitMQ Password"
+generate = true
+description = "Set a strong password for RabbitMQ"
+
+[[variables]]
+key = "RABBITMQ_USER"
+label = "RabbitMQ Username"
+default = "evolution"
+description = "Set the username for RabbitMQ"
+
+[[variables]]
+key = "RABBITMQ_VERSION"
+label = "RabbitMQ Version"
+default = "3.7"
+description = "Choose the latest version of RabbitMQ from https://hub.docker.com/_/rabbitmq/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

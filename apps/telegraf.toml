@@ -1,0 +1,21 @@
+slug = "telegraf"
+name = "Telegraf"
+category = "App"
+description = "Telegraf is an open source agent written in Go for collecting metrics."
+keywords = ["telegraf"]
+compose = '''
+services:
+  telegraf:
+    image: telegraf:{{VERSION}}
+    restart: always
+    volumes:
+    - telegraf-config:/etc/telegraf
+volumes:
+  telegraf-config:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Telegraf Version"
+default = "1.17.3-alpine"
+description = "Find versions on DockerHub https://hub.docker.com/_/telegraf?tab=tags"

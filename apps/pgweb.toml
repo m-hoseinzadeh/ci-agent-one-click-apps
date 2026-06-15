@@ -1,0 +1,19 @@
+slug = "pgweb"
+name = "pgweb"
+category = "Database"
+description = "Pgweb is a web-based database browser for PostgreSQL, written in Go"
+keywords = ["pgweb"]
+compose = '''
+services:
+  pgweb:
+    image: sosedoff/pgweb:{{PGWEB_VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8081'
+'''
+
+[[variables]]
+key = "PGWEB_VERSION"
+label = "pgweb Version"
+default = "0.11.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/sosedoff/pgweb/tags"

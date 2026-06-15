@@ -1,0 +1,122 @@
+slug = "mayan-edms"
+name = "Mayan EDMS"
+category = "App"
+description = "Mayan EDMS is an open source web-based Document Management System with many advanced features."
+keywords = ["edms", "mayan"]
+compose = '''
+services:
+  mayan-edms:
+    depends_on:
+    - mayan-edms-db
+    - mayan-edms-redis
+    image: mayanedms/mayanedms:{{APP_VERSION}}
+    restart: always
+    environment:
+      MAYAN_CELERY_BROKER_URL: redis://:{{REDIS_PASS}}@mayan-edms-redis:6379/0
+      MAYAN_CELERY_RESULT_BACKEND: redis://:{{REDIS_PASS}}@mayan-edms-redis:6379/1
+      MAYAN_DATABASES: '{''default'':{''ENGINE'':''django.db.backends.postgresql'',''NAME'':''{{DBNAME}}'',''PASSWORD'':''{{DBPASS}}'',''USER'':''{{DBUSER}}'',''HOST'':''mayan-edms-db''}}'
+      MAYAN_LOCK_MANAGER_BACKEND: mayan.apps.lock_manager.backends.redis_lock.RedisLock
+      MAYAN_LOCK_MANAGER_BACKEND_ARGUMENTS: '{''redis_url'':''redis://:{{REDIS_PASS}}@mayan-edms-redis:6379/2''}'
+      MAYAN_SEARCH_BACKEND: mayan.apps.dynamic_search.backends.whoosh.WhooshSearchBackend
+      MAYAN_APT_INSTALLS: '{{OCR_LANGS}}'
+      MAYAN_DOCKER_WAIT: mayan-edms-db:5432 mayan-edms-redis:6379
+      MAYAN_DOCUMENTS_LANGUAGE: '{{DEFAULT_DOCUMENT_LANG}}'
+      MAYAN_TIME_ZONE: '{{TIMEZONE}}'
+      MAYAN_AUTOADMIN_EMAIL: '{{EMAIL}}'
+      MAYAN_AUTOADMIN_PASSWORD: '{{PASSWORD}}'
+      MAYAN_AUTOADMIN_USERNAME: '{{USERNAME}}'
+      MAYAN_COMMON_PROJECT_TITLE: '{{PROJECT_TITLE}}'
+    volumes:
+    - mayan-edms-data:/var/lib/mayan
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  mayan-edms-redis:
+    volumes:
+    - mayan-edms-redis-data:/data
+    restart: always
+  mayan-edms-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - mayan-edms-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: '{{DBNAME}}'
+      POSTGRES_USER: '{{DBUSER}}'
+      POSTGRES_PASSWORD: '{{DBPASS}}'
+volumes:
+  mayan-edms-data:
+  mayan-edms-redis-data:
+  mayan-edms-db-data:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "Mayan EDMS version"
+default = "s4.2"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/mayanedms/mayanedms/tags"
+
+[[variables]]
+key = "DBNAME"
+label = "Database Name"
+default = "mayan"
+
+[[variables]]
+key = "DBPASS"
+label = "Database Password"
+generate = true
+
+[[variables]]
+key = "DBUSER"
+label = "Database User"
+default = "mayandbuser"
+
+[[variables]]
+key = "DEFAULT_DOCUMENT_LANG"
+label = "Default document language"
+default = "eng"
+description = "Use the ISO 639-3 code (https://en.wikipedia.org/wiki/ISO_639). Will default to *eng* if left blank."
+
+[[variables]]
+key = "EMAIL"
+label = "Admin email"
+default = "example@example.com"
+
+[[variables]]
+key = "OCR_LANGS"
+label = "Extra packages"
+default = "tesseract-ocr-spa"
+description = "Use to add extra languagues for OCR (English is installed by default). Insert as many packages as you need, separated by a space, as *tesseract-ocr-CODE*. Language codes in https://tesseract-ocr.github.io/tessdoc/Data-Files-in-different-versions.html"
+
+[[variables]]
+key = "PASSWORD"
+label = "Password"
+default = ""
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "PostgreSQL version"
+default = "12.9-alpine"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
+
+[[variables]]
+key = "PROJECT_TITLE"
+label = "Project Title (Site's name)"
+default = "Mayan EDMS"
+description = "Title and header of your site"
+
+[[variables]]
+key = "REDIS_PASS"
+label = "Redis password"
+default = "mayanredispassword"
+
+[[variables]]
+key = "TIMEZONE"
+label = "Time Zone"
+default = "UTC"
+description = "Leave blank if you'd rather change it in System => Setup => Settings"
+
+[[variables]]
+key = "USERNAME"
+label = "Admin username"
+default = "admin"
+description = "Username for your first login"

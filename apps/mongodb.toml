@@ -1,0 +1,38 @@
+slug = "mongodb"
+name = "MongoDB"
+category = "Database"
+description = "MongoDB is a cross-platform document-oriented database program. Classified as a NoSQL database program"
+keywords = ["mongodb"]
+compose = '''
+services:
+  mongodb:
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - mongodb-db-data:/data/db
+    - mongodb-db-config:/data/configdb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: '{{MONGO_USERNAME}}'
+      MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:27017'
+volumes:
+  mongodb-db-data:
+  mongodb-db-config:
+'''
+
+[[variables]]
+key = "MONGO_PASSWORD"
+label = "MongoDB password"
+
+[[variables]]
+key = "MONGO_USERNAME"
+label = "MongoDB RootUsername"
+default = "root"
+description = "Only use alphanumeric chars."
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "MongoDB Version"
+default = "4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"

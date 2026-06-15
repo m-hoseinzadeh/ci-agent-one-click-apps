@@ -1,0 +1,95 @@
+slug = "trudesk"
+name = "Trudesk"
+category = "App"
+description = "Trudesk is an open-source help desk/ticketing solution."
+keywords = ["trudesk"]
+compose = '''
+services:
+  trudesk:
+    image: polonel/trudesk:{{TRUDESK_VERSION}}
+    volumes:
+    - trudesk-data:/usr/src/trudesk/public/uploads
+    - trudesk-plugins:/usr/src/trudesk/plugins
+    - trudesk-backups:/usr/src/trudesk/backups
+    depends_on:
+    - trudesk-mongodb
+    - trudesk-elasticsearch
+    restart: always
+    environment:
+      NODE_ENV: '{{NODE_ENV}}'
+      TRUDESK_DOCKER: 'true'
+      TD_MONGODB_SERVER: trudesk-mongodb
+      TD_MONGODB_PORT: trudesk-mongodb-port
+      TD_MONGODB_USERNAME: root
+      TD_MONGODB_PASSWORD: '{{MONGO_PASSWORD}}'
+      TD_MONGODB_DATABASE: trudesk
+      TD_MONGODB_URI: mongodb://root:{{MONGO_PASSWORD}}@trudesk-mongodb:27017/trudesk?authSource=admin
+      ELATICSEARCH_URI: http://trudesk-elasticsearch:9200
+      USE_XFORWARDIP: 'true'
+    ports:
+    - '{{HTTP_PORT}}:8118'
+  trudesk-mongodb:
+    image: mongo:{{MONGODB_VERSION}}
+    volumes:
+    - trudesk-db-data:/data/db
+    - trudesk-db-config:/var/lib/mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
+  trudesk-elasticsearch:
+    image: elasticsearch:{{ELASTICSEARCH_VERSION}}
+    volumes:
+    - trudesk-elasticsearch-data:/usr/share/elasticsearch/data
+    restart: always
+    environment:
+      xpack.security.enabled: '{{ELASTICSEARCH_SECURITY_ENABLED}}'
+      xpack.security.http.ssl.enabled: '{{ELASTICSEARCH_SECURITY_ENABLED}}'
+      discovery.type: single-node
+      node.name: estrudesk01
+      bootstrap.memory_lock: true
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+volumes:
+  trudesk-data:
+  trudesk-plugins:
+  trudesk-backups:
+  trudesk-db-data:
+  trudesk-db-config:
+  trudesk-elasticsearch-data:
+'''
+
+[[variables]]
+key = "ELASTICSEARCH_SECURITY_ENABLED"
+label = "Security Enabled"
+default = "false"
+description = "When you enable this option, Elasticsearch will create a random password (see startup logs) for the `elastic` user and create SSL certificates required for authentication. **It is recommended to leave this off for a quick setup**. Warning: make sure to enable HTTP Basic Auth in CapRover!"
+
+[[variables]]
+key = "ELASTICSEARCH_VERSION"
+label = "Elasticsearch Version"
+default = "8.13.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/_/elasticsearch"
+
+[[variables]]
+key = "MONGODB_VERSION"
+label = "MongoDB Version"
+default = "5.0.26"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"
+
+[[variables]]
+key = "MONGO_PASSWORD"
+label = "MongoDB Root Password"
+generate = true
+description = "MongoDB root password"
+
+[[variables]]
+key = "NODE_ENV"
+label = "Application Environment"
+default = "production"
+description = "NodeJS application environment. Should be either `production` or `development`"
+
+[[variables]]
+key = "TRUDESK_VERSION"
+label = "Trudesk Version"
+default = "1.2.10"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/polonel/trudesk/tags"

@@ -1,0 +1,165 @@
+slug = "docmost"
+name = "Docmost"
+category = "CMS"
+description = "Docmost is an open-source collaborative wiki and documentation software."
+keywords = ["docmost"]
+compose = '''
+services:
+  docmost:
+    environment:
+      APP_URL: http://docmost.{{ROOT_DOMAIN}}
+      APP_SECRET: '{{APP_SECRET}}'
+      PORT: 3000
+      JWT_TOKEN_EXPIRES_IN: '{{JWT_TOKEN_EXPIRE_IN}}'
+      DATABASE_URL: postgresql://docmost:{{DB_DOCMOST_PASSWORD}}@docmost-db:5432/docmost?schema=public
+      REDIS_URL: redis://docmost-redis:6379
+      STORAGE_DRIVER: '{{STRORAGE_DRIVER}}'
+      AWS_S3_ACCESS_KEY_ID: '{{AWS_S3_ACCESS_KEY_ID}}'
+      AWS_S3_SECRET_ACCESS_KEY: '{{AWS_S3_SECRET_ACCESS_KEY}}'
+      AWS_S3_REGION: '{{AWS_S3_REGION}}'
+      AWS_S3_BUCKET: '{{AWS_S3_BUCKET}}'
+      AWS_S3_ENDPOINT: '{{AWS_S3_ENDPOINT}}'
+      MAIL_DRIVER: '{{MAIL_DRIVER}}'
+      POSTMARK_TOKEN: '{{POSTMARK_TOKEN}}'
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_USERNAME: '{{SMTP_USERNAME}}'
+      SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      SMTP_SECURE: '{{SMTP_SECURE}}'
+      MAIL_FROM_ADDRESS: '{{MAIL_FROM_ADDRESS}}'
+      MAIL_FROM_NAME: '{{MAIL_FROM_NAME}}'
+    image: docmost/docmost:{{DOCMOST_VERSION}}
+    restart: always
+    volumes:
+    - docmost-data:/app/data/storage
+    depends_on:
+    - docmost-db
+    - docmost-redis
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  docmost-db:
+    environment:
+      POSTGRES_DB: docmost
+      POSTGRES_USER: docmost
+      POSTGRES_PASSWORD: '{{DB_DOCMOST_PASSWORD}}'
+    image: postgres:16-alpine
+    restart: always
+    volumes:
+    - docmost-db-data:/var/lib/postgresql/data
+  docmost-redis:
+    image: redis:7.2-alpine
+    restart: always
+    volumes:
+    - docmost-redis-data:/data
+volumes:
+  docmost-data:
+  docmost-db-data:
+  docmost-redis-data:
+'''
+
+[[variables]]
+key = "APP_SECRET"
+label = "Application secret"
+generate = true
+description = "A random key that is used for application security."
+
+[[variables]]
+key = "AWS_S3_ACCESS_KEY_ID"
+label = "[OPTIONAL] S3 access key ID"
+description = "Your AWS S3 access key ID."
+
+[[variables]]
+key = "AWS_S3_BUCKET"
+label = "[OPTIONAL] S3 bucket name"
+description = "The name of your S3 bucket."
+
+[[variables]]
+key = "AWS_S3_ENDPOINT"
+label = "[OPTIONAL] S3 service endpoint URL"
+description = "The endpoint URL for your S3 service (optional)."
+
+[[variables]]
+key = "AWS_S3_REGION"
+label = "[OPTIONAL] S3 bucket region"
+description = "The region where your S3 bucket is located."
+
+[[variables]]
+key = "AWS_S3_SECRET_ACCESS_KEY"
+label = "[OPTIONAL] S3 secret access key"
+description = "Your S3 secret access key."
+
+[[variables]]
+key = "DB_DOCMOST_PASSWORD"
+label = "Database password"
+generate = true
+description = "Database password of the docmost user."
+
+[[variables]]
+key = "DOCMOST_VERSION"
+label = "Dockmost version"
+default = "0.3.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/docmost/docmost/tags"
+
+[[variables]]
+key = "JWT_TOKEN_EXPIRE_IN"
+label = "JSON expiration time"
+default = "30d"
+description = "The expiration time for JSON Web Tokens (JWT).."
+
+[[variables]]
+key = "MAIL_DRIVER"
+label = "[OPTIONAL] Mail driver"
+default = "smtp"
+description = "The mail driver to use for sending emails, can be \"smtp\" or \"postmark\"."
+
+[[variables]]
+key = "MAIL_FROM_ADDRESS"
+label = "[OPTIONAL] Sender email adress"
+description = "The email address that emails will be sent from."
+
+[[variables]]
+key = "MAIL_FROM_NAME"
+label = "[OPTIONAL] Sender email name"
+description = "The name that emails will be sent from."
+
+[[variables]]
+key = "POSTMARK_TOKEN"
+label = "[OPTIONAL] Postmark token"
+description = "The token for Postmark, if using Postmark as the mail driver."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SMTP_HOST"
+label = "[OPTIONAL] SMTP server"
+description = "The SMTP server to use for sending emails."
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "[OPTIONAL] SMTP password"
+description = "The password for the SMTP server."
+
+[[variables]]
+key = "SMTP_PORT"
+label = "[OPTIONAL]  SMTP port"
+description = "The port to use for the SMTP server."
+
+[[variables]]
+key = "SMTP_SECURE"
+label = "[OPTIONAL] SMTP secure"
+description = "Indicate if TLS should be use when connecting to the SMTP server."
+
+[[variables]]
+key = "SMTP_USERNAME"
+label = "[OPTIONAL]  SMTP username"
+description = "The username for the SMTP server."
+
+[[variables]]
+key = "STRORAGE_DRIVER"
+label = "Storage driver"
+default = "local"
+description = "The storage driver to use for file storage, can be \"local\" or \"s3\"."

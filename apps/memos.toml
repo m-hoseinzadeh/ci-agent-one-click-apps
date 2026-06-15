@@ -1,0 +1,22 @@
+slug = "memos"
+name = "memos"
+category = "App"
+description = "An open-source, self-hosted memo hub with knowledge management and socialization."
+keywords = ["memos"]
+compose = '''
+services:
+  memos:
+    image: neosmemo/memos:{{VERSION}}
+    volumes:
+    - memos-data:/var/opt/memos
+    ports:
+    - '{{HTTP_PORT}}:5230'
+volumes:
+  memos-data:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "App Version"
+default = "0.8.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/neosmemo/memos/tags"

@@ -1,0 +1,69 @@
+slug = "dolibarr"
+name = "Dolibarr"
+category = "App"
+description = "Open Source ERP & CRM for Business (SME or large companies, freelancers, foundations)"
+keywords = ["dolibarr"]
+compose = '''
+services:
+  dolibarr-db:
+    image: postgres:{{POSTGRES}}-version
+    volumes:
+    - dolibarr-db:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: dolibarr
+      POSTGRES_PASSWORD: '{{PG}}-pass'
+      POSTGRES_DB: dolibarr
+    ports:
+    - '{{HTTP_PORT}}:5432'
+  dolibarr:
+    image: upshift/dolibarr:{{DOLIBARR}}-version
+    depends_on:
+    - dolibarr-db
+    volumes:
+    - dolibarr-html:/var/www/html
+    - dolibarr-docs:/var/www/documents
+    restart: always
+    environment:
+      DOLI_DB_HOST: dolibarr-db
+      DOLI_DB_NAME: dolibarr
+      DOLI_DB_ROOT_LOGIN: dolibarr
+      DOLI_DB_ROOT_PASSWOORD: '{{PG}}-pass'
+      DOLI_DB_USER: dolibarr
+      DOLI_DB_PORT: 5432
+      DOLI_DB_TYPE: pgsql
+      DOLI_DB_PASSWORD: '{{PG}}-pass'
+      DOLI_ADMIN_LOGIN: '{{ADMIN}}-login'
+      DOLI_ADMIN_PASSWORD: '{{ADMIN}}-pass'
+      DOLI_URL_ROOT: http://dolibarr.{{ROOT_DOMAIN}}
+volumes:
+  dolibarr-db:
+  dolibarr-html:
+  dolibarr-docs:
+'''
+
+[[variables]]
+key = "ADMIN"
+label = "Admin"
+default = ""
+
+[[variables]]
+key = "DOLIBARR"
+label = "Dolibarr"
+default = ""
+
+[[variables]]
+key = "PG"
+label = "Pg"
+default = ""
+
+[[variables]]
+key = "POSTGRES"
+label = "Postgres"
+default = ""
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

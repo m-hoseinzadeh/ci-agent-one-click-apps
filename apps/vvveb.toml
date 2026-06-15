@@ -1,0 +1,61 @@
+slug = "vvveb"
+name = "Vvveb CMS"
+category = "Database"
+description = "Vvveb is a content management system based on PHP and MySQL that is usually used with the MySQL or MariaDB database"
+keywords = ["cms", "vvveb"]
+compose = '''
+services:
+  vvveb-db:
+    image: '{{DB_TYPE}}:{{DATABASE_VERSION}}'
+    volumes:
+    - vvveb-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: vvveb
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+  vvveb-vvveb:
+    depends_on:
+    - vvveb-db
+    image: vvveb/vvvebcms:{{VVVEB_VERSION}}
+    volumes:
+    - vvveb-vvveb-data:/var/www/html
+    restart: always
+    environment:
+      DB_HOST: vvveb-db
+      DB_USER: '{{DB_USER}}'
+      DB_PASSWORD: '{{DB_PASS}}'
+      DB_ENGINE: mysqli
+volumes:
+  vvveb-db-data:
+  vvveb-vvveb-data:
+'''
+
+[[variables]]
+key = "DATABASE_VERSION"
+label = "Database Version, default is MySQL"
+default = "8.4.2"
+description = "Check out the Docker pages for the valid tags https://hub.docker.com/r/library/mysql/tags/ or https://hub.docker.com/_/mariadb?tab=tags"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_TYPE"
+label = "Database Type"
+default = "mysql"
+description = "You can either choose mariadb or mysql, you need to change the version according to which DB is selected. It is case sensitive."
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "vvvebuser"
+
+[[variables]]
+key = "VVVEB_VERSION"
+label = "Vvveb Version"
+default = "php8.3-fpm-alpine"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/vvveb/vvvebcms/tags"

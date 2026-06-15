@@ -1,0 +1,48 @@
+slug = "kibana"
+name = "kibana"
+category = "App"
+description = "Kibana is a free and open user interface that lets you visualize your Elasticsearch data and navigate the Elastic Stack."
+keywords = ["kibana"]
+compose = '''
+services:
+  kibana:
+    environment:
+      SERVER_NAME: kibana
+      KIBANA_DEFAULTAPPID: '{{KIBANA_DEFAULTAPPID}}'
+      MONITORING_ENABLED: '{{MONITORING_ENABLED}}'
+      ELASTICSEARCH_HOSTS: '{{ELASTICSEARCH_HOSTS}}'
+      SERVER_PUBLICBASEURL: '{{SERVER_PUBLICBASEURL}}'
+    image: docker.elastic.co/kibana/kibana:{{VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:5601'
+'''
+
+[[variables]]
+key = "ELASTICSEARCH_HOSTS"
+label = "ELASTICSEARCH_HOSTS"
+description = "URL of the elasticsearch hosts to use. Please include the http or https in the urls. eg. http://srv-captain--elastic:9200"
+
+[[variables]]
+key = "KIBANA_DEFAULTAPPID"
+label = "Default App id"
+default = "home"
+description = "The default app that is loaded when you visit Kibana. Defaults to home"
+
+[[variables]]
+key = "MONITORING_ENABLED"
+label = "MONITORING_ENABLED"
+default = "true"
+description = "Enable kibana monitoring features?"
+
+[[variables]]
+key = "SERVER_PUBLICBASEURL"
+label = "SERVER_PUBLICBASEURL"
+default = "http://$$cap_appname.$$cap_root_domain"
+description = "The public URL of the Kibana app. Make sure to change this if you force HTTPS-only!"
+
+[[variables]]
+key = "VERSION"
+label = "Kibana version"
+default = "8.4.1"
+description = "It's highly recommended that you don't use the latest tag but instead the major version you need. See https://hub.docker.com/_/kibana for a list of versions."

@@ -1,0 +1,58 @@
+slug = "ackee"
+name = "Ackee"
+category = "Analytics"
+description = "Self-hosted, Node.js based analytics tool for those who care about privacy."
+keywords = ["ackee"]
+compose = '''
+services:
+  ackee:
+    depends_on:
+    - ackee-mongodb
+    image: electerious/ackee:{{ACKEE_VERSION}}
+    restart: always
+    environment:
+      WAIT_HOSTS: ackee-mongodb:27017
+      ACKEE_MONGODB: mongodb://ackee-mongodb/ackee
+      ACKEE_USERNAME: '{{ACKEE_USERNAME}}'
+      ACKEE_PASSWORD: '{{ACKEE_PASSWD}}'
+      ACKEE_ALLOW_ORIGIN: '{{ACKEE_ACCESS_ORIGIN}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  ackee-mongodb:
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - ackee-db-data:/data/db
+    restart: always
+volumes:
+  ackee-db-data:
+'''
+
+[[variables]]
+key = "ACKEE_ACCESS_ORIGIN"
+label = "CORS headers"
+default = "https://example.com,https://example2.com"
+description = "Ackee requires correct CORS headers. Please read https://docs.ackee.electerious.com/#/docs/CORS%20headers#heroku-or-platforms-as-a-service-configuration"
+
+[[variables]]
+key = "ACKEE_PASSWD"
+label = "Ackee Admin Password"
+generate = true
+description = "Your super secret Password for Ackee"
+
+[[variables]]
+key = "ACKEE_USERNAME"
+label = "Ackee Admin User"
+default = ""
+description = "Username for Ackee"
+
+[[variables]]
+key = "ACKEE_VERSION"
+label = "Ackee Version"
+default = "3.4.2"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/electerious/ackee/tags"
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "MongoDB Version"
+default = "4.0.20"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"

@@ -1,0 +1,134 @@
+slug = "formbricks"
+name = "Formbricks"
+category = "App"
+description = "Formbricks - The Open Source Survey & Experience Management solution for fast growing companies"
+keywords = ["formbricks"]
+compose = '''
+services:
+  formbricks-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - formbricks-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: formbricks
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+  formbricks:
+    image: formbricks/formbricks:{{FORMBRICKS_TAG}}
+    depends_on:
+    - formbricks-db
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://formbricks:{{POSTGRES_PASSWORD}}@formbricks-db/{{POSTGRES_DB}}?sslmode=disable
+      WEBAPP_URL: https://formbricks.{{ROOT_DOMAIN}}/
+      NEXTAUTH_SECRET: '{{GEN_RANDOM_HEX}}(32)'
+      NEXTAUTH_URL: https://formbricks.{{ROOT_DOMAIN}}/
+      ENCRYPTION_KEY: '{{GEN_RANDOM_HEX}}(64)'
+      EMAIL_VERIFICATION_DISABLED: '{{EMAIL_VERIFICATION_DISABLED}}'
+      MAIL_FROM: '{{MAIL_FROM}}'
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_SECURE_ENABLED: '{{SMTP_SECURE_ENABLED}}'
+      SMTP_USER: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      PASSWORD_RESET_DISABLED: '{{PASSWORD_RESET_DISABLED}}'
+      SIGNUP_DISABLED: '{{SIGNUP_DISABLED}}'
+      INVITE_DISABLED: '{{INVITE_DISABLED}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  formbricks-db-data:
+'''
+
+[[variables]]
+key = "EMAIL_VERIFICATION_DISABLED"
+label = "Email Verification Disabled"
+default = "0"
+description = "Disable email verification for new accounts. Set to 1 to disable, 0 to enable. Requires SMTP settings to be configured if enabled."
+
+[[variables]]
+key = "FORMBRICKS_TAG"
+label = "Formbricks Version"
+default = "2.1.1"
+description = "Check out our docker page for the valid tags https://hub.docker.com/r/formbricks/formbricks/tags"
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "INVITE_DISABLED"
+label = "Invite Disabled"
+default = "0"
+description = "Disable the ability for invited users to create an account. Set to 1 to disable, 0 to enable."
+
+[[variables]]
+key = "MAIL_FROM"
+label = "Mail From"
+default = "example_from_address@example.com"
+description = "The email address to use as the sender for outgoing emails. Delete variable to disable email functionality."
+
+[[variables]]
+key = "PASSWORD_RESET_DISABLED"
+label = "Password Reset Disabled"
+default = "1"
+description = "Disable the ability to reset passwords. Set to 1 to disable, 0 to enable. Requires SMTP settings to be configured if enabled."
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Postgres DB"
+default = "formbricks"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "13.1"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SIGNUP_DISABLED"
+label = "Signup Disabled"
+default = "1"
+description = "Disable the ability for new users to create an account. Set to 1 to disable, 0 to enable."
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMTP Host"
+default = "smtp.example_server_address.example.com"
+description = "The hostname of your SMTP server. Delete variable to disable email functionality."
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP Password"
+default = "a_secure_password"
+description = "The password for your SMTP server. Delete variable to disable email functionality."
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP Port"
+default = "465"
+description = "The port of your SMTP server. Typically 587 for TLS or 465 for SSL."
+
+[[variables]]
+key = "SMTP_SECURE_ENABLED"
+label = "SMTP Secure Enabled"
+default = "1"
+description = "Enable SMTP_SECURE_ENABLED for TLS (port 465). Set to 1 to enable, 0 to disable."
+
+[[variables]]
+key = "SMTP_USER"
+label = "SMTP User"
+default = "usually_example_from_address@example.com"
+description = "The username for your SMTP server. Delete variable to disable email functionality."

@@ -1,0 +1,73 @@
+slug = "openvpn-as"
+name = "OpenVPN Access Server"
+category = "App"
+description = "Full featured secure network tunneling VPN software."
+keywords = ["access", "as", "openvpn", "server"]
+compose = '''
+services:
+  openvpn-as:
+    image: linuxserver/openvpn-as:{{OPENVPN_VERSION}}
+    hostname: openvpn-as.{{ROOT_DOMAIN}}
+    environment:
+      PUID: '{{OPENVPN_PUID}}'
+      PGID: '{{OPENVPN_GUID}}'
+      TZ: '{{OPENVPN_TZ}}'
+      INTERFACE: '{{OPENVPN_INTERFACE}}'
+    volumes:
+    - openvpn-as:/config
+    ports:
+    - '{{HTTP_PORT}}:$$cap_OPENVPN_PORT_ADMIN'
+    - '{{OPENVPN_PORT_TCP}}:{{OPENVPN_PORT_TCP}}'
+    - '{{OPENVPN_PORT_UDP}}:{{OPENVPN_PORT_UDP}}'
+    cap_add:
+    - NET_ADMIN
+volumes:
+  openvpn-as:
+'''
+
+[[variables]]
+key = "OPENVPN_GUID"
+label = "General | Group ID"
+default = "1000"
+description = "Group ID that the process uses, run `id $user` on your instance to see the ID."
+
+[[variables]]
+key = "OPENVPN_INTERFACE"
+label = "Networking | Interface"
+description = "With bridge networking, leave it blank (or enter `eth0`). If `host` or `macvlan`, set it to your host's network interface, found by running `ifconfig`."
+
+[[variables]]
+key = "OPENVPN_PORT_TCP"
+label = "Networking | TCP Port"
+default = "9443"
+description = "Port of the TCP connections. Should not be changed."
+
+[[variables]]
+key = "OPENVPN_PORT_UDP"
+label = "Networking | UDP Port"
+default = "1194"
+description = "Port of the UDP connections. Should not be changed."
+
+[[variables]]
+key = "OPENVPN_PUID"
+label = "General | User ID"
+default = "1000"
+description = "User ID that the process uses, run `id $user` on your instance to see the ID."
+
+[[variables]]
+key = "OPENVPN_TZ"
+label = "General | Timezone"
+default = "UTC"
+description = "Timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "OPENVPN_VERSION"
+label = "General | Version Tag"
+default = "2.9.0-5c5bd120-Ubuntu18-ls124"
+description = "Check out their valid tags at https://hub.docker.com/r/linuxserver/openvpn-as/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

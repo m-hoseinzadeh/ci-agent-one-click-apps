@@ -1,0 +1,27 @@
+slug = "traggo"
+name = "Traggo"
+category = "App"
+description = "Traggo is a simple tag-based time tracking tool. In Traggo there are no tasks, only tagged time spans."
+keywords = ["traggo"]
+compose = '''
+services:
+  traggo:
+    volumes:
+    - traggo-data:/opt/traggo/data
+    restart: always
+    environment:
+      TRAGGO_DEFAULT_USER_NAME: '{{TRAGGO_USER}}'
+      TRAGGO_DEFAULT_USER_PASS: '{{TRAGGO_PW}}'
+    ports:
+    - '{{HTTP_PORT}}:3030'
+volumes:
+  traggo-data:
+'''
+
+[[variables]]
+key = "TRAGGO_PW"
+label = "Default User's Password"
+
+[[variables]]
+key = "TRAGGO_USER"
+label = "Default User's Username"

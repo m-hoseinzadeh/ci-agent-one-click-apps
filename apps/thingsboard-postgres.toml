@@ -1,0 +1,28 @@
+slug = "thingsboard-postgres"
+name = "ThingsBoard - Postgres"
+category = "Database"
+description = "ThingsBoard is an open-source IoT platform for data collection, processing, visualization, device management, with an integrated Postgres database."
+keywords = ["postgres", "thingsboard"]
+compose = '''
+services:
+  thingsboard-postgres:
+    image: thingsboard/tb-postgres:{{VERSION}}
+    ports:
+    - '{{HTTP_PORT}}:9090'
+    - $$mqtt_port:1883
+    - $$coap_port:5683
+    environment:
+      TB_QUEUE_TYPE: in-memory
+    volumes:
+    - thingsboard-postgres-data:/data
+    - thingsboard-postgres-logs:/var/log/thingsboard
+volumes:
+  thingsboard-postgres-data:
+  thingsboard-postgres-logs:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "ThingsBoard Version"
+default = "3.2.2"
+description = "Check out their Docker page for the valid tags hhttps://hub.docker.com/r/thingsboard/tb-postgres/tags"

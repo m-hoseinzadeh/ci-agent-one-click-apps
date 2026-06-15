@@ -1,0 +1,180 @@
+slug = "papercups"
+name = "Papercups"
+category = "Communication"
+description = "Papercups is an open source live customer chat web app written in Elixir."
+keywords = ["papercups"]
+compose = '''
+services:
+  papercups:
+    depends_on:
+    - papercups-db
+    environment:
+      DATABASE_URL: ecto://postgres:{{POSTGRES_PASSWORD}}@papercups-db/postgres
+      SECRET_KEY_BASE: '{{SECRET_KEY}}'
+      BACKEND_URL: papercups.{{ROOT_DOMAIN}}
+      MIX_ENV: '{{MIX_ENV}}'
+      REACT_APP_URL: papercups.{{ROOT_DOMAIN}}
+      FROM_ADDRESS: '{{EMAIL_FROM_ADDRESS}}'
+      MAILGUN_API_KEY: '{{MAILGUN_API_KEY}}'
+      DOMAIN: '{{EMAIL_FROM_DOMAIN}}'
+      SLACK_BOT_ACCESS_TOKEN: '{{SLACK_BOT_ACCESS_TOKEN}}'
+      PAPERCUPS_SLACK_CLIENT_ID: '{{SLACK_CLIENT_ID}}'
+      PAPERCUPS_SLACK_CLIENT_SECRET: '{{SLACK_CLIENT_SECRET}}'
+      SENTRY_DSN: '{{SENTRY_DSN}}'
+      PAPERCUPS_STRIPE_SECRET: '{{STRIPE_SECRET}}'
+      REACT_APP_GOOGLE_ANALYTICS_ID: '{{REACT_GOOGLE_ANALYTICS_ID}}'
+      REACT_APP_SLACK_CLIENT_ID: '{{REACT_SLACK_CLIENT_ID}}'
+      REACT_APP_SENTRY_DSN: '{{REACT_SENTRY_DSN}}'
+      REACT_APP_LOGROCKET_ID: '{{REACT_LOGROCKET_ID}}'
+      REACT_APP_STRIPE_PUBLIC_KEY: '{{REACT_STRIPE_PUBLIC_ID}}'
+      REACT_APP_FILE_UPLOADS_ENABLED: '{{UPLOAD_ENABLED}}'
+      CUSTOMER_IO_SITE_ID: '{{CUSTOMER_IO_SITE_ID}}'
+      CUSTOMER_IO_API_KEY: '{{CUSTOMER_IO_API_KEY}}'
+      AWS_ACCESS_KEY_ID: '{{AWS_ACCESS_KEY_ID}}'
+      AWS_SECRET_ACCESS_KEY: '{{AWS_SECRET_KEY}}'
+      BUCKET_NAME: '{{AWS_BUCKET}}'
+      AWS_REGION: '{{AWS_REGION}}'
+      REQUIRE_DB_SSL: '{{DB_REQUIRE_SSL}}'
+    ports:
+    - '{{HTTP_PORT}}:4000'
+  papercups-db:
+    image: postgres:{{POSTGRES_TAG}}
+    volume:
+    - papercups-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+'''
+
+[[variables]]
+key = "AWS_ACCESS_KEY_ID"
+label = "AWS Access Key ID"
+default = ""
+
+[[variables]]
+key = "AWS_BUCKET"
+label = "AWS Bucket"
+default = ""
+
+[[variables]]
+key = "AWS_REGION"
+label = "AWS Region"
+default = ""
+
+[[variables]]
+key = "AWS_SECRET_KEY"
+label = "AWS Secret Key ID"
+default = ""
+
+[[variables]]
+key = "CUSTOMER_IO_API_KEY"
+label = "Customer.io API Key"
+default = ""
+
+[[variables]]
+key = "CUSTOMER_IO_SITE_ID"
+label = "Customer.io Site ID"
+default = ""
+
+[[variables]]
+key = "DB_REQUIRE_SSL"
+label = "DB Require SSL"
+default = "false"
+
+[[variables]]
+key = "EMAIL_FROM_ADDRESS"
+label = "Email From Address"
+default = "noreply@mail.papercups.io"
+
+[[variables]]
+key = "EMAIL_FROM_DOMAIN"
+label = "Email From Domain"
+default = "$$cap_appname.$$cap_root_domain"
+
+[[variables]]
+key = "MAILGUN_API_KEY"
+label = "Mailgun API Key"
+default = ""
+
+[[variables]]
+key = "MIX_ENV"
+label = "Mix Env"
+default = "prod"
+description = "Learn more at https://hexdocs.pm/mix/Mix.html#module-environments"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+
+[[variables]]
+key = "POSTGRES_TAG"
+label = "Postgres Tag"
+default = "9.6-alpine"
+description = "Check out their docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "REACT_GOOGLE_ANALYTICS_ID"
+label = "Google Analytics ID"
+default = ""
+
+[[variables]]
+key = "REACT_LOGROCKET_ID"
+label = "Papercups's React LogRocket ID"
+default = ""
+
+[[variables]]
+key = "REACT_SENTRY_DSN"
+label = "Papercups's React Sentry DSN"
+default = ""
+
+[[variables]]
+key = "REACT_SLACK_CLIENT_ID"
+label = "Papercups's React Slack Client ID"
+default = ""
+
+[[variables]]
+key = "REACT_STRIPE_PUBLIC_ID"
+label = "Papercups's React Stripe Public ID"
+default = ""
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET_KEY"
+label = "Papercups Secret Key"
+generate = true
+description = "Must be at least 64 bytes"
+
+[[variables]]
+key = "SENTRY_DSN"
+label = "Sentry DSN"
+default = ""
+
+[[variables]]
+key = "SLACK_BOT_ACCESS_TOKEN"
+label = "Slack Bot Access Token"
+default = ""
+
+[[variables]]
+key = "SLACK_CLIENT_ID"
+label = "Slack Bot Client ID"
+default = ""
+
+[[variables]]
+key = "SLACK_CLIENT_SECRET"
+label = "Slack Bot Client Secret"
+default = ""
+
+[[variables]]
+key = "STRIPE_SECRET"
+label = "Stripe Secret"
+default = ""
+
+[[variables]]
+key = "UPLOAD_ENABLED"
+label = "Enable Papercups Upload"
+default = "1"

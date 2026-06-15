@@ -1,0 +1,92 @@
+slug = "rallly"
+name = "Rallly"
+category = "Database"
+description = "Doodle poll alternative. Find the best date for a meeting with your colleagues or friends without the back and forth emails. This app is packaged with PostgreSQL."
+keywords = ["rallly"]
+compose = '''
+services:
+  rallly:
+    restart: always
+    depends_on:
+    - rallly-postgres
+    image: lukevella/rallly:{{RALLLY_VERSION}}
+    environment:
+      NEXT_PUBLIC_BASE_URL: http://rallly.{{ROOT_DOMAIN}}
+      DATABASE_URL: postgres://rallly:{{RALLLY_POSTGRES_PASSWORD}}@rallly-postgres:5432/db
+      SECRET_PASSWORD: '{{RALLLY_PASSWD}}'
+      SUPPORT_EMAIL: '{{RALLLY_EMAIL}}'
+      SMTP_HOST: '{{RALLLY_SMTP_HOST}}'
+      SMTP_PORT: '{{RALLLY_SMTP_PORT}}'
+      SMTP_SECURE: '{{RALLLY_SMTP_SECURE}}'
+      SMTP_USER: '{{RALLLY_SMTP_USER}}'
+      SMTP_PWD: '{{RALLLY_SMTP_PWD}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  rallly-postgres:
+    image: postgres:12
+    volumes:
+    - rallly-postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: rallly
+      POSTGRES_PASSWORD: '{{RALLLY_POSTGRES_PASSWORD}}'
+      POSTGRES_DB: db
+volumes:
+  rallly-postgres-data:
+'''
+
+[[variables]]
+key = "RALLLY_EMAIL"
+label = "Rallly From Email"
+description = "An email address that will appear as the FROM email for all emails being sent out."
+
+[[variables]]
+key = "RALLLY_PASSWD"
+label = "Rallly Password"
+generate = true
+description = "A long string (minimum 32 characters) that is used to encrypt session data."
+
+[[variables]]
+key = "RALLLY_POSTGRES_PASSWORD"
+label = "Password"
+generate = true
+description = "Postgres password (minimum 12 characters)"
+
+[[variables]]
+key = "RALLLY_SMTP_HOST"
+label = "Rallly SMTP Host"
+description = "Host name of your SMTP server"
+
+[[variables]]
+key = "RALLLY_SMTP_PORT"
+label = "Rallly SMTP Port"
+default = "465"
+description = "Port of your SMTP server"
+
+[[variables]]
+key = "RALLLY_SMTP_PWD"
+label = "Rallly SMTP password"
+description = "Password to use for your SMTP connection"
+
+[[variables]]
+key = "RALLLY_SMTP_SECURE"
+label = "Requires secure SMTP connection? true/false"
+default = "False"
+description = "Set to \"true\" if SSL is enabled for your SMTP connection"
+
+[[variables]]
+key = "RALLLY_SMTP_USER"
+label = "Rallly SMTP user"
+description = "Username to use for your SMTP connection"
+
+[[variables]]
+key = "RALLLY_VERSION"
+label = "Rallly Version"
+default = "ac55701890cd866ee946deb25e2b2839fb14900e"
+description = "Check out the docker page for valid tags https://hub.docker.com/r/lukevella/rallly/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

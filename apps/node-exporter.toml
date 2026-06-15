@@ -1,0 +1,22 @@
+slug = "node-exporter"
+name = "Node Exporter"
+category = "Monitoring"
+description = "Prometheus exporter for machine metrics, written in Go with pluggable metric collectors."
+keywords = ["exporter", "node"]
+compose = '''
+services:
+  node-exporter:
+    image: prom/node-exporter:{{VERSION}}
+    restart: always
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - /sys:/host/sys
+    - /proc:/host/proc
+    - /:/rootfs
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Node Exporter Version"
+default = "v1.5.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/prom/node-exporter/tags"

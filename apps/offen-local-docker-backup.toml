@@ -1,0 +1,54 @@
+slug = "offen-local-docker-backup"
+name = "Offen Docker Backup (Local)"
+category = "App"
+description = "Backup Docker volumes locally"
+keywords = ["(local)", "backup", "docker", "local", "offen"]
+compose = '''
+services:
+  offen-local-docker-backup:
+    image: offen/docker-volume-backup:{{VERSION}}
+    environment:
+      BACKUP_FILENAME: '{{BACKUP_FILENAME}}'
+      BACKUP_ARCHIVE: /archive
+      BACKUP_CRON_EXPRESSION: '{{BACKUP_CRON_EXPRESSION}}'
+      BACKUP_RETENTION_DAYS: '{{BACKUP_RETENTION_DAYS}}'
+    volumes:
+    - '{{VOLUME_TO_BACKUP}}:/backup/data'
+    - '{{BACKUP_PATH}}:/archive'
+    restart: always
+'''
+
+[[variables]]
+key = "BACKUP_CRON_EXPRESSION"
+label = "Cron expression"
+default = "@daily"
+description = "Backups run on the given cron schedule in `busybox` flavor. If no value is set, `@daily` will be used. If you do not want the cron to ever run, use `0 0 5 31 2 ?`."
+
+[[variables]]
+key = "BACKUP_FILENAME"
+label = "Backup filename"
+default = "backup-%Y-%m-%dT%H-%M-%S.tar.gz"
+description = "The name of the backup file including the `.tar.gz` extension. Format verbs will be replaced as in `strftime`. Omitting them will result in the same filename for every backup run, which means previous versions will be overwritten on subsequent runs. The default results in filenames like `backup-2021-08-29T04-00-00.tar.gz`."
+
+[[variables]]
+key = "BACKUP_PATH"
+label = "Backup path"
+default = "/backups"
+description = "Path where you want to store the backups"
+
+[[variables]]
+key = "BACKUP_RETENTION_DAYS"
+label = "Backup retention days"
+default = "14"
+description = "Define this value to enable automatic rotation of old backups. The value declares the number of days for which a backup is kept."
+
+[[variables]]
+key = "VERSION"
+label = "Docker volume backup version"
+default = "v2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/offen/docker-volume-backup/tags"
+
+[[variables]]
+key = "VOLUME_TO_BACKUP"
+label = "Volume to backup"
+description = "Path of the volume that you want to backup, e.g. `/var/lib/docker/volumes/captain--my-app/_data`"

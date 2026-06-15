@@ -1,0 +1,52 @@
+slug = "etherpad"
+name = "Etherpad"
+category = "App"
+description = "Etherpad is a real-time collaborative editor for the web"
+keywords = ["etherpad"]
+compose = '''
+services:
+  etherpad:
+    image: etherpad/etherpad:{{ETHERPAD_VERSION}}
+    depends_on:
+    - etherpad-db
+    environment:
+      NODE_ENV: production
+      DB_TYPE: mysql
+      DB_HOST: etherpad-db
+      DB_PORT: '3306'
+      DB_NAME: etherpad
+      DB_USER: etherpad
+      DB_PASS: '{{DB_PASS}}'
+      DB_CHARSET: utf8mb4
+      TRUST_PROXY: 'true'
+    ports:
+    - '{{HTTP_PORT}}:9001'
+  etherpad-db:
+    image: mysql:{{MYSQL_VERSION}}
+    volumes:
+    - etherpad-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: etherpad
+      MYSQL_USER: etherpad
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+volumes:
+  etherpad-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+
+[[variables]]
+key = "ETHERPAD_VERSION"
+label = "Etherpad Docker Image"
+default = "1.8.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/etherpad/etherpad/tags - default is 1.8.0 as of 2020-04-09"
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "5.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mysql/tags/"

@@ -1,0 +1,94 @@
+slug = "call-only"
+name = "Cal.com - No Database"
+category = "Database"
+description = "The open-source Calendly alternative."
+keywords = ["cal.com", "call", "database", "no", "only"]
+compose = '''
+services:
+  call-only:
+    image: calcom/cal.com:{{VERSION}}
+    restart: always
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_WEBAPP_URL: http://call-only.{{ROOT_DOMAIN}}
+      NEXTAUTH_SECRET: '{{SECRET_KEY_BASE}}'
+      CALENDSO_ENCRYPTION_KEY: '{{CALENDSO_ENCRYPTION_KEY}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      DATABASE_HOST: '{{POSTGRES_HOST}}'
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}/{{POSTGRES_DB}}
+      DATABASE_DIRECT_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}/{{POSTGRES_DB}}
+      GOOGLE_API_CREDENTIALS: '{}'
+      EMAIL_FROM: '{{EMAIL_FROM}}'
+      EMAIL_SERVER_HOST: '{{EMAIL_HOST}}'
+      EMAIL_SERVER_PORT: '{{EMAIL_SERVER_PASSWORD}}'
+      EMAIL_SERVER_USER: '{{EMAIL_SERVER_USER}}'
+      EMAIL_SERVER_PASSWORD: '{{EMAIL_SERVER_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+'''
+
+[[variables]]
+key = "CALENDSO_ENCRYPTION_KEY"
+label = "Secret Key Base"
+default = "secret"
+description = "Encryption key that will be used to encrypt CalDAV credentials, choose a random string, for example with `dd if=/dev/urandom bs=1K count=1 | md5sum`"
+
+[[variables]]
+key = "EMAIL_FROM"
+label = "Emails from"
+default = "notifications@example.com"
+
+[[variables]]
+key = "EMAIL_HOST"
+label = "Emails server host"
+default = "smtp.example.com"
+
+[[variables]]
+key = "EMAIL_SERVER_PASSWORD"
+label = "Emails server password"
+default = "email_password"
+
+[[variables]]
+key = "EMAIL_SERVER_USER"
+label = "Emails server user"
+default = "email_user"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Postgres db"
+default = "calendso"
+
+[[variables]]
+key = "POSTGRES_HOST"
+label = "Postgres host"
+default = "database:5432"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres password"
+default = "password"
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Postgres user"
+default = "user"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET_KEY_BASE"
+label = "Secret Key Base"
+default = "secret"
+description = "The randomized string which is used to verify the integrity of signed cookies. Use `openssl rand -base64 32` to generate a key"
+
+[[variables]]
+key = "VERSION"
+label = "Cal.com Version"
+default = "v2.5.4"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/calcom/cal.com/tags"

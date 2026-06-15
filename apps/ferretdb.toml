@@ -1,0 +1,53 @@
+slug = "ferretdb"
+name = "FerretDB"
+category = "Database"
+description = "MongoDB-compatible database powered by PostgreSQL."
+keywords = ["ferretdb"]
+compose = '''
+services:
+  ferretdb-db:
+    image: ghcr.io/ferretdb/postgres-documentdb:{{POSTGRES_VERSION}}
+    restart: on-failure
+    environment:
+      POSTGRES_USER: '{{DB_USER}}'
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_DB: '{{DB_NAME}}'
+    volumes:
+    - ferretdb-db-data:/var/lib/postgresql/data
+  ferretdb:
+    image: ghcr.io/ferretdb/ferretdb:{{FERRETDB_VERSION}}
+    restart: on-failure
+    environment:
+      FERRETDB_POSTGRESQL_URL: postgres://{{DB_USER}}:{{DB_PASS}}@ferretdb-db:5432/{{DB_NAME}}
+    depends_on:
+    - ferretdb-db
+volumes:
+  ferretdb-db-data:
+'''
+
+[[variables]]
+key = "DB_NAME"
+label = "Database Name"
+default = "postgres"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+generate = true
+
+[[variables]]
+key = "DB_USER"
+label = "Database User"
+default = "username"
+
+[[variables]]
+key = "FERRETDB_VERSION"
+label = "FerretDB Version"
+default = "2.2.0"
+description = "Check available tags at https://github.com/FerretDB/FerretDB/pkgs/container/ferretdb"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres DocumentDB Version"
+default = "17-0.103.0-ferretdb-2.2.0"
+description = "Check available tags at https://github.com/FerretDB/postgres-documentdb/pkgs/container/postgres-documentdb"

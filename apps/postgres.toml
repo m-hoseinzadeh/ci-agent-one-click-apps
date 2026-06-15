@@ -1,0 +1,48 @@
+slug = "postgres"
+name = "PostgreSQL"
+category = "Database"
+description = "The PostgreSQL object-relational database system provides reliability and data integrity"
+keywords = ["postgres", "postgresql"]
+compose = '''
+services:
+  postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{PG_USER}}'
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: '{{PG_DB}}'
+      POSTGRES_INITDB_ARGS: '{{PG_INITDB_ARGS}}'
+    ports:
+    - '{{HTTP_PORT}}:5432'
+volumes:
+  postgres-data:
+'''
+
+[[variables]]
+key = "PG_DB"
+label = "Default Database"
+default = "postgres"
+
+[[variables]]
+key = "PG_INITDB_ARGS"
+label = "Optional Arguments"
+description = "Arguments will be appended to `postgres initdb`. Example: `--data-checksums`."
+
+[[variables]]
+key = "PG_PASS"
+label = "Password"
+generate = true
+
+[[variables]]
+key = "PG_USER"
+label = "Username"
+default = "postgres"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Version"
+default = "14.5"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags"

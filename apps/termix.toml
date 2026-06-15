@@ -1,0 +1,33 @@
+slug = "termix"
+name = "Termix"
+category = "App"
+description = "Self-hosted SSH and remote desktop management."
+keywords = ["termix"]
+compose = '''
+services:
+  termix:
+    image: ghcr.io/lukegus/termix:{{TERMIX_VERSION}}
+    restart: always
+    environment:
+      PORT: '8080'
+      GUACD_HOST: termix-guacd
+    volumes:
+    - termix-data:/app/data
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  termix-guacd:
+    image: guacamole/guacd:{{GUACD_VERSION}}
+    restart: always
+volumes:
+  termix-data:
+'''
+
+[[variables]]
+key = "GUACD_VERSION"
+label = "Guacd Version"
+default = "1.6.0"
+
+[[variables]]
+key = "TERMIX_VERSION"
+label = "Termix Version"
+default = "release-2.3.2"

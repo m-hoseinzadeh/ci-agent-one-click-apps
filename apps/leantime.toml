@@ -1,0 +1,59 @@
+slug = "leantime"
+name = "Leantime"
+category = "Database"
+description = "Leantime is an open source project management system for small teams and startups written in PHP, Javascript using MySQL."
+keywords = ["leantime"]
+compose = '''
+services:
+  leantime-mysql:
+    volumes:
+    - leantime-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: leantime
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_PASSWD}}'
+      MYSQL_USER: leantimeuser
+      MYSQL_PASSWORD: '{{MYSQL_PASSWD}}'
+  leantime:
+    image: leantime/leantime:{{LEANTIME_VER}}
+    container_name: leantime
+    environment:
+      LEAN_APP_URL: https://leantime.{{ROOT_DOMAIN}}
+      LEAN_DB_HOST: leantime-mysql
+      LEAN_DB_USER: leantimeuser
+      LEAN_DB_PASSWORD: '{{MYSQL_PASSWD}}'
+      LEAN_DB_DATABASE: leantime
+      LEAN_DEFAULT_TIMEZONE: '{{TIMEZONE}}'
+      LEAN_SESSION_PASSWORD: '{{GEN_RANDOM_HEX}}(32)'
+      LEAN_SESSION_EXPIRATION: 28800
+volumes:
+  leantime-mysql-data:
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "LEANTIME_VER"
+label = "Leantime Version"
+default = "2.3.6"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/leantime/leantime"
+
+[[variables]]
+key = "MYSQL_PASSWD"
+label = "MySQL User Password"
+generate = true
+description = "User password for the database instance."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TIMEZONE"
+label = "Timezone"
+default = "Europe/London"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

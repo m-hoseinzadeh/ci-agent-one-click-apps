@@ -1,0 +1,21 @@
+slug = "apprise"
+name = "Apprise"
+category = "App"
+description = "Apprise API was designed to easily fit into existing (and new) eco-systems that are looking for a simple notification solution."
+keywords = ["apprise"]
+compose = '''
+services:
+  apprise:
+    image: caronc/apprise:{{APPRISE_VERSION}}
+    restart: always
+    volume:
+    - apprise-data:/config
+    ports:
+    - '{{HTTP_PORT}}:8000'
+'''
+
+[[variables]]
+key = "APPRISE_VERSION"
+label = "Apprise Version"
+default = "v0.7.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/caronc/apprise/tags"

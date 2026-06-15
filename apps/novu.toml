@@ -1,0 +1,217 @@
+slug = "novu"
+name = "Novu"
+category = "App"
+description = "Open Source Notification Infrastructure For Developers"
+keywords = ["novu"]
+compose = '''
+services:
+  novu-cache:
+    image: redis:{{REDIS_VERSION}}
+  novu-db:
+    image: mongo:{{MONGO_VERSION}}
+    environment:
+      PUID: '{{PUID}}'
+      PGID: '{{PGID}}'
+    volumes:
+    - novu-db:/data/db
+  novu-api:
+    image: '{{NOVU_IMAGE_URL}}/api:{{NOVU_IMAGE_VERSION}}'
+    environment:
+      NODE_ENV: '{{ENVIRONMENT}}'
+      API_ROOT_URL: http://novu-api.{{ROOT_DOMAIN}}
+      DISABLE_USER_REGISTRATION: '{{NOVU_DISABLE_USER_REGISTRATION}}'
+      PORT: '{{NOVU_API_PORT}}'
+      FRONT_BASE_URL: http://novu.{{ROOT_DOMAIN}}
+      MONGO_URL: mongodb://novu-db/{{MONGO_DB}}
+      REDIS_HOST: novu-cache
+      REDIS_PORT: '{{REDIS_PORT}}'
+      REDIS_DB_INDEX: '{{REDIS_DB_INDEX}}'
+      S3_LOCAL_STACK: '{{NOVU_S3_LOCAL_STACK}}'
+      S3_BUCKET_NAME: '{{NOVU_S3_BUCKET_NAME}}'
+      S3_REGION: '{{NOVU_S3_REGION}}'
+      AWS_ACCESS_KEY_ID: '{{NOVU_AWS_ACCESS_KEY_ID}}'
+      AWS_SECRET_ACCESS_KEY: '{{NOVU_AWS_SECRET_ACCESS_KEY}}'
+      JWT_SECRET: '{{NOVU_JWT_SECRET}}'
+      STORE_ENCRYPTION_KEY: '{{NOVU_STORE_ENCRYPTION_KEY}}'
+      SENTRY_DSN: '{{NOVU_API_SENTRY_DSN}}'
+    depends_on:
+    - novu-db
+    - novu-cache
+    ports:
+    - '{{HTTP_PORT}}:$$cap_NOVU_API_PORT'
+  novu-ws:
+    image: '{{NOVU_IMAGE_URL}}/ws:{{NOVU_IMAGE_VERSION}}'
+    environment:
+      PORT: '{{NOVU_PORT_WEBSOCKET}}'
+      NODE_ENV: '{{ENVIRONMENT}}'
+      MONGO_URL: mongodb://novu-db/{{MONGO_DB}}
+      REDIS_HOST: novu-cache
+      REDIS_PORT: '{{REDIS_PORT}}'
+      JWT_SECRET: '{{NOVU_JWT_SECRET}}'
+    depends_on:
+    - novu-db
+    - novu-cache
+  novu:
+    image: '{{NOVU_IMAGE_URL}}/web:{{NOVU_IMAGE_VERSION}}'
+    environment:
+      REACT_APP_API_URL: http://novu-api.{{ROOT_DOMAIN}}
+      REACT_APP_ENVIRONMENT: '{{ENVIRONMENT}}'
+      REACT_APP_WIDGET_EMBED_PATH: http://novu-embed.{{ROOT_DOMAIN}}/embed.umd.min.js
+      REACT_APP_DOCKER_HOSTED_ENV: '{{NOVU_DOCKER_HOSTED_ENVIRONMENT}}'
+    depends_on:
+    - novu-api
+  novu-widget:
+    image: '{{NOVU_IMAGE_URL}}/widget:{{NOVU_IMAGE_VERSION}}'
+    environment:
+      REACT_APP_API_URL: http://novu-api.{{ROOT_DOMAIN}}
+      REACT_APP_WS_URL: http://novu-ws.{{ROOT_DOMAIN}}
+      REACT_APP_ENVIRONMENT: '{{ENVIRONMENT}}'
+    depends_on:
+    - novu-api
+    - novu
+  novu-embed:
+    image: '{{NOVU_IMAGE_URL}}/embed:{{NOVU_IMAGE_VERSION}}'
+    environment:
+      WIDGET_URL: http://novu-widget.{{ROOT_DOMAIN}}
+    depends_on:
+    - novu-widget
+volumes:
+  novu-db:
+'''
+
+[[variables]]
+key = "ENVIRONMENT"
+label = "General | Environment"
+default = "prod"
+description = "Application environment (e.g `dev`, `test`, `prod`, `ci`, `local`)."
+
+[[variables]]
+key = "MONGO_DB"
+label = "MongoDB | Database Name"
+default = "novu"
+description = "Name of the database in MongoDB."
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "MongoDB | Version"
+default = "6.0.2"
+description = "Version tag of MongoDB's image. Check out their valid tags at https://hub.docker.com/_/mongo/tags"
+
+[[variables]]
+key = "NOVU_API_PORT"
+label = "API | Port"
+default = "3000"
+description = "Port of Novu's API."
+
+[[variables]]
+key = "NOVU_API_SENTRY_DSN"
+label = "API | Sentry DSN"
+description = "Sentry's DSN for error tracking. Leave empty to disable."
+
+[[variables]]
+key = "NOVU_AWS_ACCESS_KEY_ID"
+label = "S3 | AWS Access Key ID"
+default = "test"
+description = "Access key ID for AWS. Leave to `test` to use local file storage."
+
+[[variables]]
+key = "NOVU_AWS_SECRET_ACCESS_KEY"
+label = "S3 | AWS Secret Access Key"
+default = "test"
+description = "Secret access key for AWS. Leave to `test` to use local file storage."
+
+[[variables]]
+key = "NOVU_DISABLE_USER_REGISTRATION"
+label = "Privacy | Disable User Registration"
+default = "false"
+description = "Whether to disable user registration."
+
+[[variables]]
+key = "NOVU_DOCKER_HOSTED_ENVIRONMENT"
+label = "General | Docker-Hosted Environment"
+default = "true"
+description = "Whether to the application is hosted in Docker."
+
+[[variables]]
+key = "NOVU_IMAGE_URL"
+label = "Application | Image URL"
+default = "ghcr.io/novuhq/novu"
+description = "URL to Novu's Docker images."
+
+[[variables]]
+key = "NOVU_IMAGE_VERSION"
+label = "Application | Version"
+default = "0.8.0"
+description = "Version tag of Novu's Docker images. Check out their valid tags at https://github.com/novuhq/novu/pkgs/container/novu%2Fapi"
+
+[[variables]]
+key = "NOVU_JWT_SECRET"
+label = "Security | JWT Secret"
+generate = true
+description = "Secret for JWT."
+
+[[variables]]
+key = "NOVU_PORT_WEBSOCKET"
+label = "Networking | WebSocket Port"
+default = "3002"
+description = "Port of Novu's WebSocket host."
+
+[[variables]]
+key = "NOVU_S3_BUCKET_NAME"
+label = "S3 | Bucket Name"
+default = "novu-local"
+description = "Name of the bucket. Leave to `novu-local` to use local file storage."
+
+[[variables]]
+key = "NOVU_S3_LOCAL_STACK"
+label = "S3 | Local Stack URL"
+default = "http://localhost:4566"
+description = "URL to Localstack instance. Leave to `http://localhost:4566` to use local file storage."
+
+[[variables]]
+key = "NOVU_S3_REGION"
+label = "S3 | Region"
+default = "us-east-1"
+description = "Region of the storage. Leave to `us-east-1` if using local file storage."
+
+[[variables]]
+key = "NOVU_STORE_ENCRYPTION_KEY"
+label = "Security | Store Encryption Key"
+generate = true
+description = "Key for store encryption."
+
+[[variables]]
+key = "PGID"
+label = "General | Group ID"
+default = "1000"
+description = "Group ID that the process uses, run `id $user` on your instance to see the ID."
+
+[[variables]]
+key = "PUID"
+label = "General | User ID"
+default = "1000"
+description = "User ID that the process uses, run `id $user` on your instance to see the ID."
+
+[[variables]]
+key = "REDIS_DB_INDEX"
+label = "Redis | Database Index"
+default = "2"
+description = "Index of the database in Redis."
+
+[[variables]]
+key = "REDIS_PORT"
+label = "Redis | Port"
+default = "6379"
+description = "Port of Redis' host."
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis | Version"
+default = "7.0.5"
+description = "Version tag of Redis' image. Check out their valid tags at https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

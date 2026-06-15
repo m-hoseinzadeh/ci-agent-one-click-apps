@@ -1,0 +1,54 @@
+slug = "qbittorrent"
+name = "qBittorrent"
+category = "App"
+description = "qBittorrent BitTorrent client"
+keywords = ["qbittorrent"]
+compose = '''
+services:
+  qbittorrent:
+    image: linuxserver/qbittorrent:{{QBITTORRENT_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      UMASK: 18
+      WEBUI_PORT: '{{WEBUI_PORT}}'
+    ports:
+    - '{{HTTP_PORT}}:$$cap_webui_port'
+    - '{{WEBUI_PORT}}:8080'
+    - 6881:6881
+    hostname: qbittorrent.{{ROOT_DOMAIN}}
+    volumes:
+    - qbittorrent-config:/config
+    - '{{PATH_TO_DOWNLOADS}}:/downloads'
+volumes:
+  qbittorrent-config:
+'''
+
+[[variables]]
+key = "PATH_TO_DOWNLOADS"
+label = "Path to downloads folder"
+default = "qbittorrent-downloads"
+description = "Path to downloads folder where you want to save the downloaded torrents. You can mention an existing directory here too. Eg. /home/user/downloads/"
+
+[[variables]]
+key = "QBITTORRENT_VERSION"
+label = "qBittorrent Version"
+default = "version-14.3.5.99202105022253-7365-063844ed4ubuntu20.04.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/qbittorrent/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Brussels"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "WEBUI_PORT"
+label = "qBittorrent WebUI Port"
+default = "8081"
+description = "The port used to access qBittorrent"

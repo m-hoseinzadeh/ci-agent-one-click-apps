@@ -1,0 +1,39 @@
+slug = "languagetool"
+name = "LanguageTool"
+category = "App"
+description = "Style and Grammar Checker for 25+ Languages."
+keywords = ["languagetool"]
+compose = '''
+services:
+  languagetool:
+    image: erikvl87/languagetool:{{VERSION}}
+    restart: always
+    environment:
+      langtool_languageModel: /ngrams
+      Java_Xms: '{{MIN_SIZE}}'
+      Java_Xmx: '{{MAX_SIZE}}'
+    volumes:
+    - languagetool-data:/ngrams
+    ports:
+    - '{{HTTP_PORT}}:8010'
+volumes:
+  languagetool-data:
+'''
+
+[[variables]]
+key = "MAX_SIZE"
+label = "Maximum heap size"
+default = "1g"
+description = "Setting a maximum Java heap size"
+
+[[variables]]
+key = "MIN_SIZE"
+label = "Minimal heap size"
+default = "512m"
+description = "Setting a minimal Java heap size"
+
+[[variables]]
+key = "VERSION"
+label = "LanguageTool Version"
+default = "6.1"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/erikvl87/languagetool/tags"

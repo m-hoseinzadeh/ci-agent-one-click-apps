@@ -1,0 +1,51 @@
+slug = "jellyfin"
+name = "Jellyfin"
+category = "App"
+description = "A free media streaming alternative to Plex. Also supports group sync."
+keywords = ["jellyfin"]
+compose = '''
+services:
+  jellyfin:
+    image: ghcr.io/linuxserver/jellyfin:{{JF_VERSION}}
+    environment:
+      PUID: '{{PUID}}'
+      PGID: '{{PGID}}'
+      TZ: '{{TZ}}'
+      JELLYFIN_PublishedServerUrl: jellyfin.{{ROOT_DOMAIN}}
+    volumes:
+    - jellyfin-config:/config
+    ports:
+    - '{{HTTP_PORT}}:8096'
+volumes:
+  jellyfin-config:
+'''
+
+[[variables]]
+key = "JF_VERSION"
+label = "Jellyfin Version"
+default = "10.10.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/jellyfin/tags"
+
+[[variables]]
+key = "PGID"
+label = "Jellyfin GroupID"
+default = "1000"
+description = "GroupID used by JellyFin to avoid permission problems, please refer to docs- https://github.com/linuxserver/docker-jellyfin#Parameters"
+
+[[variables]]
+key = "PUID"
+label = "Jellyfin UserID"
+default = "1000"
+description = "UserID used by JellyFin to avoid permission problems, please refer to docs- https://github.com/linuxserver/docker-jellyfin#Parameters"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Asia/Kolkata"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

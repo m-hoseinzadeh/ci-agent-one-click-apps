@@ -1,0 +1,53 @@
+slug = "gitea"
+name = "Gitea"
+category = "CMS"
+description = "Gitea is a software package for hosting software development using Git as well as bug tracking, wikis and code review"
+keywords = ["gitea"]
+compose = '''
+services:
+  gitea-db:
+    image: mysql:{{MYSQL_VERSION}}
+    volumes:
+    - gitea-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: gitea
+      MYSQL_USER: gitea
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+  gitea:
+    depends_on:
+    - gitea-db
+    image: gitea/gitea:{{GITEA_VERSION}}
+    volumes:
+    - gitea-data:/data
+    restart: always
+    environment:
+      RUN_MODE: prod
+      DB_TYPE: mysql
+      DB_HOST: gitea-db:3306
+      DB_USER: gitea
+      DB_PASSWD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  gitea-db-data:
+  gitea-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "MySQL Root password"
+generate = true
+
+[[variables]]
+key = "GITEA_VERSION"
+label = "Gitea Version"
+default = "1.21.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/gitea/gitea/tags"
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "8.0.32"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mysql/tags/"

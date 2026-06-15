@@ -1,0 +1,187 @@
+slug = "authentik"
+name = "Authentik"
+category = "App"
+description = "Authentik is an open-source Identity Provider that unifies your identity needs into a single platform, replacing Okta, Active Directory, and auth0. Supports SAML, OIDC, OAuth2, SCIM and LDAP."
+keywords = ["authentik"]
+compose = '''
+services:
+  authentik-postgresql:
+    image: docker.io/library/postgres:{{POSTGRES_VERSION}}-alpine
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - pg_isready -d {{POSTGRES_DB}} -U {{POSTGRES_USER}}
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    volumes:
+    - authentik-postgresql-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+  authentik-redis:
+    image: docker.io/library/redis:8.0-alpine
+    command:
+    - redis-server
+    - --save
+    - '60'
+    - '1'
+    - --loglevel
+    - warning
+    restart: unless-stopped
+    healthcheck:
+      test:
+      - CMD-SHELL
+      - redis-cli ping | grep PONG
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    volumes:
+    - authentik-redis-data:/data
+  authentik-init:
+    image: alpine:3.19
+    restart: 'no'
+    command:
+    - sh
+    - -c
+    - 'set -e
+
+      echo "Setting up Authentik volume permissions..."
+
+      chown -R 1000:1000 /media /templates /certs
+
+      chmod -R u+rwX,g+rX /media /templates /certs
+
+      echo "Permissions configured successfully"
+
+
+      echo "Init container entering sleep mode"
+
+      sleep 100d
+
+      '
+    user: root
+    volumes:
+    - authentik-media:/media
+    - authentik-certs:/certs
+    - authentik-custom-templates:/templates
+  authentik:
+    image: ghcr.io/goauthentik/server:{{AUTHENTIK_VERSION}}
+    restart: unless-stopped
+    command:
+    - dumb-init
+    - --
+    - ak
+    - server
+    environment:
+      AUTHENTIK_SECRET_KEY: '{{AUTHENTIK_SECRET_KEY}}'
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__USER: '{{POSTGRES_USER}}'
+      AUTHENTIK_POSTGRESQL__NAME: '{{POSTGRES_DB}}'
+      AUTHENTIK_POSTGRESQL__PASSWORD: '{{POSTGRES_PASSWORD}}'
+      AUTHENTIK_ERROR_REPORTING__ENABLED: '{{ERROR_REPORTING}}'
+      AUTHENTIK_DISABLE_UPDATE_CHECK: '{{DISABLE_UPDATE_CHECK}}'
+      AUTHENTIK_DISABLE_STARTUP_ANALYTICS: '{{DISABLE_ANALYTICS}}'
+    volumes:
+    - authentik-media:/media
+    - authentik-custom-templates:/templates
+    depends_on:
+    - authentik-postgresql
+    - authentik-redis
+    - authentik-init
+    ports:
+    - '{{HTTP_PORT}}:9000'
+  authentik-worker:
+    image: ghcr.io/goauthentik/server:{{AUTHENTIK_VERSION}}
+    restart: unless-stopped
+    command:
+    - dumb-init
+    - --
+    - ak
+    - worker
+    user: root
+    environment:
+      AUTHENTIK_SECRET_KEY: '{{AUTHENTIK_SECRET_KEY}}'
+      AUTHENTIK_REDIS__HOST: authentik-redis
+      AUTHENTIK_POSTGRESQL__HOST: authentik-postgresql
+      AUTHENTIK_POSTGRESQL__USER: '{{POSTGRES_USER}}'
+      AUTHENTIK_POSTGRESQL__NAME: '{{POSTGRES_DB}}'
+      AUTHENTIK_POSTGRESQL__PASSWORD: '{{POSTGRES_PASSWORD}}'
+      AUTHENTIK_ERROR_REPORTING__ENABLED: '{{ERROR_REPORTING}}'
+      AUTHENTIK_DISABLE_UPDATE_CHECK: '{{DISABLE_UPDATE_CHECK}}'
+      AUTHENTIK_DISABLE_STARTUP_ANALYTICS: '{{DISABLE_ANALYTICS}}'
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - authentik-media:/media
+    - authentik-certs:/certs
+    - authentik-custom-templates:/templates
+    depends_on:
+    - authentik-postgresql
+    - authentik-redis
+    - authentik-init
+volumes:
+  authentik-postgresql-data:
+  authentik-redis-data:
+  authentik-media:
+  authentik-certs:
+  authentik-custom-templates:
+'''
+
+[[variables]]
+key = "AUTHENTIK_SECRET_KEY"
+label = "Authentik Secret Key"
+generate = true
+description = "Secret key for Authentik encryption and signing"
+
+[[variables]]
+key = "AUTHENTIK_VERSION"
+label = "Authentik Version"
+default = "2025.6.1"
+description = "Authentik version tag. Check https://github.com/goauthentik/authentik/releases for latest versions"
+
+[[variables]]
+key = "DISABLE_ANALYTICS"
+label = "Disable Analytics"
+default = "true"
+description = "Disable startup analytics collection"
+
+[[variables]]
+key = "DISABLE_UPDATE_CHECK"
+label = "Disable Update Check"
+default = "true"
+description = "Disable automatic update checking"
+
+[[variables]]
+key = "ERROR_REPORTING"
+label = "Enable Error Reporting"
+default = "false"
+description = "Enable anonymous error reporting to help improve Authentik"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "PostgreSQL Database Name"
+default = "authentik"
+description = "Database name for Authentik"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL Password"
+generate = true
+description = "Strong database password"
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "PostgreSQL User"
+default = "authentik"
+description = "Database username for Authentik"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "PostgreSQL Version"
+default = "16"
+description = "PostgreSQL major version (14, 15, 16, 17)"

@@ -1,0 +1,152 @@
+slug = "affine"
+name = "Affine (Community)"
+category = "App"
+description = "Affine is a next-gen knowledge base that brings planning, sorting, and creating all together."
+keywords = ["(community)", "affine"]
+compose = '''
+services:
+  affine:
+    image: ghcr.io/toeverything/affine:{{AFFINE_VERSION}}
+    depends_on:
+      affine-redis:
+        condition: service_healthy
+      affine-postgres:
+        condition: service_healthy
+      affine-migration:
+        condition: service_completed_successfully
+    volumes:
+    - affine-db-data:/root/.affine/config
+    - affine-db-data:/root/.affine/storage
+    logging:
+      driver: json-file
+      options:
+        max-size: 1000m
+    restart: unless-stopped
+    environment:
+      REDIS_SERVER_HOST: affine-redis
+      DATABASE_URL: postgres://affine:{{DB_AFFINE_PASSWORD}}@affine-postgres:5432/affine
+      NODE_ENV: production
+      AFFINE_INDEXER_ENABLED: 'false'
+      AFFINE_SERVER_HOST: '{{AFFINE_SERVER_HOST}}'
+      AFFINE_SERVER_HTTPS: '{{AFFINE_SERVER_HTTPS}}'
+      AFFINE_SERVER_EXTERNAL_URL: '{{AFFINE_SERVER_EXTERNAL_URL}}'
+      MAILER_HOST: '{{MAILER_HOST}}'
+      MAILER_PORT: '{{MAILER_PORT}}'
+      MAILER_USER: '{{MAILER_USER}}'
+      MAILER_PASSWORD: '{{MAILER_PASSWORD}}'
+      MAILER_SENDER: '{{MAILER_SENDER}}'
+    ports:
+    - '{{HTTP_PORT}}:3010'
+  affine-migration-delete-me-after-install:
+    image: ghcr.io/toeverything/affine:{{AFFINE_VERSION}}
+    command:
+    - sh
+    - -c
+    - node ./scripts/self-host-predeploy.js
+    depends_on:
+      affine-redis:
+        condition: service_healthy
+      affine-postgres:
+        condition: service_healthy
+    volumes:
+    - affine-db-data:/root/.affine/config
+    - affine-db-data:/root/.affine/storage
+    restart: on-failure
+    environment:
+      REDIS_SERVER_HOST: affine-redis
+      DATABASE_URL: postgres://affine:{{DB_AFFINE_PASSWORD}}@affine-postgres:5432/affine
+      AFFINE_INDEXER_ENABLED: 'false'
+  affine-redis:
+    image: redis
+    restart: unless-stopped
+    volumes:
+    - affine-db-data:/data
+    healthcheck:
+      test:
+      - CMD
+      - redis-cli
+      - --raw
+      - incr
+      - ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  affine-postgres:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    volumes:
+    - affine-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+      - CMD
+      - pg_isready
+      - -U
+      - affine
+      - -d
+      - affine
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    environment:
+      POSTGRES_DB: affine
+      POSTGRES_USER: affine
+      POSTGRES_PASSWORD: '{{DB_AFFINE_PASSWORD}}'
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_HOST_AUTH_METHOD: trust
+volumes:
+  affine-db-data:
+'''
+
+[[variables]]
+key = "AFFINE_SERVER_EXTERNAL_URL"
+label = "AFFINE_SERVER_EXTERNAL_URL"
+description = "Used to factor url to server resources (e.g., https://affine.yourdomain.com)"
+
+[[variables]]
+key = "AFFINE_SERVER_HOST"
+label = "AFFINE_SERVER_HOST"
+description = "Default access domain of AFFiNE. Make sure this matches the URL in browser. (e.g., affine.yourdomain.com)"
+
+[[variables]]
+key = "AFFINE_SERVER_HTTPS"
+label = "AFFINE_SERVER_HTTPS"
+default = "True"
+description = "Use https prefix in url. Make sure this matches the URL in browser. (e.g., true|false)"
+
+[[variables]]
+key = "AFFINE_VERSION"
+label = "Affine Version Tag"
+default = "0.25.5"
+description = "Check out their Docker page for valid tags https://github.com/toeverything/AFFiNE/pkgs/container/affine"
+
+[[variables]]
+key = "DB_AFFINE_PASSWORD"
+label = "Database Password"
+generate = true
+description = "Database password for the affine user."
+
+[[variables]]
+key = "MAILER_HOST"
+label = "MAILER_HOST (Optional)"
+description = "Email server domain (optional)"
+
+[[variables]]
+key = "MAILER_PASSWORD"
+label = "MAILER_PASSWORD (Optional)"
+description = "Email password (optional)"
+
+[[variables]]
+key = "MAILER_PORT"
+label = "MAILER_PORT (Optional)"
+description = "Email server port (optional)"
+
+[[variables]]
+key = "MAILER_SENDER"
+label = "MAILER_SENDER (Optional)"
+description = "Email sender (optional, not available for consumer mail services)"
+
+[[variables]]
+key = "MAILER_USER"
+label = "MAILER_USER (Optional)"
+description = "Email login user (optional)"

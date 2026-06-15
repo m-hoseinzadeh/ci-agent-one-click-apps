@@ -1,0 +1,68 @@
+slug = "mattermost-team"
+name = "Mattermost Team Edition"
+category = "Communication"
+description = "Mattermost Team Edition open source collaboration/chat software"
+keywords = ["edition", "mattermost", "team"]
+compose = '''
+services:
+  mattermost-team-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - mattermost-team-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: mmuser
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: mattermost
+  mattermost-team:
+    image: mattermost/mattermost-team-edition:{{MATTERMOST_VERSION}}
+    depends_on:
+    - mattermost-team-db
+    volumes:
+    - mattermost-team-data:/mattermost/data
+    - mattermost-team-logs:/mattermost/logs
+    - mattermost-team-config:/mattermost/config
+    - mattermost-team-plugins:/mattermost/plugins
+    - mattermost-team-clientplugins:/mattermost/client/plugins
+    restart: always
+    environment:
+      MM_USERNAME: mmuser
+      MM_PASSWORD: '{{PG_PASS}}'
+      MM_DBNAME: mattermost
+      DB_HOST: mattermost-team-db
+      MM_SERVICESETTINGS_SITEURL: https://mattermost-team.{{ROOT_DOMAIN}}
+      MM_SQLSETTINGS_DATASOURCE: postgres://mmuser:{{PG_PASS}}@mattermost-team-db:5432/mattermost?sslmode=disable&connect_timeout=10
+    ports:
+    - '{{HTTP_PORT}}:8065'
+volumes:
+  mattermost-team-db-data:
+  mattermost-team-data:
+  mattermost-team-logs:
+  mattermost-team-config:
+  mattermost-team-plugins:
+  mattermost-team-clientplugins:
+'''
+
+[[variables]]
+key = "MATTERMOST_VERSION"
+label = "mattermost Docker Image tag. Use 'release-9.7' for example."
+default = "release-9.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mattermost/mattermost-team-edition/tags"
+
+[[variables]]
+key = "PG_PASS"
+label = "Database Password"
+generate = true
+description = "Password must be at least 30 characters.  Please use a random string."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "postgres database Docker Image tag. Use '14.3' for example."
+default = "14.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

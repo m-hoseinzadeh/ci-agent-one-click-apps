@@ -1,0 +1,20 @@
+slug = "mariadb"
+name = "MariaDB"
+category = "Database"
+description = "MariaDB Server is one of the most popular open source relational databases. It's made by the original developers of MySQL and guaranteed to stay open source"
+keywords = ["mariadb"]
+compose = '''
+services:
+  mariadb-db:
+    volumes:
+    - mariadb-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+volumes:
+  mariadb-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "MariaDB Root password"

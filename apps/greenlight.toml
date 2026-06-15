@@ -1,0 +1,290 @@
+slug = "greenlight"
+name = "Greenlight (no database)"
+category = "Database"
+description = "This will create a Greenlight only. You will need to create and configure the database information manually. Intended for advanced users."
+keywords = ["(no", "database)", "greenlight"]
+compose = '''
+services:
+  greenlight-greenlight:
+    image: bigbluebutton/greenlight:v2
+    volumes:
+    - greenlight-greenlight-log:/usr/src/app/log
+    - greenlight-greenlight-storage:/usr/src/app/storage
+    environment:
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
+      BIGBLUEBUTTON_ENDPOINT: '{{BIGBLUEBUTTON_ENDPOINT}}'
+      BIGBLUEBUTTON_SECRET: '{{BIGBLUEBUTTON_SECRET}}'
+      SAFE_HOSTS: '{{SAFE_HOSTS}}'
+      ALLOW_GREENLIGHT_ACCOUNTS: '{{ALLOW_GREENLIGHT_ACCOUNTS}}'
+      RECAPTCHA_SITE_KEY: '{{RECAPTCHA_SITE_KEY}}'
+      RECAPTCHA_SECRET_KEY: '{{RECAPTCHA_SECRET_KEY}}'
+      GOOGLE_ANALYTICS_TRACKING_ID: '{{GOOGLE_ANALYTICS_TRACKING_ID}}'
+      ALLOW_MAIL_NOTIFICATIONS: '{{ALLOW_MAIL_NOTIFICATIONS}}'
+      SMTP_SERVER: '{{SMTP_SERVER}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_DOMAIN: '{{SMTP_DOMAIN}}'
+      SMTP_USERNAME: '{{SMTP_USERNAME}}'
+      SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      SMTP_AUTH: '{{SMTP_AUTH}}'
+      SMTP_STARTTLS_AUTO: '{{SMTP_STARTTLS_AUTO}}'
+      SMTP_SENDER: '{{SMTP_SENDER}}'
+      SMTP_TEST_RECIPIENT: '{{SMTP_TEST_RECIPIENT}}'
+      RELATIVE_URL_ROOT: /
+      ROOM_FEATURES: '{{ROOM_FEATURES}}'
+      PAGINATION_NUMBER: '{{PAGINATION_NUMBER}}'
+      NUMBER_OF_ROWS: '{{NUMBER_OF_ROWS}}'
+      ENABLE_GOOGLE_CALENDAR_BUTTON: '{{ENABLE_GOOGLE_CALENDAR_BUTTON}}'
+      MAINTENANCE_MODE: '{{MAINTENANCE_MODE}}'
+      MAINTENANCE_WINDOW: '{{MAINTENANCE_WINDOW}}'
+      HELP_URL: '{{HELP_URL}}'
+      ENABLE_SSL: '{{ENABLE_SSL}}'
+      DB_ADAPTER: '{{DB_ADAPTER}}'
+      DB_HOST: '{{DB_HOST}}'
+      DB_PORT: '{{DB_PORT}}'
+      DB_NAME: '{{DB_NAME}}'
+      DB_USERNAME: '{{DB_USERNAME}}'
+      DB_PASSWORD: '{{DB_PASSWORD}}'
+      CABLE_ADAPTER: '{{CABLE_ADAPTER}}'
+      DEFAULT_REGISTRATION: '{{DEFAULT_REGISTRATION}}'
+      AWS_ACCESS_KEY_ID: '{{AWS_ACCESS_KEY_ID}}'
+      AWS_SECRET_ACCESS_KEY: '{{AWS_SECRET_ACCESS_KEY}}'
+      AWS_REGION: '{{AWS_REGION}}'
+      AWS_BUCKET: '{{AWS_BUCKET}}'
+      WEB_CONCURRENCY: '{{WEB_CONCURRENCY}}'
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  greenlight-greenlight-log:
+  greenlight-greenlight-storage:
+'''
+
+[[variables]]
+key = "ALLOW_GREENLIGHT_ACCOUNTS"
+label = "ALLOW_GREENLIGHT_ACCOUNTS"
+default = "true"
+description = "Set this to true if you want GreenLight to support user signup"
+
+[[variables]]
+key = "ALLOW_MAIL_NOTIFICATIONS"
+label = "ALLOW_MAIL_NOTIFICATIONS"
+default = "false"
+description = "ALLOW_MAIL_NOTIFICATIONS"
+
+[[variables]]
+key = "AWS_ACCESS_KEY_ID"
+label = "AWS_ACCESS_KEY_ID"
+default = ""
+description = "AWS_ACCESS_KEY_ID"
+
+[[variables]]
+key = "AWS_BUCKET"
+label = "AWS_BUCKET"
+default = ""
+description = "AWS_BUCKET"
+
+[[variables]]
+key = "AWS_REGION"
+label = "AWS_REGION"
+default = ""
+description = "AWS_REGION"
+
+[[variables]]
+key = "AWS_SECRET_ACCESS_KEY"
+label = "AWS_SECRET_ACCESS_KEY"
+default = ""
+description = "AWS_SECRET_ACCESS_KEY"
+
+[[variables]]
+key = "BIGBLUEBUTTON_ENDPOINT"
+label = "BIGBLUEBUTTON_ENDPOINT"
+default = "https://scalelite.eunarede.stream/bigbluebutton/"
+description = "The endpoint for your BigBlueButton"
+
+[[variables]]
+key = "BIGBLUEBUTTON_SECRET"
+label = "BIGBLUEBUTTON_SECRET"
+description = "The secret for your BigBlueButton"
+
+[[variables]]
+key = "CABLE_ADAPTER"
+label = "CABLE_ADAPTER"
+default = "postgresql"
+description = "CABLE_ADAPTER"
+
+[[variables]]
+key = "DB_ADAPTER"
+label = "DB_ADAPTER"
+default = "postgresql"
+description = "DB_ADAPTER"
+
+[[variables]]
+key = "DB_HOST"
+label = "DB_HOST"
+default = "srv-captain--postgres-db"
+description = "DB_HOST"
+
+[[variables]]
+key = "DB_NAME"
+label = "DB_NAME"
+description = "DB_NAME"
+
+[[variables]]
+key = "DB_PASSWORD"
+label = "DB_PASSWORD"
+description = "DB_PASSWORD"
+
+[[variables]]
+key = "DB_PORT"
+label = "DB_PORT"
+default = "5432"
+description = "DB_PORT"
+
+[[variables]]
+key = "DB_USERNAME"
+label = "DB_USERNAME"
+default = "postgres"
+description = "DB_USERNAME"
+
+[[variables]]
+key = "DEFAULT_REGISTRATION"
+label = "DEFAULT_REGISTRATION"
+default = "open"
+description = "Specify the default registration to be used by Greenlight"
+
+[[variables]]
+key = "ENABLE_GOOGLE_CALENDAR_BUTTON"
+label = "ENABLE_GOOGLE_CALENDAR_BUTTON"
+default = "true"
+description = "ENABLE_GOOGLE_CALENDAR_BUTTON"
+
+[[variables]]
+key = "ENABLE_SSL"
+label = "ENABLE_SSL"
+default = "false"
+description = "ENABLE_SSL"
+
+[[variables]]
+key = "GOOGLE_ANALYTICS_TRACKING_ID"
+label = "GOOGLE_ANALYTICS_TRACKING_ID"
+default = ""
+description = "GOOGLE_ANALYTICS_TRACKING_ID"
+
+[[variables]]
+key = "HELP_URL"
+label = "HELP_URL"
+default = "#"
+description = "HELP_URL"
+
+[[variables]]
+key = "MAINTENANCE_MODE"
+label = "MAINTENANCE_MODE"
+default = ""
+description = "MAINTENANCE_MODE"
+
+[[variables]]
+key = "MAINTENANCE_WINDOW"
+label = "MAINTENANCE_WINDOW"
+default = ""
+description = "MAINTENANCE_WINDOW"
+
+[[variables]]
+key = "NUMBER_OF_ROWS"
+label = "NUMBER_OF_ROWS"
+default = "10"
+description = "Specify the maximum number of rows that should be displayed per page for a paginated table"
+
+[[variables]]
+key = "PAGINATION_NUMBER"
+label = "PAGINATION_NUMBER"
+default = "10"
+description = "Specify the maximum number of records to be sent to the BigBlueButton API in one call"
+
+[[variables]]
+key = "RECAPTCHA_SECRET_KEY"
+label = "RECAPTCHA_SECRET_KEY"
+default = ""
+description = "RECAPTCHA_SECRET_KEY"
+
+[[variables]]
+key = "RECAPTCHA_SITE_KEY"
+label = "RECAPTCHA_SITE_KEY"
+default = ""
+description = "RECAPTCHA_SITE_KEY"
+
+[[variables]]
+key = "ROOM_FEATURES"
+label = "ROOM_FEATURES"
+default = "mute-on-join,require-moderator-approval,anyone-can-start,all-join-moderator,recording"
+description = "Specify which settings you would like the users to configure on room"
+
+[[variables]]
+key = "SAFE_HOSTS"
+label = "SAFE_HOSTS"
+default = "$$cap_appname.$$cap_root_domain"
+description = "The hostname that the application is accessible"
+
+[[variables]]
+key = "SECRET_KEY_BASE"
+label = "SECRET_KEY_BASE"
+generate = true
+description = "Create a Secret Key for Rails"
+
+[[variables]]
+key = "SMTP_AUTH"
+label = "SMTP_AUTH"
+default = ""
+description = "SMTP_AUTH"
+
+[[variables]]
+key = "SMTP_DOMAIN"
+label = "SMTP_DOMAIN"
+default = ""
+description = "SMTP_DOMAIN"
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP_PASSWORD"
+default = ""
+description = "SMTP_PASSWORD"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP_PORT"
+default = ""
+description = "SMTP_PORT"
+
+[[variables]]
+key = "SMTP_SENDER"
+label = "SMTP_SENDER"
+default = ""
+description = "SMTP_SENDER"
+
+[[variables]]
+key = "SMTP_SERVER"
+label = "SMTP_SERVER"
+default = ""
+description = "SMTP_SERVER"
+
+[[variables]]
+key = "SMTP_STARTTLS_AUTO"
+label = "SMTP_STARTTLS_AUTO"
+default = ""
+description = "SMTP_STARTTLS_AUTO"
+
+[[variables]]
+key = "SMTP_TEST_RECIPIENT"
+label = "SMTP_TEST_RECIPIENT"
+default = ""
+description = "SMTP_TEST_RECIPIENT"
+
+[[variables]]
+key = "SMTP_USERNAME"
+label = "SMTP_USERNAME"
+default = ""
+description = "SMTP_USERNAME"
+
+[[variables]]
+key = "WEB_CONCURRENCY"
+label = "WEB_CONCURRENCY"
+default = "2"
+description = "The amount of workers (separate processes) used by the web server"

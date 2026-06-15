@@ -1,0 +1,71 @@
+slug = "foundryvtt"
+name = "Foundry Virtual Tabletop"
+category = "App"
+description = "Foundry VTT is an application built for experiencing multiplayer tabletop RPGs where your players connect directly through the browser. REQUIRES LICENCE"
+keywords = ["foundry", "foundryvtt", "tabletop", "virtual"]
+compose = '''
+services:
+  foundryvtt:
+    image: felddy/foundryvtt:{{FOUNDRY_VERSION}}
+    environment:
+      FOUNDRY_USERNAME: '{{FOUNDRY_USERNAME}}'
+      FOUNDRY_PASSWORD: '{{FOUNDRY_PASSWORD}}'
+      FOUNDRY_ADMIN_KEY: '{{FOUNDRY_ADMIN_KEY}}'
+      FOUNDRY_PROXY_SSL: '{{FOUNDRY_PROXY_SSL}}'
+      FOUNDRY_MINIFY_STATIC_FILES: '{{FOUNDRY_MINIFY_STATIC_FILES}}'
+      CONTAINER_CACHE: '{{FOUNDRY_CONTAINER_CACHE}}'
+      TIMEZONE: '{{FOUNDRY_TIMEZONE}}'
+    volumes:
+    - foundryvtt:/data
+    ports:
+    - '{{HTTP_PORT}}:30000'
+volumes:
+  foundryvtt:
+'''
+
+[[variables]]
+key = "FOUNDRY_ADMIN_KEY"
+label = "Admin password"
+description = "Admin password to be applied at startup. If omitted the admin password will be cleared."
+
+[[variables]]
+key = "FOUNDRY_CONTAINER_CACHE"
+label = "Cache path"
+default = "/data/container_cache"
+description = "Set a path to cache downloads of the Foundry distribution archive and speed up subsequent container startups. The path should be in /data or another persistent mount point in the container. e.g.; /data/container_cache"
+
+[[variables]]
+key = "FOUNDRY_MINIFY_STATIC_FILES"
+label = "Minify static?"
+default = "true"
+description = "Set to true to reduce network traffic by serving minified static JavaScript and CSS files. Enabling this setting is recommended for most users, but module developers may wish to disable it."
+
+[[variables]]
+key = "FOUNDRY_PASSWORD"
+label = "Password"
+default = "password"
+description = "Account password for foundryvtt.com. Required for downloading an application distribution."
+
+[[variables]]
+key = "FOUNDRY_PROXY_SSL"
+label = "Proxy SSL"
+default = "true"
+description = "Indicates whether the software is running behind a reverse proxy that uses SSL. This allows invitation links and A/V functionality to work as if the Foundry Server had SSL configured directly. CapRover has built-in reverse proxy."
+
+[[variables]]
+key = "FOUNDRY_TIMEZONE"
+label = "Timezone"
+default = "UTC"
+description = "Container TZ database name https://en.wikipedia.org/wiki/List_of_tz_database_time_zones#List"
+
+[[variables]]
+key = "FOUNDRY_USERNAME"
+label = "Username"
+default = "user"
+description = "Account username or email address for foundryvtt.com. Required for downloading an application distribution."
+
+[[variables]]
+key = "FOUNDRY_VERSION"
+label = "Foundry VTT Version"
+default = "0.8.9"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/felddy/foundryvtt/tags"

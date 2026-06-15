@@ -1,0 +1,94 @@
+slug = "parse"
+name = "Parse"
+category = "App"
+description = "Parse Server is an open source Backend-as-a-Service(BaaS) framework initially developed by Facebook"
+keywords = ["parse"]
+compose = '''
+services:
+  parse-mongodb:
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - parse-db-data:/data/db
+    - parse-db-config:/data/configdb
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
+  parse-parse:
+    depends_on:
+    - parse-mongodb
+    image: parseplatform/parse-server:{{PARSE_VERSION}}
+    restart: always
+    volumes:
+    - parse-parse-cloud:/parse-server/cloud
+    - parse-parse-config:/parse-server/config
+    environment:
+      PORT: '8080'
+      PARSE_SERVER_APPLICATION_ID: '{{APP_ID}}'
+      PARSE_SERVER_MASTER_KEY: '{{MASTER_KEY}}'
+      PARSE_SERVER_DATABASE_URI: mongodb://root:{{MONGO_PASSWORD}}@parse-mongodb:27017/parse?authSource=admin
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  parse-parse-dashboard:
+    depends_on:
+    - parse-parse
+    image: parseplatform/parse-dashboard:{{PARSE_DASHBOARD_VERSION}}
+    restart: always
+    environment:
+      PORT: '4040'
+      PARSE_DASHBOARD_SERVER_URL: https://parse-parse.{{ROOT_DOMAIN}}/parse
+      PARSE_DASHBOARD_MASTER_KEY: '{{MASTER_KEY}}'
+      PARSE_DASHBOARD_APP_ID: '{{APP_ID}}'
+      PARSE_DASHBOARD_APP_NAME: parse-parse
+      PARSE_DASHBOARD_USER_ID: caprover
+      PARSE_DASHBOARD_ALLOW_INSECURE_HTTP: 'true'
+      PARSE_DASHBOARD_USER_PASSWORD: '{{PARSE_DASHBOARD_PASSWORD}}'
+volumes:
+  parse-db-data:
+  parse-db-config:
+  parse-parse-cloud:
+  parse-parse-config:
+'''
+
+[[variables]]
+key = "APP_ID"
+label = "Application ID"
+description = "Use a random string. See Parse documentation for more details."
+
+[[variables]]
+key = "MASTER_KEY"
+label = "Master Key"
+description = "Use a random string. See Parse documentation for more details."
+
+[[variables]]
+key = "MONGO_PASSWORD"
+label = "MongoDB password"
+description = "Only use alphanumeric chars."
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "MongoDB Version"
+default = "4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"
+
+[[variables]]
+key = "PARSE_DASHBOARD_PASSWORD"
+label = "Parse Dashboard Password"
+
+[[variables]]
+key = "PARSE_DASHBOARD_VERSION"
+label = "Parse Dashboard Version"
+default = "2.0.5"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/parseplatform/parse-dashboard/tags"
+
+[[variables]]
+key = "PARSE_VERSION"
+label = "Parse Version"
+default = "3.1.3"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/parseplatform/parse-server/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

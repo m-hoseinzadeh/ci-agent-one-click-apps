@@ -1,0 +1,96 @@
+slug = "moodle"
+name = "Moodle LMS"
+category = "App"
+description = "Moodle(TM) is a very popular open source learning management solution (LMS) for the delivery of elearning courses and programs."
+keywords = ["lms", "moodle"]
+compose = '''
+services:
+  moodle:
+    image: bitnamilegacy/moodle:{{MD_VERSION}}
+    volumes:
+    - moodle-moodle:/bitnami/moodle
+    - moodle-moodledata:/bitnami/moodledata
+    restart: always
+    environment:
+      MOODLE_DATABASE_TYPE: '{{DB_TYPE}}'
+      MOODLE_DATABASE_HOST: '{{DB_HOST}}'
+      MOODLE_DATABASE_PORT_NUMBER: '{{DB_PORT}}'
+      MOODLE_DATABASE_USER: '{{DB_USER}}'
+      MOODLE_DATABASE_NAME: '{{DB_NAME}}'
+      MOODLE_DATABASE_PASSWORD: '{{DB_PASS}}'
+      ALLOW_EMPTY_PASSWORD: 'no'
+      MOODLE_USERNAME: admin
+      MOODLE_PASSWORD: password
+      MOODLE_EMAIL: '{{MD_ADMIN_EMAIL}}'
+      MOODLE_SITE_NAME: '{{MD_SITENAME}}'
+      MOODLE_SKIP_BOOTSTRAP: '{{MD_BOOTSTRAP}}'
+      PHP_MAX_INPUT_VARS: '6000'
+      PHP_MEMORY_LIMIT: 256M
+      PHP_UPLOAD_MAX_FILESIZE: 100M
+      PHP_POST_MAX_SIZE: 100M
+      PHP_MAX_INPUT_TIME: '30'
+      PHP_MAX_EXECUTION_TIME: '30'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  moodle-moodle:
+  moodle-moodledata:
+'''
+
+[[variables]]
+key = "DB_HOST"
+label = "Database Host"
+default = "srv-captain--xxx"
+description = "Database host"
+
+[[variables]]
+key = "DB_NAME"
+label = "DB Name"
+default = "moodle"
+description = "Database name"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+
+[[variables]]
+key = "DB_PORT"
+label = "Database Port"
+default = "3306"
+description = "Default Mysql port will be 3306"
+
+[[variables]]
+key = "DB_TYPE"
+label = "Database type"
+default = "mariadb"
+description = "Valid values mariadb, mysqli"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "moodledbuser"
+description = "Database username"
+
+[[variables]]
+key = "MD_ADMIN_EMAIL"
+label = "Moodle Admin Email"
+default = "user@example.com"
+description = "Moodle application email."
+
+[[variables]]
+key = "MD_BOOTSTRAP"
+label = "Is moodle exists in db?"
+default = "no"
+description = "Set 'no' for new installation. This is necessary in case you use a database that already has Moodle data."
+
+[[variables]]
+key = "MD_SITENAME"
+label = "Moodle Site Name"
+default = "New site"
+description = "Moodle Site name."
+
+[[variables]]
+key = "MD_VERSION"
+label = "Moodle Version"
+default = "latest"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/bitnamilegacy/moodle/tags/"

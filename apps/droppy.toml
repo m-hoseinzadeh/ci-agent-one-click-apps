@@ -1,0 +1,25 @@
+slug = "droppy"
+name = "droppy"
+category = "Storage"
+description = "droppy is a self-hosted file storage server with a web interface"
+keywords = ["droppy"]
+compose = '''
+services:
+  droppy:
+    image: ghcr.io/droppyjs/droppy:{{DROPPY_VERSION}}
+    volumes:
+    - droppy-config:/config
+    - droppy-files:/files
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8989'
+volumes:
+  droppy-config:
+  droppy-files:
+'''
+
+[[variables]]
+key = "DROPPY_VERSION"
+label = "droppy version tag"
+default = "v0.0.6"
+description = "Check out their docker page for the valid tags @ https://github.com/orgs/droppyjs/packages/container/package/droppy"

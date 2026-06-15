@@ -1,0 +1,163 @@
+slug = "penpot"
+name = "Penpot"
+category = "App"
+description = "The open-source solution for design and prototyping."
+keywords = ["penpot"]
+compose = '''
+services:
+  penpot-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - penpot-postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_INITDB_ARGS: --data-checksums
+      POSTGRES_DB: penpot
+      POSTGRES_USER: penpot
+      POSTGRES_PASSWORD: '{{POSTGRES_PASS}}'
+  penpot-redis:
+    image: redis:{{REDIS_VERSION}}
+    restart: always
+  penpot-exporter:
+    image: penpotapp/exporter:{{PENPOT_VERSION}}
+    restart: always
+    environment:
+      PENPOT_PUBLIC_URI: '{{PUBLIC_URI}}'
+      PENPOT_REDIS_URI: redis://penpot-redis:6379/0
+      PENPOT_SECRET_KEY: '{{SECRET_KEY}}'
+  penpot-backend:
+    image: penpotapp/backend:{{PENPOT_VERSION}}
+    volumes:
+    - penpot-assets-data:/opt/data
+    environment:
+      PENPOT_PUBLIC_URI: '{{PUBLIC_URI}}'
+      PENPOT_TELEMETRY_ENABLED: '{{ENABLE_TELEMETRY}}'
+      PENPOT_SMTP_DEFAULT_FROM: '{{SMTP_FROM}}'
+      PENPOT_SMTP_DEFAULT_REPLY_TO: '{{SMTP_REPLY_TO}}'
+      PENPOT_SMTP_HOST: '{{SMTP_HOST}}'
+      PENPOT_SMTP_PORT: '{{SMTP_PORT}}'
+      PENPOT_SMTP_USERNAME: '{{SMTP_USERNAME}}'
+      PENPOT_SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      PENPOT_SMTP_TLS: '{{SMTP_TLS}}'
+      PENPOT_SMTP_SSL: '{{SMTP_SSL}}'
+      PENPOT_DATABASE_URI: postgresql://penpot-postgres/penpot
+      PENPOT_DATABASE_USERNAME: penpot
+      PENPOT_DATABASE_PASSWORD: '{{POSTGRES_PASS}}'
+      PENPOT_REDIS_URI: redis://penpot-redis:6379/0
+      PENPOT_ASSETS_STORAGE_BACKEND: assets-fs
+      PENPOT_STORAGE_ASSETS_FS_DIRECTORY: /opt/data/assets
+      PENPOT_FLAGS: '{{FLAGS}}'
+      PENPOT_REGISTRATION_DOMAIN_WHITELIST: '{{REGISTRATION_DOMAIN_WHITELIST}}'
+      PENPOT_SECRET_KEY: '{{SECRET_KEY}}'
+      PENPOT_TENANT: pro
+    depends_on:
+    - penpot-postgres
+    - penpot-redis
+  penpot:
+    image: penpotapp/frontend:{{PENPOT_VERSION}}
+    volumes:
+    - penpot-assets-data:/opt/data
+    environment:
+      PENPOT_FLAGS: '{{FLAGS}}'
+      PENPOT_BACKEND_URI: http://penpot-backend:6060
+      PENPOT_EXPORTER_URI: http://penpot-exporter:6061
+    depends_on:
+    - penpot-backend
+    - penpot-exporter
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  penpot-postgres-data:
+  penpot-assets-data:
+'''
+
+[[variables]]
+key = "ENABLE_TELEMETRY"
+label = "Send Anonymous Data"
+default = "false"
+description = "When enabled, a periodical process will send anonymous data about this instance. Read more at https://github.com/penpot/penpot/blob/f2fd97693427c7decb86e745bf178fe70fe332a0/docker/images/docker-compose.yaml#L56-L62"
+
+[[variables]]
+key = "FLAGS"
+label = "Penpot Flags"
+default = "enable-registration enable-login-with-password disable-email-verification"
+description = "Add \"disable-secure-session-cookies\" if you are going to serve it without HTTPS. Checkout option on their documentation https://help.penpot.app/technical-guide/configuration"
+
+[[variables]]
+key = "PENPOT_VERSION"
+label = "Penpot version for frontend, backend and exporter"
+default = "2.14.2"
+description = "Checkout their docker page for the valid tags https://hub.docker.com/r/penpotapp/frontend/tags"
+
+[[variables]]
+key = "POSTGRES_PASS"
+label = "Postgres Database password"
+generate = true
+description = "Password for postgres"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "15"
+description = "Checkout their docker description page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "PUBLIC_URI"
+label = "Public URI"
+description = "Frontend url to access your Penpot"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "7"
+description = "Checkout their docker description page for the valid tags https://hub.docker.com/_/redis?tab=description"
+
+[[variables]]
+key = "REGISTRATION_DOMAIN_WHITELIST"
+label = "Penpot Registration Domain Whitelist"
+description = "Checkout option on their documentation https://help.penpot.app/technical-guide/configuration"
+
+[[variables]]
+key = "SECRET_KEY"
+label = "Penpot Secret Key"
+generate = true
+description = "Mandatory key introduced in Penpot versions 2.x."
+
+[[variables]]
+key = "SMTP_FROM"
+label = "SMTP from address"
+default = "user@example.com"
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMTP host"
+default = "smtp.example.com"
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP password"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP port"
+default = "587"
+
+[[variables]]
+key = "SMTP_REPLY_TO"
+label = "SMTP reply address"
+default = "no-reply@example.com"
+
+[[variables]]
+key = "SMTP_SSL"
+label = "SMTP SSL support"
+default = "false"
+
+[[variables]]
+key = "SMTP_TLS"
+label = "SMTP TLS support"
+default = "true"
+
+[[variables]]
+key = "SMTP_USERNAME"
+label = "SMTP username"
+default = "user@example.com"

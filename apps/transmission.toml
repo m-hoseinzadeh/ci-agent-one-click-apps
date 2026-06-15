@@ -1,0 +1,71 @@
+slug = "transmission"
+name = "Transmission"
+category = "App"
+description = "Transmission is a BitTorrent client which features a variety of user interfaces on top of a cross-platform back-end."
+keywords = ["transmission"]
+compose = '''
+services:
+  transmission:
+    image: ghcr.io/linuxserver/transmission:{{TRANSMISSION_VERSION}}
+    environment:
+      PUID: '1000'
+      PGID: '1000'
+      TZ: '{{TZ}}'
+      TRANSMISSION_WEB_HOME: /{{UI}}/
+      USER: '{{USER}}'
+      PASS: '{{PASS}}'
+      WHITELIST: ''
+      HOST_WHITELIST: ''
+      WEBUI_PORT: '9091'
+    ports:
+    - '{{HTTP_PORT}}:9091'
+    - 51413:51413
+    hostname: transmission.{{ROOT_DOMAIN}}
+    volumes:
+    - transmission-config:/config
+    - '{{PATH_TO_DOWNLOADS}}:/downloads'
+    - transmission-watch:/watch
+volumes:
+  transmission-config:
+  transmission-watch:
+'''
+
+[[variables]]
+key = "PASS"
+label = "Password"
+default = "password"
+
+[[variables]]
+key = "PATH_TO_DOWNLOADS"
+label = "Path to downloads folder"
+default = "transmission-downloads"
+description = "Path to downloads folder where you want to save the downloaded torrents. You can mention an existing directory here too. Eg. /home/user/torrents/"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TRANSMISSION_VERSION"
+label = "Transmission Version"
+default = "arm64v8-version-3.00-r2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/transmission/tags"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Asia/Kolkata"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "UI"
+label = "User Interface"
+default = "transmission-web-control"
+description = "Specify an alternative UI options are combustion-release, transmission-web-control, kettu and flood-for-transmission."
+
+[[variables]]
+key = "USER"
+label = "Username"
+default = "admin"

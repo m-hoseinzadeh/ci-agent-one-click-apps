@@ -1,0 +1,30 @@
+slug = "picoshare"
+name = "PicoShare"
+category = "App"
+description = "A minimalist, easy-to-host service for sharing images and other files"
+keywords = ["picoshare"]
+compose = '''
+services:
+  picoshare:
+    image: mtlynch/picoshare:{{VERSION}}
+    environment:
+      PS_SHARED_SECRET: '{{PS_SHARED_SECRET}}'
+      PORT: 4001
+    volumes:
+    - picoshare-data:/data
+    ports:
+    - '{{HTTP_PORT}}:4001'
+volumes:
+  picoshare-data:
+'''
+
+[[variables]]
+key = "PS_SHARED_SECRET"
+label = "PS Shared Secret"
+description = "Specifies a passphrase for the admin user to log in to PicoShare."
+
+[[variables]]
+key = "VERSION"
+label = "PicoShare Version"
+default = "1.4.4"
+description = "Check out their Docker page for the valid tags https://github.com/mtlynch/picoshare/releases"

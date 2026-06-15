@@ -1,0 +1,48 @@
+slug = "ohmyform"
+name = "OhMyForm"
+category = "App"
+description = "Create stunning embedable forms for recruiting, market research, surveys and more https://ohmyform.com/"
+keywords = ["ohmyform"]
+compose = '''
+services:
+  ohmyform:
+    image: ohmyform/ohmyform:0.9.9
+    volumes:
+    - ohmyform-data:/data
+    environment:
+      CREATE_ADMIN: 'TRUE'
+      ADMIN_EMAIL: '{{OHMYFORM_EMAIL}}'
+      ADMIN_USERNAME: '{{OHMYFORM_USER}}'
+      ADMIN_PASSWORD: '{{OHMYFORM_PASS}}'
+      MAILER_URI: smtp://ohmyform-mailhog:1025
+      PORT: '5000'
+      MONGODB_URI: mongodb://ohmyform-mongo/ohmyform
+    ports:
+    - '{{HTTP_PORT}}:5000'
+  ohmyform-mongo:
+    image: mongo:4
+    volumes:
+    - ohmyform-mongo:/data/db
+  ohmyform-mailhog:
+    image: mailhog/mailhog:v1.0.1
+volumes:
+  ohmyform-data:
+  ohmyform-mongo:
+'''
+
+[[variables]]
+key = "OHMYFORM_EMAIL"
+label = "Admin E-Mail"
+description = "E-Mail for the OhMyForm admin user"
+
+[[variables]]
+key = "OHMYFORM_PASS"
+label = "Admin password"
+generate = true
+description = "Password for the OhMyForm admin user"
+
+[[variables]]
+key = "OHMYFORM_USER"
+label = "Admin user name"
+default = "ohmyadmin"
+description = "User name for the OhMyForm admin user"

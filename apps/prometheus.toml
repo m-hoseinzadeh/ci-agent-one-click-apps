@@ -1,0 +1,30 @@
+slug = "prometheus"
+name = "Prometheus"
+category = "Monitoring"
+description = "Systems and service monitoring"
+keywords = ["prometheus"]
+compose = '''
+services:
+  prometheus:
+    image: '{{IMAGE_REPO}}:{{VERSION}}'
+    volumes:
+    - prometheus-config:/etc/prometheus
+    - prometheus-data:/prometheus
+    ports:
+    - '{{HTTP_PORT}}:9090'
+volumes:
+  prometheus-config:
+  prometheus-data:
+'''
+
+[[variables]]
+key = "IMAGE_REPO"
+label = "Image repository"
+default = "prom/prometheus"
+description = "Default official multi-arch image. For 32-bit ARM, you may use prom/prometheus-linux-armv7."
+
+[[variables]]
+key = "VERSION"
+label = "Prometheus Docker tag"
+default = "v3.5.0"
+description = "Use a concrete tag, not \"latest\". v3.5.0 is an LTS release. See release notes and tags."

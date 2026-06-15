@@ -1,0 +1,66 @@
+slug = "wallabag"
+name = "Wallabag"
+category = "App"
+description = "Wallabag is a self hostable application for saving web pages, Save and classify articles. Read them later. Freely."
+keywords = ["wallabag"]
+compose = '''
+services:
+  wallabag:
+    depends_on:
+    - wallabag-mariadb
+    image: wallabag/wallabag:{{WALLABAG_VERSION}}
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MARIADB}}-rootpass'
+      SYMFONY__ENV__DATABASE_DRIVER: pdo_mysql
+      SYMFONY__ENV__DATABASE_HOST: wallabag-mariadb
+      SYMFONY__ENV__DATABASE_PORT: 3306
+      SYMFONY__ENV__DATABASE_NAME: '{{MARIADB}}-db'
+      SYMFONY__ENV__DATABASE_USER: '{{MARIADB}}-user'
+      SYMFONY__ENV__DATABASE_PASSWORD: '{{MARIADB}}-pass'
+      SYMFONY__ENV__SECRET: '{{GEN_RANDOM_HEX}}(30)'
+      SYMFONY__ENV__DOMAIN_NAME: https://wallabag.{{ROOT_DOMAIN}}
+      SYMFONY__ENV__DATABASE_CHARSET: utf8mb4
+    volumes:
+    - wallabag-images:/var/www/wallabag/web/assets/images
+  wallabag-mariadb:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MARIADB}}-rootpass'
+    volumes:
+    - wallabag-mariadb-data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:3306'
+volumes:
+  wallabag-images:
+  wallabag-mariadb-data:
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "MARIADB"
+label = "Mariadb"
+default = ""
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.5.6"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags/"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "WALLABAG_VERSION"
+label = "Version Tag"
+default = "2.4.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/wallabag/wallabag/tags"

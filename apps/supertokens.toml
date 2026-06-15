@@ -1,0 +1,65 @@
+slug = "supertokens"
+name = "SuperTokens"
+category = "App"
+description = "Auth Provider solution alternative to Auth0 / Firebase Auth / AWS Cognito"
+keywords = ["supertokens"]
+compose = '''
+services:
+  supertokens-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - supertokens-postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{PG_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{PG_DB}}'
+  supertokens:
+    depends_on:
+    - supertokens-postgres
+    image: supertokens/supertokens-postgresql:{{SUPERTOKENS_VERSION}}
+    restart: always
+    environment:
+      API_KEYS: '{{SUPERTOKENS_API_KEYS}}'
+      DISABLE_TELEMETRY: true
+      POSTGRESQL_CONNECTION_URI: postgresql://{{PG_USER}}:{{POSTGRES_PASSWORD}}@supertokens-postgres:5432/{{PG_DB}}
+    ports:
+    - '{{HTTP_PORT}}:3567'
+volumes:
+  supertokens-postgres-data:
+'''
+
+[[variables]]
+key = "PG_DB"
+label = "Postgres database name"
+default = "supertokens"
+description = "Name of the databse"
+
+[[variables]]
+key = "PG_USER"
+label = "Postgres Username"
+default = "supertokens"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres User Password"
+generate = true
+description = "User password for the database instance."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "15-alpine"
+description = "Version of PostgreSQL. Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "SUPERTOKENS_API_KEYS"
+label = "API Keys"
+generate = true
+description = "A comma separated list of API keys (https://supertokens.com/docs/thirdpartyemailpassword/common-customizations/core/api-keys)"
+
+[[variables]]
+key = "SUPERTOKENS_VERSION"
+label = "SuperTokens Version"
+default = "7.0"
+description = "Choose the latest version of SuperTokens from https://hub.docker.com/r/supertokens/supertokens-postgresql/tags"

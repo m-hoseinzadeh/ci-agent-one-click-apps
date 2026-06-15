@@ -1,0 +1,45 @@
+slug = "teamspeak"
+name = "TeamSpeak"
+category = "App"
+description = "TeamSpeak is the number one choice VoIP communication system for Online Gaming."
+keywords = ["teamspeak"]
+compose = '''
+services:
+  teamspeak:
+    ports:
+    - '{{PORT_VOICE}}:9987'
+    - '{{PORT_FILES}}:30033'
+    - '{{PORT_QUERY}}:10011'
+    environment:
+      TS3SERVER_LICENSE: accept
+    image: teamspeak:{{VERSION}}
+    restart: always
+    volumes:
+    - teamspeak-data:/var/ts3server/
+volumes:
+  teamspeak-data:
+'''
+
+[[variables]]
+key = "PORT_FILES"
+label = "File transfer (TCP)"
+default = "30033"
+description = "Transferring files."
+
+[[variables]]
+key = "PORT_QUERY"
+label = "Server Query Port (TCP)"
+default = "10011"
+description = "Port for querying in server discovery"
+
+[[variables]]
+key = "PORT_VOICE"
+label = "Voice Port (UDP)"
+default = "9987"
+description = "Port for voice (UDP)"
+
+[[variables]]
+key = "VERSION"
+label = "TeamSpeak Docker Version"
+default = "3.13.7"
+description = "It's highly recommended that you don't use the latest tag but instead the major version you need, e.g. teamspeak:3.12.0"

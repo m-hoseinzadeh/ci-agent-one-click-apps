@@ -1,0 +1,74 @@
+slug = "seafile-nomemcached"
+name = "Seafile (no memcached)"
+category = "Storage"
+description = "Reliable and Performant File Sync and Share Solution"
+keywords = ["(no", "memcached)", "nomemcached", "seafile"]
+compose = '''
+services:
+  seafile-nomemcached-db:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PSWD}}'
+      MYSQL_LOG_CONSOLE: 'true'
+    volumes:
+    - seafile-nomemcached-db-data:/var/lib/mysql
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  seafile-nomemcached:
+    image: seafileltd/seafile-mc:{{SEAFILE_VERSION}}
+    volumes:
+    - seafile-nomemcached-data:/shared
+    environment:
+      DB_HOST: seafile-nomemcached-db
+      DB_ROOT_PASSWD: '{{MARIADB_ROOT_PSWD}}'
+      TIME_ZONE: '{{TIMEZONE}}'
+      SEAFILE_ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      SEAFILE_ADMIN_PASSWORD: '{{ADMIN_PSWD}}'
+      SEAFILE_SERVER_HOSTNAME: '{{SEAFILE_HOSTNAME}}'
+    depends_on:
+    - seafile-nomemcached-db
+volumes:
+  seafile-nomemcached-db-data:
+  seafile-nomemcached-data:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Seafile Admin Email"
+default = "admin@seafile.com"
+description = "Email for admin user of Seafile"
+
+[[variables]]
+key = "ADMIN_PSWD"
+label = "Seafile Admin Password"
+generate = true
+description = "Password for admin user of Seafile. Must have at least 8 chars, 1 letter and 1 number"
+
+[[variables]]
+key = "MARIADB_ROOT_PSWD"
+label = "MariaDB Root Password"
+generate = true
+description = "Default password for root user of MariaDB. Must have at least 8 chars, 1 letter and 1 number"
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.6.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"
+
+[[variables]]
+key = "SEAFILE_HOSTNAME"
+label = "Seafile Hostname"
+description = "Hostname of Seafile instance (that will be used by it in future)"
+
+[[variables]]
+key = "SEAFILE_VERSION"
+label = "Seafile Version"
+default = "8.0.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/seafileltd/seafile-mc/tags"
+
+[[variables]]
+key = "TIMEZONE"
+label = "Seafile Timezone"
+default = "Etc/UTC"
+description = "Timezone that Seafile should use"

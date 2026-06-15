@@ -1,0 +1,38 @@
+slug = "couchdb"
+name = "CouchDB"
+category = "Database"
+description = "Apache CouchDB is an open-source document-oriented NoSQL database, implemented in Erlang"
+keywords = ["couchdb"]
+compose = '''
+services:
+  couchdb:
+    image: couchdb:{{COUCHDB_VERSION}}
+    volumes:
+    - couchdb-db-data:/opt/couchdb/data
+    - couchdb-db-etc:/opt/couchdb/etc
+    restart: always
+    environment:
+      COUCHDB_USER: '{{COUCHDB_USER}}'
+      COUCHDB_PASSWORD: '{{COUCHDB_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:5984'
+volumes:
+  couchdb-db-data:
+  couchdb-db-etc:
+'''
+
+[[variables]]
+key = "COUCHDB_PASSWORD"
+label = "CouchDB Password"
+default = ""
+
+[[variables]]
+key = "COUCHDB_USER"
+label = "CouchDB Username"
+default = "mainuser"
+
+[[variables]]
+key = "COUCHDB_VERSION"
+label = "CouchDB Version Tag"
+default = "2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/couchdb/tags/"

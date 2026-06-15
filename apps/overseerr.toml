@@ -1,0 +1,44 @@
+slug = "overseerr"
+name = "Overseerr"
+category = "App"
+description = "Overseerr - A request management and media discovery tool built for Plex."
+keywords = ["overseerr"]
+compose = '''
+services:
+  overseerr:
+    image: lscr.io/linuxserver/overseerr:{{OVERSEERR_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    volumes:
+    - overseerr-config:/config
+    ports:
+    - '{{HTTP_PORT}}:5055'
+volumes:
+  overseerr-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID for the process, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "OVERSEERR_VERSION"
+label = "Overseerr Version"
+default = "1.33.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/overseerr/tags"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID for the process, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/Chicago"
+description = "Set the timezone. Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

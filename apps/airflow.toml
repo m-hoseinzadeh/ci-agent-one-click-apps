@@ -1,0 +1,243 @@
+slug = "airflow"
+name = "Airflow"
+category = "Automation"
+description = "A tool to express and execute workflows as directed acyclic graphs (DAGs)."
+keywords = ["airflow"]
+compose = '''
+services:
+  airflow-db:
+    restart: always
+    image: bitnami/postgresql:{{POSTGRESQL_VERSION}}
+    user:
+    environment:
+      POSTGRESQL_DATABASE: '{{POSTGRESQL_NAME}}'
+      POSTGRESQL_USERNAME: '{{POSTGRESQL_USER}}'
+      POSTGRESQL_PASSWORD: '{{POSTGRESQL_PASSWORD}}'
+    volumes:
+    - airflow-postgresql-persistance:/bitnami
+  airflow-redis:
+    restart: always
+    image: bitnamilegacy/redis:{{REDIS_VERSION}}
+    user:
+    environment:
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+    volumes:
+    - airflow-redis-persistance:/bitnami
+  airflow:
+    restart: always
+    depends_on:
+    - airflow-db
+    - airflow-redis
+    image: bitnamilegacy/airflow:{{AIRFLOW_VERSION}}
+    user:
+    environment:
+      AIRFLOW_EXECUTOR: CeleryExecutor
+      AIRFLOW_DATABASE_HOST: airflow-db
+      AIRFLOW_DATABASE_NAME: '{{POSTGRESQL_NAME}}'
+      AIRFLOW_DATABASE_USERNAME: '{{POSTGRESQL_USER}}'
+      AIRFLOW_DATABASE_PASSWORD: '{{POSTGRESQL_PASSWORD}}'
+      REDIS_HOST: airflow-redis
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      AIRFLOW_WEBSERVER_HOST: airflow
+      AIRFLOW_BASE_URL: https://airflow.{{ROOT_DOMAIN}}/
+      AIRFLOW_SECRET_KEY: '{{AIRFLOW_SECRET_KEY}}'
+      AIRFLOW_LOAD_EXAMPLES: '{{AIRFLOW_EXAMPLES}}'
+      AIRFLOW_USERNAME: '{{AIRFLOW_USER}}'
+      AIRFLOW_PASSWORD: '{{AIRFLOW_PASSWORD}}'
+      AIRFLOW_EMAIL: '{{AIRFLOW_EMAIL}}'
+      AIRFLOW__SMTP__SMTP_HOST: '{{SMTP_HOST}}'
+      AIRFLOW__SMTP__SMTP_PORT: '{{SMTP_PORT}}'
+      AIRFLOW__SMTP__SMTP_STARTTLS: '{{SMTP_STARTTLS}}'
+      AIRFLOW__SMTP__SMTP_SSL: '{{SMTP_SSL}}'
+      AIRFLOW__SMTP__SMTP_USER: '{{SMTP_USER}}'
+      AIRFLOW__SMTP__SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      AIRFLOW__SMTP__SMTP_MAIL_FROM: '{{SMTP_MAIL_FROM}}'
+    volumes:
+    - '{{AIRFLOW_DAG_PATH}}:/opt/bitnami/airflow/dags'
+    - '{{AIRFLOW_PY_REQUIREMENTS}}:/bitnami/python/requirements.txt'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  airflow-worker:
+    image: bitnamilegacy/airflow-worker:{{AIRFLOW_WORKER_VERSION}}
+    depends_on:
+    - airflow
+    environment:
+      AIRFLOW_EXECUTOR: CeleryExecutor
+      AIRFLOW_DATABASE_HOST: airflow-db
+      AIRFLOW_DATABASE_NAME: '{{POSTGRESQL_NAME}}'
+      AIRFLOW_DATABASE_USERNAME: '{{POSTGRESQL_USER}}'
+      AIRFLOW_DATABASE_PASSWORD: '{{POSTGRESQL_PASSWORD}}'
+      REDIS_HOST: airflow-redis
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      AIRFLOW_WEBSERVER_HOST: airflow
+      AIRFLOW_BASE_URL: https://airflow.{{ROOT_DOMAIN}}/
+      AIRFLOW_SECRET_KEY: '{{AIRFLOW_SECRET_KEY}}'
+      AIRFLOW_LOAD_EXAMPLES: '{{AIRFLOW_EXAMPLES}}'
+    volumes:
+    - airflow-data:/opt/bitnami/airflow/data
+    - '{{AIRFLOW_DAG_PATH}}:/opt/bitnami/airflow/dags'
+    - '{{AIRFLOW_PY_REQUIREMENTS}}:/bitnami/python/requirements.txt'
+  airflow-scheduler:
+    restart: always
+    depends_on:
+    - airflow
+    image: bitnamilegacy/airflow-scheduler:{{AIRFLOW_SCHEDULER_VERSION}}
+    user:
+    environment:
+      AIRFLOW_EXECUTOR: CeleryExecutor
+      AIRFLOW_DATABASE_HOST: airflow-db
+      AIRFLOW_DATABASE_NAME: '{{POSTGRESQL_NAME}}'
+      AIRFLOW_DATABASE_USERNAME: '{{POSTGRESQL_USER}}'
+      AIRFLOW_DATABASE_PASSWORD: '{{POSTGRESQL_PASSWORD}}'
+      REDIS_HOST: airflow-redis
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      AIRFLOW_WEBSERVER_HOST: airflow
+      AIRFLOW_BASE_URL: https://airflow.{{ROOT_DOMAIN}}/
+      AIRFLOW_SECRET_KEY: '{{AIRFLOW_SECRET_KEY}}'
+      AIRFLOW_LOAD_EXAMPLES: '{{AIRFLOW_EXAMPLES}}'
+    volumes:
+    - '{{AIRFLOW_DAG_PATH}}:/opt/bitnami/airflow/dags'
+    - '{{AIRFLOW_PY_REQUIREMENTS}}:/bitnami/python/requirements.txt'
+volumes:
+  airflow-postgresql-persistance:
+  airflow-redis-persistance:
+  airflow-data:
+'''
+
+[[variables]]
+key = "AIRFLOW_DAG_PATH"
+label = "DAGs Volume"
+default = "airflow-dags"
+description = "Name of the DAG volume or Path to the custom DAGs folder, make sure the folder is accesible"
+
+[[variables]]
+key = "AIRFLOW_EMAIL"
+label = "Airflow email"
+description = "Email address that will receive notifications from airflow (need SMPT details)"
+
+[[variables]]
+key = "AIRFLOW_EXAMPLES"
+label = "Load Airflow DAG Examples?"
+default = "no"
+description = "Wheter to load or not load sample DAGs (yes/no)"
+
+[[variables]]
+key = "AIRFLOW_PASSWORD"
+label = "Airflow password"
+generate = true
+description = "Airflow Admin's password"
+
+[[variables]]
+key = "AIRFLOW_PY_REQUIREMENTS"
+label = "Path or volume to a requirements.txt file"
+default = "airflow-requstxt"
+description = "Installation of additional python modules at start-up time, make sure the file is accesible"
+
+[[variables]]
+key = "AIRFLOW_SCHEDULER_VERSION"
+label = "Bitnami's airflow scheduler Version"
+default = "2.3.3"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/airflow-scheduler"
+
+[[variables]]
+key = "AIRFLOW_SECRET_KEY"
+label = "Airflow Secret Key"
+generate = true
+description = "Secret key used to run your flask app. It should be as random as possible."
+
+[[variables]]
+key = "AIRFLOW_USER"
+label = "Airflow user"
+default = "airflow_user"
+description = "Airflow's Admin user name"
+
+[[variables]]
+key = "AIRFLOW_VERSION"
+label = "Bitnami's airflow Version"
+default = "2.3.3"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/airflow"
+
+[[variables]]
+key = "AIRFLOW_WORKER_VERSION"
+label = "Bitnami's airflow worker Version"
+default = "2.3.3"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/airflow-worker"
+
+[[variables]]
+key = "POSTGRESQL_NAME"
+label = "Postresql database name"
+default = "airflow_db"
+description = "Name of the postgresql db"
+
+[[variables]]
+key = "POSTGRESQL_PASSWORD"
+label = "Postresql password"
+generate = true
+description = "Password to the postgresql db"
+
+[[variables]]
+key = "POSTGRESQL_USER"
+label = "Postresql database user"
+default = "airflow_db_user"
+description = "Password to the postgresql db"
+
+[[variables]]
+key = "POSTGRESQL_VERSION"
+label = "Bitnami's Posgresql Version"
+default = "12.12.0"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/postgresql"
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis password"
+generate = true
+description = "Password to redis db"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Bitnami's redis Version"
+default = "7.0.4"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/redis"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMTP Host"
+description = "Host for SMPT connection"
+
+[[variables]]
+key = "SMTP_MAIL_FROM"
+label = "Mail from address"
+description = "Specofy who the email is from"
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP Password"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/airflow-scheduler"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP Port"
+description = "Port for SMPT connection"
+
+[[variables]]
+key = "SMTP_SSL"
+label = "Use SSL?"
+default = "no"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/airflow-scheduler"
+
+[[variables]]
+key = "SMTP_STARTTLS"
+label = "Use startTLS?"
+default = "no"
+description = "Do you want to use startTLS? (yes/no)"
+
+[[variables]]
+key = "SMTP_USER"
+label = "SMTP User"
+description = "Check the tag version on https://hub.docker.com/r/bitnamilegacy/airflow-scheduler"

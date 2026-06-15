@@ -1,0 +1,52 @@
+slug = "umami-postgresql"
+name = "umami-postgresql"
+category = "Database"
+description = "umami is a simple, easy to use, self-hosted web analytics solution. The goal is to provide you with a friendly privacy-focused alternative to Google Analytics."
+keywords = ["postgresql", "umami"]
+compose = '''
+services:
+  umami-postgresql:
+    image: ghcr.io/umami-software/umami:{{UMAMI_VERSION}}
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://umami:{{POSTGRES_PASS}}@umami-postgresql-postgres/umami
+    depends_on:
+    - umami-postgresql-postgres
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  umami-postgresql-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - umami-postgresql-postgres-data:/var/lib/postgresql
+    restart: always
+    environment:
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: '{{POSTGRES_PASS}}'
+      POSTGRES_INITDB_ARGS: '{{PG_INITDB_ARGS}}'
+volumes:
+  umami-postgresql-postgres-data:
+'''
+
+[[variables]]
+key = "PG_INITDB_ARGS"
+label = "OPTIONAL: Arguments for 'postgres initdb'"
+description = "For example, --data-checksums"
+
+[[variables]]
+key = "POSTGRES_PASS"
+label = "Potgress Database password"
+generate = true
+description = "Password for postgres"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "18.1-alpine"
+description = "Checkout their page for the valid tags https://hub.docker.com/_/postgres"
+
+[[variables]]
+key = "UMAMI_VERSION"
+label = "Caprover Umami Version"
+default = "3.0.3"
+description = "Checkout their github page for the valid tags https://github.com/umami-software/umami/pkgs/container/umami"

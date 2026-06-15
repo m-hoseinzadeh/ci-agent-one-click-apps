@@ -1,0 +1,45 @@
+slug = "tautulli"
+name = "Tautulli"
+category = "Monitoring"
+description = "A python based web application for monitoring, analytics and notifications for Plex Media Server."
+keywords = ["tautulli"]
+compose = '''
+services:
+  tautulli:
+    image: tautulli/tautulli:{{VERSION}}
+    restart: always
+    volumes:
+    - tautulli-config:/config
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    ports:
+    - '{{HTTP_PORT}}:8181'
+volumes:
+  tautulli-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "America/Los_Angeles"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "VERSION"
+label = "Tautulli Version Tag"
+default = "v2.7.5"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/tautulli/tautulli/tags?page=1&ordering=last_updated"

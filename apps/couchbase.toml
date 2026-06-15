@@ -1,0 +1,23 @@
+slug = "couchbase"
+name = "CouchBase"
+category = "Database"
+description = "Couchbase is an open-source, distributed multi-model NoSQL document-oriented database software"
+keywords = ["couchbase"]
+compose = '''
+services:
+  couchbase-db:
+    image: couchbase:{{CB_VERSION}}
+    volumes:
+    - couchbase-data:/opt/couchbase/var
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8091'
+volumes:
+  couchbase-data:
+'''
+
+[[variables]]
+key = "CB_VERSION"
+label = "CouchBase Version"
+default = "community-6.6.0"
+description = "Check out their Docker page for the valid tags https://registry.hub.docker.com/_/couchbase?tab=tags"

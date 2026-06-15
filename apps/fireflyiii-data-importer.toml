@@ -1,0 +1,61 @@
+slug = "fireflyiii-data-importer"
+name = "Firefly III Data Importer"
+category = "App"
+description = "Firefly III Data Importer (FIDI) is a tool to import data into Firefly III."
+keywords = ["data", "firefly", "fireflyiii", "iii", "importer"]
+compose = '''
+services:
+  fireflyiii-data-importer:
+    image: fireflyiii/data-importer:{{FIDI_VERSION}}
+    environment:
+      FIREFLY_III_ACCESS_TOKEN: '{{FF_TOKEN}}'
+      FIREFLY_III_URL: '{{FF_URL}}'
+      NORDIGEN_ID: '{{NORDIGEN_ID}}'
+      NORDIGEN_KEY: '{{NORDIGEN_KEY}}'
+      SPECTRE_APP_ID: '{{SPECTRE_APP_ID}}'
+      SPECTRE_SECRET: '{{SPECTRE_SECRET}}'
+    hostname: fireflyiii-data-importer.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:8080'
+'''
+
+[[variables]]
+key = "FF_TOKEN"
+label = "Firefly III Access Token"
+
+[[variables]]
+key = "FF_URL"
+label = "Firefly III URL"
+description = "Your Firefly III instance URL"
+
+[[variables]]
+key = "FIDI_VERSION"
+label = "FIDI Version"
+default = "version-v1.0.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/fireflyiii/data-importer/tags"
+
+[[variables]]
+key = "NORDIGEN_ID"
+label = "Nordigen ID"
+description = "Your Nordigen ID (optional)"
+
+[[variables]]
+key = "NORDIGEN_KEY"
+label = "Nordigen Key"
+description = "Your Nordigen Key (optional)"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SPECTRE_APP_ID"
+label = "Spectre App ID (optional)"
+description = "Your Spectre App ID (optional)"
+
+[[variables]]
+key = "SPECTRE_SECRET"
+label = "Spectre Secret"
+description = "Your Spectre Secret (optional)"

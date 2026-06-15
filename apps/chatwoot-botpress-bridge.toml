@@ -1,0 +1,51 @@
+slug = "chatwoot-botpress-bridge"
+name = "Chatwoot Botpress Bridge"
+category = "Communication"
+description = "Bridge to connect chatwoot and botpress."
+keywords = ["botpress", "bridge", "chatwoot"]
+compose = '''
+services:
+  chatwoot-botpress-bridge:
+    image: douglara/chatwoot-botpress-bridge:{{VERSION}}
+    restart: always
+    environment:
+      RAILS_ENV: production
+      CHATWOOT_ENDPOINT: '{{CHATWOOT_ENDPOINT}}'
+      CHATWOOT_BOT_TOKEN: '{{CHATWOOT_BOT_TOKEN}}'
+      BOTPRESS_ENDPOINT: '{{BOTPRESS_ENDPOINT}}'
+      BOTPRESS_BOT_ID: '{{BOTPRESS_BOT_ID}}'
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+'''
+
+[[variables]]
+key = "BOTPRESS_BOT_ID"
+label = "Botpress Bot ID"
+description = "ID for bot you have created in botpress"
+
+[[variables]]
+key = "BOTPRESS_ENDPOINT"
+label = "Botpress endpoint"
+description = "Botpress url example: https://app.botpress.com"
+
+[[variables]]
+key = "CHATWOOT_BOT_TOKEN"
+label = "Chatwoot Bot Token"
+description = "To generate token follow instructions: https://github.com/douglara/chatwoot-botpress-bridge"
+
+[[variables]]
+key = "CHATWOOT_ENDPOINT"
+label = "Chatwoot endpoint"
+description = "Chawoot url example: https://app.chatwoot.com"
+
+[[variables]]
+key = "SECRET_KEY_BASE"
+label = "Secret Key Base"
+description = "The randomized string which is used to verify the integrity of signed cookies. Use `openssl rand -hex 64` to generate a key"
+
+[[variables]]
+key = "VERSION"
+label = "Chatwoot Botpress Bridge Version"
+default = "1"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/douglara/chatwoot-botpress-bridge/tags"

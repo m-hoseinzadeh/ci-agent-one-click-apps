@@ -1,0 +1,82 @@
+slug = "humhub"
+name = "HumHub"
+category = "App"
+description = "A open source social media network"
+keywords = ["humhub"]
+compose = '''
+services:
+  humhub-db:
+    image: mysql:5.7
+    volumes:
+    - humhub-db-data:/var/lib/mysql/
+    environment:
+      MYSQL_DATABASE: '{{MYSQL_DATABASE_NAME}}'
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_ROOT_PASSWD}}'
+      MYSQL_USER: '{{MYSQL_USER}}'
+      MYSQL_PASSWORD: '{{MYSQL_PASSWD}}'
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  humhub:
+    environment:
+      HUMHUB_AUTO_INSTALL: '{{HUMHUB_AUTO_INSTALL}}'
+      HUMHUB_DB_HOST: humhub-db
+      HUMHUB_DB_NAME: '{{MYSQL_DATABASE_NAME}}'
+      HUMHUB_DB_USER: '{{MYSQL_USER}}'
+      HUMHUB_DB_PASSWORD: '{{MYSQL_PASSWD}}'
+      HUMHUB_HOST: humhub.{{ROOT_DOMAIN}}
+      HUMHUB_PROTO: https
+    image: mriedmann/humhub:{{HUMHUB_VERSION}}
+    restart: always
+    volumes:
+    - humhub-config:/var/www/localhost/htdocs/protected/config
+    - humhub-uploads:/var/www/localhost/htdocs/uploads
+    - humhub-modules:/var/www/localhost/htdocs/protected/modules
+volumes:
+  humhub-db-data:
+  humhub-config:
+  humhub-uploads:
+  humhub-modules:
+'''
+
+[[variables]]
+key = "HUMHUB_AUTO_INSTALL"
+label = "AutoSetup"
+default = "false"
+description = "If this is set to false (advised) you will have to provide the DB creds on first run."
+
+[[variables]]
+key = "HUMHUB_VERSION"
+label = "Version Tag"
+default = "1.6.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mriedmann/humhub/tags"
+
+[[variables]]
+key = "MYSQL_DATABASE_NAME"
+label = "Database Name"
+default = "humhub"
+description = "The name of humhub db"
+
+[[variables]]
+key = "MYSQL_PASSWD"
+label = "Database Password"
+generate = true
+description = "Password to connect to the database"
+
+[[variables]]
+key = "MYSQL_ROOT_PASSWD"
+label = "Database Root Password"
+generate = true
+description = "Password to manage to the database"
+
+[[variables]]
+key = "MYSQL_USER"
+label = "Database User"
+default = "humhub"
+description = "The username to for humhub to connect to database"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

@@ -1,0 +1,24 @@
+slug = "baikal"
+name = "Baïkal"
+category = "App"
+description = "Baïkal is a lightweight CalDAV+CardDAV server. It offers an extensive web interface with easy management of users, address books and calendars."
+keywords = ["baikal", "baïkal"]
+compose = '''
+services:
+  baikal:
+    image: ckulka/baikal:{{VERSION}}
+    volumes:
+    - baikal-data:/var/www/baikal/Specific
+    - baikal-config:/var/www/baikal/config
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  baikal-data:
+  baikal-config:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Baikal Version"
+default = "0.9.2-nginx"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/ckulka/baikal/tags"

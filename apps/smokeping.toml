@@ -1,0 +1,48 @@
+slug = "smokeping"
+name = "Smokeping"
+category = "App"
+description = "Smokeping keeps track of your network latency."
+keywords = ["smokeping"]
+compose = '''
+services:
+  smokeping:
+    documentation: https://docs.linuxserver.io/images/docker-smokeping
+    image: linuxserver/smokeping:{{SMOKEPING_VERSION}}
+    restart: always
+    volumes:
+    - smokeping-config:/config
+    - smokeping-data:/data
+    environment:
+      PUID: '{{PUID}}'
+      PGID: '{{PGID}}'
+      TZ: '{{TZ}}'
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  smokeping-config:
+  smokeping-data:
+'''
+
+[[variables]]
+key = "PGID"
+label = "PGID"
+default = "1000"
+description = "For GroupID. Ensure any volume directories on the host are owned by the same user you specify. Default to 1000, see more at https://docs.linuxserver.io/images/docker-smokeping#user-group-identifiers"
+
+[[variables]]
+key = "PUID"
+label = "PUID"
+default = "1000"
+description = "For UserID. Ensure any volume directories on the host are owned by the same user you specify. Default to 1000 se more at https://docs.linuxserver.io/images/docker-smokeping#user-group-identifiers"
+
+[[variables]]
+key = "SMOKEPING_VERSION"
+label = "Smokeping Version"
+default = "2.7.3"
+description = "Smokeping Image Version"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "UTC"
+description = "Timezone. Specify a timezone to use EG Europe/London"

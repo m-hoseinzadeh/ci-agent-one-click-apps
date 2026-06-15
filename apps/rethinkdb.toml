@@ -1,0 +1,16 @@
+slug = "rethinkdb"
+name = "RethinkDB"
+category = "App"
+description = "RethinkDB pushes JSON to your apps in realtime"
+keywords = ["rethinkdb"]
+compose = '''
+services:
+  rethinkdb:
+    image: rethinkdb:2.3.6
+    volumes:
+    - rethinkdb-data:/data/rethinkdb_data/
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  rethinkdb-data:
+'''

@@ -1,0 +1,38 @@
+slug = "couchdb-clouseau"
+name = "CouchDB + Clouseau"
+category = "Database"
+description = "CouchDB + Clouseau (Full Text Search) - IBM CouchDB 3 official image"
+keywords = ["clouseau", "couchdb"]
+compose = '''
+services:
+  couchdb-clouseau:
+    image: ibmcom/couchdb3:{{COUCHDB_VERSION}}
+    volumes:
+    - couchdb-clouseau-db-data:/opt/couchdb/data
+    - couchdb-clouseau-db-etc:/opt/couchdb/etc
+    restart: always
+    environment:
+      COUCHDB_USER: '{{COUCHDB_USER}}'
+      COUCHDB_PASSWORD: '{{COUCHDB_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:5984'
+volumes:
+  couchdb-clouseau-db-data:
+  couchdb-clouseau-db-etc:
+'''
+
+[[variables]]
+key = "COUCHDB_PASSWORD"
+label = "CouchDB Password"
+default = ""
+
+[[variables]]
+key = "COUCHDB_USER"
+label = "CouchDB Username"
+default = "mainuser"
+
+[[variables]]
+key = "COUCHDB_VERSION"
+label = "CouchDB Version Tag"
+default = "3.2.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/couchdb/tags/"

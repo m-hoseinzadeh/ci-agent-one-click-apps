@@ -1,0 +1,30 @@
+slug = "portainer"
+name = "Portainer"
+category = "App"
+description = "Portainer is a lightweight management UI which allows you to easily manage your different Docker environments"
+keywords = ["portainer"]
+compose = '''
+services:
+  portainer:
+    image: portainer/portainer-{{PORTAINER_EDITION}}:{{PORTAINER_VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - portainer-data:/data
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:9000'
+volumes:
+  portainer-data:
+'''
+
+[[variables]]
+key = "PORTAINER_EDITION"
+label = "Portainer Edition"
+default = "ce"
+description = "Community edition (ce) or Enterprise edition (ee)"
+
+[[variables]]
+key = "PORTAINER_VERSION"
+label = "Portainer Version"
+default = "2.16.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/portainer/portainer-ce/tags"

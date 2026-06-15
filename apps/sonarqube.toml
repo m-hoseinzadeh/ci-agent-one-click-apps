@@ -1,0 +1,61 @@
+slug = "sonarqube"
+name = "sonarqube"
+category = "Dev tools"
+description = "Catch bugs and vulnerabilities in your app, with thousands of automated Static Code Analysis rules"
+keywords = ["sonarqube"]
+compose = '''
+services:
+  sonarqube-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - sonarqube-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: sonarqube
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: sonarqube
+      POSTGRES_INITDB_ARGS: '{{PG_INITDB_ARGS}}'
+  sonarqube:
+    image: sonarqube:{{SONAR_VERSION}}
+    depends_on:
+    - sonarqube-db
+    volumes:
+    - sonarqube-conf:/opt/sonarqube/conf
+    - sonarqube-data:/opt/sonarqube/data
+    - sonarqube-logs:/opt/sonarqube/logs
+    - sonarqube-extensions:/opt/sonarqube/extensions
+    restart: always
+    environment:
+      SONAR_JDBC_USERNAME: sonarqube
+      SONAR_JDBC_PASSWORD: '{{PG_PASS}}'
+      SONAR_JDBC_URL: jdbc:postgresql://sonarqube-db:5432/sonarqube
+    ports:
+    - '{{HTTP_PORT}}:9000'
+volumes:
+  sonarqube-db-data:
+  sonarqube-conf:
+  sonarqube-data:
+  sonarqube-logs:
+  sonarqube-extensions:
+'''
+
+[[variables]]
+key = "PG_INITDB_ARGS"
+label = "OPTIONAL: Arguments for 'postgres initdb'"
+description = "For example, --data-checksums"
+
+[[variables]]
+key = "PG_PASS"
+label = "Postgres Password"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "9.6"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
+
+[[variables]]
+key = "SONAR_VERSION"
+label = "Sonarqube Version"
+default = "10.2.1-community"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/sonarqube?tab=tags/"

@@ -1,0 +1,181 @@
+slug = "mastodon"
+name = "Mastodon"
+category = "App"
+description = "Social networking, back in your hands."
+keywords = ["mastodon"]
+compose = '''
+services:
+  mastodon:
+    environment:
+      LOCAL_DOMAIN: mastodon.{{ROOT_DOMAIN}}
+      ALTERNATE_DOMAINS: '{{ALT_DOMAIN}}'
+      REDIS_HOST: mastodon-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      DB_HOST: mastodon-postgres
+      DB_USER: mastodon
+      DB_NAME: mastodon_production
+      DB_PASS: '{{POSTGRES_PASSWORD}}'
+      DB_PORT: 5432
+      ES_ENABLED: 'false'
+      OTP_SECRET: '{{OPT_SECRET_BASE}}'
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
+      VAPID_PRIVATE_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      VAPID_PUBLIC_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      SINGLE_USER_MODE: '{{SU_MODE}}'
+      SMTP_SERVER: '{{SMTP_SERVER}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_LOGIN: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASS}}'
+      SMTP_FROM_ADDRESS: '{{SMTP_FROM}}'
+      SMTP_TLS: '{{SMTP_TLS}}'
+      S3_ENABLED: 'false'
+      RAILS_ENV: production
+    volumes:
+    - mastodon-system:/mastodon/public/system
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  mastodon-streaming:
+    environment:
+      LOCAL_DOMAIN: mastodon.{{ROOT_DOMAIN}}
+      ALTERNATE_DOMAINS: '{{ALT_DOMAIN}}'
+      REDIS_HOST: mastodon-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      DB_HOST: mastodon-postgres
+      DB_USER: mastodon
+      DB_NAME: mastodon_production
+      DB_PASS: '{{POSTGRES_PASSWORD}}'
+      DB_PORT: 5432
+      ES_ENABLED: 'false'
+      OTP_SECRET: '{{OPT_SECRET_BASE}}'
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
+      VAPID_PRIVATE_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      VAPID_PUBLIC_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      SINGLE_USER_MODE: '{{SU_MODE}}'
+      SMTP_SERVER: '{{SMTP_SERVER}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_LOGIN: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASS}}'
+      SMTP_FROM_ADDRESS: '{{SMTP_FROM}}'
+      SMTP_TLS: '{{SMTP_TLS}}'
+      S3_ENABLED: 'false'
+      RAILS_ENV: production
+    volumes:
+    - mastodon-system:/mastodon/public/system
+  mastodon-sidekiq:
+    environment:
+      LOCAL_DOMAIN: mastodon.{{ROOT_DOMAIN}}
+      ALTERNATE_DOMAINS: '{{ALT_DOMAIN}}'
+      REDIS_HOST: mastodon-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      DB_HOST: mastodon-postgres
+      DB_USER: mastodon
+      DB_NAME: mastodon_production
+      DB_PASS: '{{POSTGRES_PASSWORD}}'
+      DB_PORT: 5432
+      ES_ENABLED: 'false'
+      OTP_SECRET: '{{OPT_SECRET_BASE}}'
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
+      VAPID_PRIVATE_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      VAPID_PUBLIC_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      SINGLE_USER_MODE: '{{SU_MODE}}'
+      SMTP_SERVER: '{{SMTP_SERVER}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_LOGIN: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASS}}'
+      SMTP_FROM_ADDRESS: '{{SMTP_FROM}}'
+      SMTP_TLS: '{{SMTP_TLS}}'
+      S3_ENABLED: 'false'
+      RAILS_ENV: production
+    volumes:
+    - mastodon-system:/mastodon/public/system
+  mastodon-postgres:
+    image: postgres:14-alpine
+    volumes:
+    - mastodon-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: mastodon
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: mastodon_production
+  mastodon-redis:
+    volumes:
+    - mastodon-redis-data:/data
+    environment:
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+volumes:
+  mastodon-system:
+  mastodon-postgres-data:
+  mastodon-redis-data:
+'''
+
+[[variables]]
+key = "ALT_DOMAIN"
+label = "Alternate domains (optional)"
+description = "If you have multiple domains pointed at your Mastodon server, this setting will allow Mastodon to recognize itself when users are addressed using those other domains. Separate the domains by commas, e.g. foo.com,bar.com"
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "OPT_SECRET_BASE"
+label = "One-time password secret"
+generate = true
+description = "Two-Factor Authentication (2FA) Key"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+description = "Password must be at least 12 characters.  Please use a random string."
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis Password"
+generate = true
+description = "Password must be at least 12 characters. Please use a random string."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET_KEY_BASE"
+label = "Secret Key Base"
+generate = true
+description = "The randomized string which is used to verify the integrity of signed cookies. Please use a string with more than 26 characters"
+
+[[variables]]
+key = "SMTP_FROM"
+label = "SMTP from"
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP port"
+
+[[variables]]
+key = "SMTP_SERVER"
+label = "SMTP hostname"
+
+[[variables]]
+key = "SMTP_TLS"
+label = "SMTP TLS"
+
+[[variables]]
+key = "SMTP_USER"
+label = "SMTP username"
+
+[[variables]]
+key = "SU_MODE"
+label = "Single user mode"
+default = "false"
+description = "If set to true, the frontpage of your Mastodon server will always redirect to the first profile in the database and registrations will be disabled."

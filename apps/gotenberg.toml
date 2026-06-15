@@ -1,0 +1,270 @@
+slug = "gotenberg"
+name = "Gotenberg"
+category = "App"
+description = "Docker-Powered Stateless API For PDF Files"
+keywords = ["gotenberg"]
+compose = '''
+services:
+  gotenberg:
+    environment:
+      VERSION: '{{GOTENBERG_VERSION}}'
+      API_PORT: '{{GOTENBERG_API_PORT}}'
+      API_TIMEOUT: '{{GOTENBERG_API_TIMEOUT}}'
+      API_ROOT_PATH: '{{GOTENBERG_API_ROOT_PATH}}'
+      API_TRACE_HEADER: '{{GOTENBERG_API_TRACE_HEADER}}'
+      API_DISABLE_HEALTH_CHECK: '{{GOTENBERG_API_DISABLE_HEALTH_CHECK}}'
+      CHROMIUM_ALLOW_FILE_ACCESS_FROM_FILES: '{{GOTENBERG_CHROMIUM_ALLOW_FILE_ACCESS_FROM_FILES}}'
+      CHROMIUM_ALLOW_INSECURE_LOCALHOST: '{{GOTENBERG_CHROMIUM_ALLOW_INSECURE_LOCALHOST}}'
+      CHROMIUM_ALLOW_LIST: '{{GOTENBERG_CHROMIUM_ALLOW_LIST}}'
+      CHROMIUM_DENY_LIST: '{{GOTENBERG_CHROMIUM_DENY_LIST}}'
+      CHROMIUM_IGNORE_CERTIFICATE_ERRORS: '{{GOTENBERG_CHROMIUM_IGNORE_CERTIFICATE_ERRORS}}'
+      CHROMIUM_DISABLE_WEB_SECURITY: '{{GOTENBERG_CHROMIUM_DISABLE_WEB_SECURITY}}'
+      CHROMIUM_INCOGNITO: '{{GOTENBERG_CHROMIUM_INCOGNITO}}'
+      CHROMIUM_HOST_RESOLVER_RULES: '{{GOTENBERG_CHROMIUM_HOST_RESOLVER_RULES}}'
+      CHROMIUM_PROXY_SERVER: '{{GOTENBERG_CHROMIUM_PROXY_SERVER}}'
+      CHROMIUM_DISABLE_JAVASCRIPT: '{{GOTENBERG_CHROMIUM_DISABLE_JAVASCRIPT}}'
+      CHROMIUM_DISABLE_ROUTES: '{{GOTENBERG_CHROMIUM_DISABLE_ROUTES}}'
+      LIBREOFFICE_DISABLE_ROUTES: '{{GOTENBERG_LIBREOFFICE_DISABLE_ROUTES}}'
+      LIBREOFFICE_LISTENER_START_TIMEOUT: '{{GOTENBERG_LIBREOFFICE_LISTENER_START_TIMEOUT}}'
+      LIBREOFFICE_LISTENER_RESTART_THRESHOLD: '{{GOTENBERG_LIBREOFFICE_LISTENER_RESTART_THRESHOLD}}'
+      PDFENGINES_ENGINES: '{{GOTENBERG_PDFENGINES_ENGINES}}'
+      PDFENGINES_DISABLE_ROUTES: '{{GOTENBERG_PDFENGINES_DISABLE_ROUTES}}'
+      WEBHOOK_ALLOW_LIST: '{{GOTENBERG_WEBHOOK_ALLOW_LIST}}'
+      WEBHOOK_DENY_LIST: '{{GOTENBERG_WEBHOOK_DENY_LIST}}'
+      WEBHOOK_ERROR_ALLOW_LIST: '{{GOTENBERG_WEBHOOK_ERROR_ALLOW_LIST}}'
+      WEBHOOK_ERROR_DENY_LIST: '{{GOTENBERG_WEBHOOK_ERROR_DENY_LIST}}'
+      WEBHOOK_MAX_RETRY: '{{GOTENBERG_WEBHOOK_MAX_RETRY}}'
+      WEBHOOK_RETRY_MIN_WAIT: '{{GOTENBERG_WEBHOOK_RETRY_MIN_WAIT}}'
+      WEBHOOK_RETRY_MAX_WAIT: '{{GOTENBERG_WEBHOOK_RETRY_MAX_WAIT}}'
+      WEBHOOK_CLIENT_TIMEOUT: '{{GOTENBERG_WEBHOOK_CLIENT_TIMEOUT}}'
+      WEBHOOK_DISABLE: '{{GOTENBERG_WEBHOOK_DISABLE}}'
+      PROMETHEUS_COLLECT_INTERVAL: '{{GOTENBERG_PROMETHEUS_COLLECT_INTERVAL}}'
+      PROMETHEUS_NAMESPACE: '{{GOTENBERG_PROMETHEUS_NAMESPACE}}'
+      PROMETHEUS_DISABLE_COLLECT: '{{GOTENBERG_PROMETHEUS_DISABLE_COLLECT}}'
+      PROMETHEUS_DISABLE_ROUTE_LOGGING: '{{GOTENBERG_PROMETHEUS_DISABLE_ROUTE_LOGGING}}'
+      LOG_FORMAT: '{{GOTENBERG_LOG_FORMAT}}'
+      LOG_LEVEL: '{{GOTENBERG_LOG_LEVEL}}'
+      GRACEFUL_SHUTDOWN_DURATION: '{{GOTENBERG_GRACEFUL_SHUTDOWN_DURATION}}'
+    ports:
+    - '{{HTTP_PORT}}:$$cap_GOTENBERG_API_PORT'
+'''
+
+[[variables]]
+key = "GOTENBERG_API_DISABLE_HEALTH_CHECK"
+label = "API | Disable Health Check"
+default = "false"
+description = "Whether to disable health check logging."
+
+[[variables]]
+key = "GOTENBERG_API_PORT"
+label = "API | Port"
+default = "3000"
+description = "Port of Gotenberg."
+
+[[variables]]
+key = "GOTENBERG_API_ROOT_PATH"
+label = "API | Root Path"
+default = "/"
+description = "Root path of the API for service discovery via URL paths."
+
+[[variables]]
+key = "GOTENBERG_API_TIMEOUT"
+label = "API | Timeout"
+default = "30s"
+description = "Time limit for requests."
+
+[[variables]]
+key = "GOTENBERG_API_TRACE_HEADER"
+label = "API | Trace Header"
+default = "Gotenberg-Trace"
+description = "Header name to use for identifying requests."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_ALLOW_FILE_ACCESS_FROM_FILES"
+label = "Chromium | Allow File Access From Files"
+default = "true"
+description = "Whether to allow `file://` URIs to read other `file://` URIs."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_ALLOW_INSECURE_LOCALHOST"
+label = "Chromium | Allow Insecure Localhost"
+default = "true"
+description = "Whether to ignore TLS/SSL errors on `localhost`."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_ALLOW_LIST"
+label = "Chromium | Allow List"
+description = "Allowed URLs for Chromium using a regular expression."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_DENY_LIST"
+label = "Chromium | Deny List"
+default = "^file:///[^tmp].*"
+description = "Denied URLs for Chromium using a regular expression."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_DISABLE_JAVASCRIPT"
+label = "Chromium | Disable JavaScript"
+default = "false"
+description = "Whether to disable JavaScript."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_DISABLE_ROUTES"
+label = "Chromium | Disable Routes"
+default = "false"
+description = "Whether to disable the routes for Chromium."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_DISABLE_WEB_SECURITY"
+label = "Chromium | Disable Web Security"
+default = "true"
+description = "Whether to not enforce the same-origin policy."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_HOST_RESOLVER_RULES"
+label = "Chromium | Host Resolver Rules"
+description = "Custom mappings to the host resolver."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_IGNORE_CERTIFICATE_ERRORS"
+label = "Chromium | Ignore Certificate Errors"
+default = "true"
+description = "Whether to ignore certificate errors."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_INCOGNITO"
+label = "Chromium | Incognito Mode"
+default = "false"
+description = "Whether to start Chromium with incognito mode."
+
+[[variables]]
+key = "GOTENBERG_CHROMIUM_PROXY_SERVER"
+label = "Chromium | Proxy Server"
+description = "Outbound proxy server. This switch only affects HTTP and HTTPS requests."
+
+[[variables]]
+key = "GOTENBERG_GRACEFUL_SHUTDOWN_DURATION"
+label = "General | Graceful Shutdown Duration"
+default = "30s"
+description = "Graceful shutdown duration."
+
+[[variables]]
+key = "GOTENBERG_LIBREOFFICE_DISABLE_ROUTES"
+label = "LibreOffice | Disable Routes"
+default = "false"
+description = "Whether to disable the routes for LibreOffice."
+
+[[variables]]
+key = "GOTENBERG_LIBREOFFICE_LISTENER_RESTART_THRESHOLD"
+label = "LibreOffice | Listener Restart Threshold"
+default = "10"
+description = "Conversions limit after which the LibreOffice listener is restarted. `0` means no long-running LibreOffice listener."
+
+[[variables]]
+key = "GOTENBERG_LIBREOFFICE_LISTENER_START_TIMEOUT"
+label = "LibreOffice | Listener Start Timeout"
+default = "10s"
+description = "Time limit for starting the LibreOffice listener."
+
+[[variables]]
+key = "GOTENBERG_LOG_FORMAT"
+label = "Logging | Format"
+default = "auto"
+description = "Log format (`auto`, `json` or `text`)"
+
+[[variables]]
+key = "GOTENBERG_LOG_LEVEL"
+label = "Logging | Level"
+default = "info"
+description = "Log level (`error`, `warn`, `info` or `debug`)"
+
+[[variables]]
+key = "GOTENBERG_PDFENGINES_DISABLE_ROUTES"
+label = "PDF Engines | Disable Routes"
+default = "false"
+description = "Whether to disable the routes for PDF Engines."
+
+[[variables]]
+key = "GOTENBERG_PDFENGINES_ENGINES"
+label = "PDF Engines | Engines"
+description = "PDF engines and their order (e.g. `pdftk,uno-pdfengine`). Leave blank to use all."
+
+[[variables]]
+key = "GOTENBERG_PROMETHEUS_COLLECT_INTERVAL"
+label = "Prometheus | Collect Interval"
+default = "1s"
+description = "Interval for collecting modules' metrics."
+
+[[variables]]
+key = "GOTENBERG_PROMETHEUS_DISABLE_COLLECT"
+label = "Prometheus | Disable Collect"
+default = "false"
+description = "Whether to disable the collect of metrics."
+
+[[variables]]
+key = "GOTENBERG_PROMETHEUS_DISABLE_ROUTE_LOGGING"
+label = "Prometheus | Disable Route Logging"
+default = "false"
+description = "Whether to disable the route logging."
+
+[[variables]]
+key = "GOTENBERG_PROMETHEUS_NAMESPACE"
+label = "Prometheus | Namespace"
+default = "gotenberg"
+description = "Namespace of modules' metrics."
+
+[[variables]]
+key = "GOTENBERG_VERSION"
+label = "General | Version"
+default = "7"
+description = "Check out their valid tags at https://hub.docker.com/r/gotenberg/gotenberg/tags"
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_ALLOW_LIST"
+label = "Webhook | Allow List"
+description = "Allowed URLs for the webhook feature using a regular expression."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_CLIENT_TIMEOUT"
+label = "Webhook | Client Timeout"
+default = "30s"
+description = "Time limit for requests to the webhook."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_DENY_LIST"
+label = "Webhook | Deny List"
+description = "Denied URLs for the webhook feature using a regular expression."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_DISABLE"
+label = "Webhook | Disable"
+default = "false"
+description = "Whether to disable the webhook feature."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_ERROR_ALLOW_LIST"
+label = "Webhook | Error Allow List"
+description = "Allowed URLs in case of an error for the webhook feature using a regular expression."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_ERROR_DENY_LIST"
+label = "Webhook | Error Deny List"
+description = "Denied URLs in case of an error for the webhook feature using a regular expression."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_MAX_RETRY"
+label = "Webhook | Maximum Retry"
+default = "4"
+description = "Maximum number of retries for the webhook feature."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_RETRY_MAX_WAIT"
+label = "Webhook | Maximum Retry Waiting Time"
+default = "30s"
+description = "Maximum duration to wait before trying to call the webhook again."
+
+[[variables]]
+key = "GOTENBERG_WEBHOOK_RETRY_MIN_WAIT"
+label = "Webhook | Minimum Retry Waiting Time"
+default = "1s"
+description = "Minimum duration to wait before trying to call the webhook again."

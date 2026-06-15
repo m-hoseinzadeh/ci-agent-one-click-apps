@@ -1,0 +1,31 @@
+slug = "mumble"
+name = "Mumble server"
+category = "Communication"
+description = "Mumble is an open-source, low-latency, high quality voice chat software."
+keywords = ["mumble", "server"]
+compose = '''
+services:
+  mumble:
+    image: mumblevoip/mumble-server:{{VERSION}}
+    container_name: mumble-server
+    hostname: mumble-server
+    restart: on-failure
+    volumes:
+    - mumble-data:/data/
+    ports:
+    - '{{PORT}}:64738'
+volumes:
+  mumble-data:
+'''
+
+[[variables]]
+key = "PORT"
+label = "Voice Port (UDP)"
+default = "64738"
+description = "Port for voice"
+
+[[variables]]
+key = "VERSION"
+label = "Mumble Version"
+default = "v1.4.230"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mumblevoip/mumble-server/tags"

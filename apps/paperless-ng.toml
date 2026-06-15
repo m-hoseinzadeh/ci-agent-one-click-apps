@@ -1,0 +1,315 @@
+slug = "paperless-ng"
+name = "Paperless-ng"
+category = "App"
+description = "Paperless is an application by Daniel Quinn and others that indexes your scanned documents and allows you to easily search for documents and store metadata alongside your documents."
+keywords = ["ng", "paperless"]
+compose = '''
+services:
+  paperless-ng:
+    depends_on:
+    - paperless-ng-db
+    - paperless-ng-redis
+    image: jonaswinkler/paperless-ng:{{APP_VERSION}}
+    restart: always
+    environment:
+      APP_URL: http://paperless-ng.{{ROOT_DOMAIN}}
+      PAPERLESS_REDIS: redis://paperless-ng-redis:6379/0
+      PAPERLESS_DBHOST: paperless-ng-db
+      PAPERLESS_DBNAME: '{{DBNAME}}'
+      PAPERLESS_DBUSER: '{{DBUSER}}'
+      PAPERLESS_DBPASS: '{{DBPASS}}'
+      PAPERLESS_FILENAME_FORMAT: '{{FILENAME_FORMAT}}'
+      PAPERLESS_LOGROTATE_MAX_SIZE: '{{LOGROTATE_MAX_SIZE}}'
+      PAPERLESS_LOGROTATE_MAX_BACKUPS: '{{LOGROTATE_MAX_BACKUP}}'
+      PAPERLESS_SECRET_KEY: '{{SECRET_KEY}}'
+      PAPERLESS_ALLOWED_HOSTS: paperless-ng.{{ROOT_DOMAIN}}
+      PAPERLESS_CORS_ALLOWED_HOSTS: http://paperless-ng.{{ROOT_DOMAIN}}
+      PAPERLESS_ADMIN_USER: '{{ADMIN_USER}}'
+      PAPERLESS_ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
+      PAPERLESS_ADMIN_MAIL: '{{ADMIN_EMAIL}}'
+      PAPERLESS_COOKIE_PREFIX: paperless-ng
+      PAPERLESS_OCR_LANGUAGE: '{{OCR_LANGUAGE}}'
+      PAPERLESS_OCR_MODE: '{{OCR_MODE}}'
+      PAPERLESS_OCR_CLEAN: '{{OCR_CLEAN}}'
+      PAPERLESS_OCR_DESKEW: '{{OCR_DESKEW}}'
+      PAPERLESS_OCR_ROTATE_PAGES: '{{OCR_ROTATE_PAGES}}'
+      PAPERLESS_OCR_ROTATE_PAGES_THRESHOLD: '{{OCR_ROTATE_THRESHOLD}}'
+      PAPERLESS_OCR_OUTPUT_TYPE: '{{OCR_OUTPUT_TYPE}}'
+      PAPERLESS_OCR_PAGES: '{{OCR_PAGES}}'
+      PAPERLESS_OCR_IMAGE_DPI: '{{OCR_IMAGE_DPI}}'
+      PAPERLESS_OCR_USER_ARGS: $$cap_ocr_user_args
+      PAPERLESS_TIKA_ENABLED: 1
+      PAPERLESS_TIKA_GOTENBERG_ENDPOINT: http://paperless-ng-gotenberg:3000
+      PAPERLESS_TIKA_ENDPOINT: http://paperless-ng-tika:9998
+      PAPERLESS_TIME_ZONE: '{{TIMEZONE}}'
+      PAPERLESS_CONSUMER_POLLING: '{{CONSUMER_POLLING}}'
+      PAPERLESS_CONSUMER_DELETE_DUPLICATES: '{{CONSUMER_DELETE_DUPLICATES}}'
+      PAPERLESS_CONSUMER_RECURSIVE: '{{CONSUMER_RECURSIVE}}'
+      PAPERLESS_CONSUMER_SUBDIRS_AS_TAGS: '{{CONSUMER_SUBDIRS_AS_TAGS}}'
+      PAPERLESS_CONVERT_MEMORY_LIMIT: '{{CONVERT_MEMORY_LIMIT}}'
+      PAPERLESS_CONVERT_TMPDIR: '{{CONVERT_TEMPDIR}}'
+      PAPERLESS_OPTIMIZE_THUMBNAILS: '{{OPTIMIZE_THUMBNAILS}}'
+      PAPERLESS_PRE_CONSUME_SCRIPT: '{{PRE_CONSUME_SCRIPT}}'
+      PAPERLESS_POST_CONSUME_SCRIPT: '{{POST_CONSUME_SCRIPT}}'
+      PAPERLESS_FILENAME_DATE_ORDER: '{{FILENAME_DATE_ORDER}}'
+      PAPERLESS_THUMBNAIL_FONT_NAME: '{{THUMBNAIL_FONT_NAME}}'
+      PAPERLESS_IGNORE_DATES: '{{PAPERLESS_IGNORE_DATES}}'
+      PAPERLESS_WEBSERVER_WORKERS: '{{WEBSERVER_WORKERS}}'
+      USERMAP_UID: '{{USERMAP_UID}}'
+      USERMAP_GID: '{{USERMAP_GID}}'
+      PAPERLESS_OCR_LANGUAGES: '{{DOCKER_OCR_LANGUAGES}}'
+    volumes:
+    - paperless-ng-data:/usr/src/paperless/data
+    - paperless-ng-media:/usr/src/paperless/media
+    - paperless-ng-export:/usr/src/paperless/export
+    - paperless-ng-consume:/usr/src/paperless/consume
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  paperless-ng-redis:
+    volumes:
+    - paperless-ng-redis-data:/data
+    restart: always
+  paperless-ng-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - paperless-ng-db:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: '{{DBNAME}}'
+      POSTGRES_USER: '{{DBUSER}}'
+      POSTGRES_PASSWORD: '{{DBPASS}}'
+  paperless-ng-gotenberg:
+    image: thecodingmachine/gotenberg:6
+    restart: unless-stopped
+    environment:
+      DISABLE_GOOGLE_CHROME: 1
+  paperless-ng-tika:
+    image: apache/tika
+    restart: unless-stopped
+volumes:
+  paperless-ng-data:
+  paperless-ng-media:
+  paperless-ng-export:
+  paperless-ng-consume:
+  paperless-ng-redis-data:
+  paperless-ng-db:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Admin Email"
+default = "root@localhost"
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Admin Password"
+generate = true
+
+[[variables]]
+key = "ADMIN_USER"
+label = "Admin User"
+default = "admin"
+
+[[variables]]
+key = "APP_VERSION"
+label = "Paperless-ng"
+default = "1.4.1"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/jonaswinkler/paperless-ng/tags"
+
+[[variables]]
+key = "CONSUMER_DELETE_DUPLICATES"
+label = "Consumer Delete Duplicates"
+default = "false"
+description = "When the consumer detects a duplicate document, it will not touch the original document."
+
+[[variables]]
+key = "CONSUMER_POLLING"
+label = "Consumer Polling (seconds)"
+default = "0"
+description = "Defaults to 0, which disables polling and uses filesystem notifications."
+
+[[variables]]
+key = "CONSUMER_RECURSIVE"
+label = "Consumer Recursive"
+default = "false"
+description = "Enable recursive watching of the consumption directory. Paperless will then pickup files from files in subdirectories within your consumption directory as well."
+
+[[variables]]
+key = "CONSUMER_SUBDIRS_AS_TAGS"
+label = "Consumer Sub Directory as tags"
+default = "false"
+description = "Set the names of subdirectories as tags for consumed files. E.g. <CONSUMPTION_DIR>/foo/bar/file.pdf will add the tags “foo” and “bar” to the consumed file"
+
+[[variables]]
+key = "CONVERT_MEMORY_LIMIT"
+label = "Convert Memory Limit"
+default = "0"
+description = "For more information on how to use this value, you should search the web for “MAGICK_MEMORY_LIMIT”."
+
+[[variables]]
+key = "CONVERT_TEMPDIR"
+label = "Convert Memory Limit"
+description = "For more information on how to use this value, you should search the web for “MAGICK_TMPDIR”."
+
+[[variables]]
+key = "DBNAME"
+label = "Database Name"
+default = "paperless"
+
+[[variables]]
+key = "DBPASS"
+label = "Database Password"
+generate = true
+
+[[variables]]
+key = "DBUSER"
+label = "Database User"
+default = "paperless"
+
+[[variables]]
+key = "DOCKER_OCR_LANGUAGES"
+label = "OCR Languages to install"
+description = "Additional OCR languages to install. By default, paperless comes with English, German, Italian, Spanish and French."
+
+[[variables]]
+key = "FILENAME_DATE_ORDER"
+label = "Filename Date Order"
+description = "Defaults to none, which disables this feature. The date order can be set to any option as specified in https://dateparser.readthedocs.io/en/latest/settings.html#date-order."
+
+[[variables]]
+key = "FILENAME_FORMAT"
+label = "Filename Format"
+description = "Changes the filenames paperless uses to store documents in the media directory. See File name handling (https://paperless-ng.readthedocs.io/en/latest/advanced_usage.html#advanced-file-name-handling) for details. Default is none, which disables this feature."
+
+[[variables]]
+key = "LOGROTATE_MAX_BACKUP"
+label = "Log Rotate Max Backup Count"
+default = "20"
+description = "Number of rotated log files to keep."
+
+[[variables]]
+key = "LOGROTATE_MAX_SIZE"
+label = "Log Rotate Max Size (in bytes)"
+description = "Maximum file size for log files before they are rotated, in bytes."
+
+[[variables]]
+key = "OCR_CLEAN"
+label = "OCR Clean"
+default = "clean"
+description = "Tells paperless to use unpaper to clean any input document before sending it to tesseract. This uses more resources, but generally results in better OCR results. Available mode- clean, clean-final, none"
+
+[[variables]]
+key = "OCR_DESKEW"
+label = "OCR Deskew"
+default = "true"
+description = "Tells paperless to correct skewing (slight rotation of input images mainly due to improper scanning)."
+
+[[variables]]
+key = "OCR_IMAGE_DPI"
+label = "OCR Image DPI"
+description = "Set this to the DPI your scanner produces images at. Default is none, which will automatically calculate image DPI so that the produced PDF documents are A4 sized."
+
+[[variables]]
+key = "OCR_LANGUAGE"
+label = "OCR Language"
+default = "eng"
+description = "Customize the language that paperless will attempt to use when parsing documents. It should be a 3-letter language code consistent with ISO 639 https://www.loc.gov/standards/iso639-2/php/code_list.php This can be a combination of multiple languages such as deu+eng, in which case tesseract will use whatever language matches best. Keep in mind that tesseract uses much more cpu time with multiple languages enabled."
+
+[[variables]]
+key = "OCR_MODE"
+label = "OCR Mode"
+default = "skip"
+description = "Tell paperless when and how to perform ocr on your documents. Four modes are available- skip, skip_noarchive, redo, force. Read more about this in the OCRmyPDF documentation (https://ocrmypdf.readthedocs.io/en/latest/advanced.html#when-ocr-is-skipped)."
+
+[[variables]]
+key = "OCR_OUTPUT_TYPE"
+label = "OCR Output Type"
+default = "pdfa"
+description = "Specify the the type of PDF documents that paperless should produce. Choices- pdf, pdfa, pdfa-1, pdfa-2, pdfa-3"
+
+[[variables]]
+key = "OCR_PAGES"
+label = "OCR Pages Count"
+default = "0"
+description = "Tells paperless to use only the specified amount of pages for OCR. Documents with less than the specified amount of pages get OCR’ed completely. Specifying 1 here will only use the first page. Specifying 0 disables this feature a and always use all pages."
+
+[[variables]]
+key = "OCR_ROTATE_PAGES"
+label = "OCR Rotate Pages"
+default = "true"
+description = "Tells paperless to correct page rotation (90°, 180° and 270° rotation). If you notice that paperless is not rotating incorrectly rotated pages (or vice versa), try adjusting the threshold up or down (see below)."
+
+[[variables]]
+key = "OCR_ROTATE_THRESHOLD"
+label = "OCR Rotate Pages Threshold"
+default = "12"
+description = "This is an arbitrary value reported by tesseract. “15” is a very conservative value, whereas “2” is a very aggressive option and will often result in correctly rotated pages being rotated as well."
+
+[[variables]]
+key = "OPTIMIZE_THUMBNAILS"
+label = "Optimize Thumbnails"
+default = "true"
+description = "This usually reduces the size of thumbnails by about 20%, but uses considerable compute time during consumption."
+
+[[variables]]
+key = "PAPERLESS_IGNORE_DATES"
+label = "Ignore Dates"
+description = "You may specify dates in a multitude of formats supported by dateparser (see https://dateparser.readthedocs.io/en/latest/#popular-formats)"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "13"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
+
+[[variables]]
+key = "POST_CONSUME_SCRIPT"
+label = "Post Consume Script (path)"
+description = "Executed after the consumer has successfully processed a document and has moved it into paperless. For more information, take a look at Post-consumption script (https://paperless-ng.readthedocs.io/en/latest/advanced_usage.html#advanced-post-consume-script)"
+
+[[variables]]
+key = "PRE_CONSUME_SCRIPT"
+label = "Pre Consume Script (path)"
+description = "Executed after the consumer sees a new document in the consumption folder, but before any processing of the document is performed. For more information, take a look at Pre-consumption script (https://paperless-ng.readthedocs.io/en/latest/advanced_usage.html?highlight=PAPERLESS_PRE_CONSUME_SCRIPT#pre-consumption-script)"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET_KEY"
+label = "Paperless Secret Key"
+generate = true
+description = "Paperless uses this to make session tokens."
+
+[[variables]]
+key = "THUMBNAIL_FONT_NAME"
+label = "Thumbnail Font Name"
+default = "/usr/share/fonts/liberation/LiberationSerif-Regular.ttf"
+description = "Paperless creates thumbnails for plain text files by rendering the content of the file on an image and uses a predefined font for that"
+
+[[variables]]
+key = "TIMEZONE"
+label = "Timezone"
+default = "UTC"
+description = "Set the time zone here. See https://docs.djangoproject.com/en/3.1/ref/settings/#std:setting-TIME_ZONE for details on how to set it."
+
+[[variables]]
+key = "USERMAP_GID"
+label = "Usermap GID"
+default = "1000"
+description = "Set this to your actual user ID on the host system, which you can get by executing ```id -g```"
+
+[[variables]]
+key = "USERMAP_UID"
+label = "Usermap UID"
+default = "1000"
+description = "Set this to your actual user ID on the host system, which you can get by executing ```id -u```"
+
+[[variables]]
+key = "WEBSERVER_WORKERS"
+label = "Webserver Workers"
+default = "2"
+description = "The number of worker processes the webserver should spawn."

@@ -1,0 +1,177 @@
+slug = "outline"
+name = "Outline"
+category = "CMS"
+description = "An open, extensible, wiki for your team built using React and Node.js."
+keywords = ["outline"]
+compose = '''
+services:
+  outline-redis:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - outline-redis-data:/redis.conf
+    restart: always
+  outline-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - outline-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{DB_USER}}'
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_DB: outline
+  outline:
+    depends_on:
+    - outline-redis
+    - outline-db
+    environment:
+      SECRET_KEY: '{{SECRET_KEY}}'
+      UTILS_SECRET: '{{UTILS_SECRET}}'
+      DATABASE_URL: postgres://{{DB_USER}}:{{DB_PASS}}@outline-db:5432/outline
+      DATABASE_URL_TEST: postgres://{{DB_USER}}:{{DB_PASS}}@outline-db:5432/outline-test
+      PGSSLMODE: disable
+      REDIS_URL: redis://outline-redis:6379
+      URL: https://outline.{{ROOT_DOMAIN}}
+      PORT: '3000'
+      AWS_S3_UPLOAD_BUCKET_URL: '{{S3_STORAGE_URL}}'
+      AWS_REGION: '{{S3_STORAGE_REGION}}'
+      AWS_S3_UPLOAD_BUCKET_NAME: '{{S3_STORAGE_BUCKET_NAME}}'
+      AWS_ACCESS_KEY_ID: '{{S3_STORAGE_ACCESS_KEY_ID}}'
+      AWS_SECRET_ACCESS_KEY: '{{S3_STORAGE_SECRET_ACCESS_KEY}}'
+      AWS_S3_UPLOAD_MAX_SIZE: '26214400'
+      AWS_S3_FORCE_PATH_STYLE: true
+      AWS_S3_ACL: private
+      GOOGLE_CLIENT_ID: '{{GOOGLE_CLIENT_ID}}'
+      GOOGLE_CLIENT_SECRET: '{{GOOGLE_CLIENT_SECRET}}'
+      FORCE_HTTPS: 'false'
+      ENABLE_UPDATES: 'false'
+      DEBUG: http
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_USERNAME: '{{SMTP_USERNAME}}'
+      SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      SMTP_FROM_EMAIL: '{{SMTP_FROM_EMAIL}}'
+      SMTP_REPLY_EMAIL: '{{SMTP_REPLY_EMAIL}}'
+      SMTP_TLS_CIPHERS: '{{SMTP_TLS_CIPHERS}}'
+      SMTP_SECURE: '{{SMTP_SECURE}}'
+      DEFAULT_LANGUAGE: '{{DEFAULT_LANGUAGE}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  outline-redis-data:
+  outline-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "outline_user"
+
+[[variables]]
+key = "DEFAULT_LANGUAGE"
+label = "The default interface language"
+default = "en_US"
+description = "See translate.getoutline.com for a list of available language codes and their rough percentage translated."
+
+[[variables]]
+key = "GOOGLE_CLIENT_ID"
+label = "Google Client ID"
+
+[[variables]]
+key = "GOOGLE_CLIENT_SECRET"
+label = "Google Client Secret"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "14.4"
+description = "Check out their page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "7.0.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redis?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "S3_STORAGE_ACCESS_KEY_ID"
+label = "S3 storage Access Key ID"
+default = "outline_user"
+description = "For instance in your Minio instance, create a new user called outline_user for the outline app with a new policy that grants full access inside the bucket (e.g. outlineAppFullAccess - see also https://wiki.generaloutline.com/share/125de1cc-9ff6-424b-8415-0d58c809a40f#h-iam-policy)"
+
+[[variables]]
+key = "S3_STORAGE_BUCKET_NAME"
+label = "S3 Storage bucket name"
+default = "outline-data"
+description = "Log into the Minio dashboard, then select the `Create Bucket` menu option to create a new bucket (e.g. named outline-data). Don't forget to add `Read and Write` policy to the bucket so the Outline app would be able to upload content"
+
+[[variables]]
+key = "S3_STORAGE_REGION"
+label = "S3 Storage region"
+default = "eu-east-1"
+description = "Name of the location of the server e.g. \"us-west-rack2\""
+
+[[variables]]
+key = "S3_STORAGE_SECRET_ACCESS_KEY"
+label = "S3 storage Secret Access Key"
+description = "For instance in your Minio instance it correponds to the password/secret of above outline_user"
+
+[[variables]]
+key = "S3_STORAGE_URL"
+label = "S3 Storage compatible API URL for instance Minio, AWS, etc."
+default = "https://YOUR_S3_STORAGE_PROVIDER_API_URL"
+description = "NB: You can have your own S3 storage by using the Open Source Minio alternative (there is a Caprover one-click-apps for that)"
+
+[[variables]]
+key = "SECRET_KEY"
+label = "SECRET_KEY"
+description = "Run this command to generate a key: `openssl rand -hex 32`"
+
+[[variables]]
+key = "SMTP_FROM_EMAIL"
+label = "SMTP from email"
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMTP host"
+description = "To support sending outgoing transactional emails such as \"document updated\" or \"you've been invited\" you'll need to provide authentication for an SMTP server"
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP password"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP port"
+
+[[variables]]
+key = "SMTP_REPLY_EMAIL"
+label = "SMTP reply email"
+
+[[variables]]
+key = "SMTP_SECURE"
+label = "SMTP Secure"
+default = "True"
+
+[[variables]]
+key = "SMTP_TLS_CIPHERS"
+label = "SMTP TLS ciphers"
+
+[[variables]]
+key = "SMTP_USERNAME"
+label = "SMTP username"
+
+[[variables]]
+key = "UTILS_SECRET"
+label = "UTILS_SECRET"
+description = "Run this command to generate a key: `openssl rand -hex 32`"

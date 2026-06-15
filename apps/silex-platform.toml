@@ -1,0 +1,73 @@
+slug = "silex-platform"
+name = "silex-platform"
+category = "App"
+description = "Silex is an online tool for visually creating static sites with dynamic data. With the free/libre spirit of internet, together."
+keywords = ["platform", "silex"]
+compose = '''
+services:
+  silex-platform:
+    image: silexlabs/silex-platform:{{VERSION}}
+    environment:
+      SILEX_URL: https://silex-platform.{{ROOT_DOMAIN}}
+      STORAGE_CONNECTORS: '{{STORAGE_CONNECTOR}}'
+      HOSTING_CONNECTORS: '{{HOSTING_CONNECTOR}}'
+      GITLAB_DOMAIN: https://gitlab.com
+      GITLAB_CLIENT_ID: '{{GITLAB_CLIENT_ID}}'
+      GITLAB_CLIENT_SECRET: '{{GITLAB_CLIENT_SECRET}}'
+      GITLAB2_DOMAIN: '{{GITLAB2_DOMAIN}}'
+      GITLAB2_CLIENT_ID: '{{GITLAB2_CLIENT_ID}}'
+      GITLAB2_CLIENT_SECRET: '{{GITLAB2_CLIENT_SECRET}}'
+      GITLAB_SCOPE: api read_user
+      GITLAB_TIMEOUT: 5000
+    ports:
+    - '{{HTTP_PORT}}:6805'
+'''
+
+[[variables]]
+key = "GITLAB2_CLIENT_ID"
+label = "GITLAB2_CLIENT_ID"
+description = "Your client-id for your other gitlab instance app"
+
+[[variables]]
+key = "GITLAB2_CLIENT_SECRET"
+label = "GITLAB2_CLIENT_SECRET"
+description = "Your client-secret for your other gitlab instance app"
+
+[[variables]]
+key = "GITLAB2_DOMAIN"
+label = "GITLAB2_DOMAIN"
+description = "Domain for your other gitlab instance (e.g. https://framagit.org)"
+
+[[variables]]
+key = "GITLAB_CLIENT_ID"
+label = "GITLAB_CLIENT_ID"
+description = "Your client-id for your gitlab app (see https://docs.gitlab.com/ee/integration/oauth_provider.html#create-a-user-owned-application)"
+
+[[variables]]
+key = "GITLAB_CLIENT_SECRET"
+label = "GITLAB_CLIENT_SECRET"
+description = "Your client-secret for your gitlab app (see https://docs.gitlab.com/ee/integration/oauth_provider.html#create-a-user-owned-application)"
+
+[[variables]]
+key = "HOSTING_CONNECTOR"
+label = "HOSTING_CONNECTOR"
+default = "gitlab,download"
+description = "Hosting connector you want to use should be one or more of following gitlab,ftp,gitlab2,download (separated with comma but no space)"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "STORAGE_CONNECTOR"
+label = "STORAGE_CONNECTOR"
+default = "gitlab"
+description = "Storage connector you want to use should be one or more of following gitlab,ftp,gitlab2 (separated with comma but no space)"
+
+[[variables]]
+key = "VERSION"
+label = "silex-platform Version"
+default = "v1.0.162"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/silexlabs/silex-platform/tags"

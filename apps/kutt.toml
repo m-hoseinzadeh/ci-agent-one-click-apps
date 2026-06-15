@@ -1,0 +1,235 @@
+slug = "kutt"
+name = "Kutt"
+category = "App"
+description = "Free Modern URL Shortener"
+keywords = ["kutt"]
+compose = '''
+services:
+  kutt:
+    image: kutt/kutt:{{KUTT_VERSION}}
+    environment:
+      PORT: '{{KUTT_PORT}}'
+      SITE_NAME: '{{KUTT_SITE_NAME}}'
+      DEFAULT_DOMAIN: kutt.{{ROOT_DOMAIN}}
+      LINK_LENGTH: '{{KUTT_LINK_LENGTH}}'
+      DB_HOST: kutt-db
+      DB_NAME: '{{POSTGRES_DB}}'
+      DB_USER: '{{POSTGRES_USER}}'
+      DB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      REDIS_HOST: kutt-cache
+      DISALLOW_REGISTRATION: '{{KUTT_DISALLOW_REGISTRATION}}'
+      DISALLOW_ANONYMOUS_LINKS: '{{KUTT_DISALLOW_ANONYMOUS_LINKS}}'
+      USER_LIMIT_PER_DAY: '{{KUTT_USER_LIMIT_PER_DAY}}'
+      NON_USER_COOLDOWN: '{{KUTT_NON_USER_COOLDOWN}}'
+      DEFAULT_MAX_STATS_PER_LINK: '{{KUTT_DEFAULT_MAX_STATS_PER_LINK}}'
+      CUSTOM_DOMAIN_USE_HTTPS: '{{KUTT_CUSTOM_DOMAIN_USE_HTTPS}}'
+      JWT_SECRET: '{{KUTT_JWT_SECRET}}'
+      ADMIN_EMAILS: '{{KUTT_ADMIN_EMAILS}}'
+      RECAPTCHA_SITE_KEY: '{{KUTT_RECAPTCHA_SITE_KEY}}'
+      RECAPTCHA_SECRET_KEY: '{{KUTT_RECAPTCHA_SECRET_KEY}}'
+      GOOGLE_SAFE_BROWSING_KEY: '{{KUTT_GOOGLE_SAFE_BROWSING_KEY}}'
+      GOOGLE_ANALYTICS: '{{KUTT_GOOGLE_ANALYTICS_INDIVIDUAL}}'
+      GOOGLE_ANALYTICS_UNIVERSAL: '{{KUTT_GOOGLE_ANALYTICS_UNIVERSAL}}'
+      MAIL_HOST: '{{KUTT_MAIL_HOST}}'
+      MAIL_PORT: '{{KUTT_MAIL_PORT}}'
+      MAIL_SECURE: '{{KUTT_MAIL_SECURE}}'
+      MAIL_USER: '{{KUTT_MAIL_USER}}'
+      MAIL_FROM: '{{KUTT_MAIL_FROM}}'
+      MAIL_PASSWORD: '{{KUTT_MAIL_PASSWORD}}'
+      REPORT_EMAIL: '{{KUTT_REPORT_EMAIL}}'
+      CONTACT_EMAIL: '{{KUTT_CONTACT_EMAIL}}'
+    depends_on:
+    - kutt-db
+    - kutt-cache
+    ports:
+    - '{{HTTP_PORT}}:$$cap_KUTT_PORT'
+  kutt-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+    volumes:
+    - kutt-db:/var/lib/postgresql/data
+  kutt-cache:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - kutt-cache:/data
+volumes:
+  kutt-db:
+  kutt-cache:
+'''
+
+[[variables]]
+key = "KUTT_ADMIN_EMAILS"
+label = "Administration | Admin Email Addresses"
+description = "Comma separated email addresses of administrators so they can access admin actions on settings page."
+
+[[variables]]
+key = "KUTT_CONTACT_EMAIL"
+label = "Contact | Contact Mail Address"
+description = "Support mail address to show on the application. Leave blank to disable."
+
+[[variables]]
+key = "KUTT_CUSTOM_DOMAIN_USE_HTTPS"
+label = "Security | HTTPS For Custom Domains"
+default = "false"
+description = "Whether to use HTTPS for links with custom domain."
+
+[[variables]]
+key = "KUTT_DEFAULT_MAX_STATS_PER_LINK"
+label = "Performance | Maximum Stats Per Link"
+default = "5000"
+description = "Maximum number of visits for each link to have detailed statistics."
+
+[[variables]]
+key = "KUTT_DISALLOW_ANONYMOUS_LINKS"
+label = "Privacy | Disallow Anonymous Links"
+default = "false"
+description = "Whether to disable creation of links anonymously."
+
+[[variables]]
+key = "KUTT_DISALLOW_REGISTRATION"
+label = "Privacy | Disallow Registration"
+default = "false"
+description = "Whether to disable registration."
+
+[[variables]]
+key = "KUTT_GOOGLE_ANALYTICS_INDIVIDUAL"
+label = "Tracking | Google Analytics Tracking ID"
+description = "Tracking ID for Google Analytics. Format is `UA-XXXX-XX`. Leave blank if you do not want to use Google Analytics."
+
+[[variables]]
+key = "KUTT_GOOGLE_ANALYTICS_UNIVERSAL"
+label = "Tracking | Google Analytics Universal Tracking ID"
+description = "Universal tracking ID for Google Analytics. Format is `UA-XXXX-XX`. Leave blank if you do not want to use Google Analytics."
+
+[[variables]]
+key = "KUTT_GOOGLE_SAFE_BROWSING_KEY"
+label = "Anti-Abuse | Google Safe Browsing Key"
+description = "Key for Google Cloud API to prevent from users from submitting malware URLs. Leave blank if you do not want to use Google Safe Browsing."
+
+[[variables]]
+key = "KUTT_JWT_SECRET"
+label = "Security | JWT Secret"
+generate = true
+description = "Passphrase to encrypt JWT. Should be a long and secure key. You can also generate one using command `openssl rand -hex 64`."
+
+[[variables]]
+key = "KUTT_LINK_LENGTH"
+label = "General | Link Length"
+default = "6"
+description = "Length of the generated links."
+
+[[variables]]
+key = "KUTT_MAIL_FROM"
+label = "Mail | Sender"
+description = "Specify the \"From\" field. Example: `Kutt <support@kutt.it>`. Leave blank to use the mail address only."
+
+[[variables]]
+key = "KUTT_MAIL_HOST"
+label = "Mail | Host"
+description = "Mail host used to send verification mails. Leave blank if you do not want to use email delivery. If you would like to approve users manually you will have to search for the verification token of the user in the database (`SELECT verification_token FROM users WHERE email='myuser@mydomain'`) and call `/verify/<verification_token>` to verify."
+
+[[variables]]
+key = "KUTT_MAIL_PASSWORD"
+label = "Mail | Password"
+description = "Password of mail user that sends verification mails. Leave blank if you do not want to use email delivery."
+
+[[variables]]
+key = "KUTT_MAIL_PORT"
+label = "Mail | Port"
+default = "465"
+description = "Port of mail host used to send verification mails. Using port `465` is recommended. Leave blank if you do not want to use email delivery."
+
+[[variables]]
+key = "KUTT_MAIL_SECURE"
+label = "Mail | Security"
+default = "true"
+description = "Whether to use secure connection to send mails. Use value `true` (recommended) or `false` when using email delivery. Leave blank when not using email delivery."
+
+[[variables]]
+key = "KUTT_MAIL_USER"
+label = "Mail | User"
+description = "Mail user that sends verification mails. Leave blank if you do not want to use email delivery."
+
+[[variables]]
+key = "KUTT_NON_USER_COOLDOWN"
+label = "Anti-Abuse | Non-User Cool Down"
+default = "0"
+description = "Cool down for non-logged in users in minutes. Set to `0` to disable."
+
+[[variables]]
+key = "KUTT_PORT"
+label = "General | Port"
+default = "3000"
+description = "Kutt's port. Should be left untouched."
+
+[[variables]]
+key = "KUTT_RECAPTCHA_SECRET_KEY"
+label = "Anti-Abuse | Recaptcha Secret Key"
+description = "Secret key for Recaptcha. Leave blank if you do not want to use Recaptcha."
+
+[[variables]]
+key = "KUTT_RECAPTCHA_SITE_KEY"
+label = "Anti-Abuse | Recaptcha Site Key"
+description = "Site key for Recaptcha. Leave blank if you do not want to use Recaptcha."
+
+[[variables]]
+key = "KUTT_REPORT_EMAIL"
+label = "Contact | Report Mail Address"
+description = "Mail address that will receive submitted reports. Leave blank to disable."
+
+[[variables]]
+key = "KUTT_SITE_NAME"
+label = "General | Site Name"
+default = "Kutt"
+description = "The name of the site (e.g. `My Link Shortener`)."
+
+[[variables]]
+key = "KUTT_USER_LIMIT_PER_DAY"
+label = "Anti-Abuse | Daily Limit"
+default = "50"
+description = "Daily link creation limit for each user."
+
+[[variables]]
+key = "KUTT_VERSION"
+label = "Version | Application"
+default = "v2.7.3"
+description = "Kutt's version. Check out their valid tags at https://hub.docker.com/r/kutt/kutt/tags"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database | Name"
+default = "kutt"
+description = "Name of the database in PostgreSQL."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database | Password"
+generate = true
+description = "Password of the database user in PostgreSQL."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User"
+default = "kutt"
+description = "Name of the database user in PostgreSQL."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Version | Database"
+default = "14.0-alpine"
+description = "PostgreSQL's version. Check out their valid tags at https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Version | Cache"
+default = "6.2-alpine"
+description = "Redis' version. Check out their valid tags at https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

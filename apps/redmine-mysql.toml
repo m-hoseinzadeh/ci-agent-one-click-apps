@@ -1,0 +1,60 @@
+slug = "redmine-mysql"
+name = "Redmine (MySQL)"
+category = "Database"
+description = "Redmine is a flexible project management web application written using Ruby on Rails framework. This app is packaged with MySQL."
+keywords = ["(mysql)", "mysql", "redmine"]
+compose = '''
+services:
+  redmine-mysql-db:
+    image: mysql:{{MYSQL_VERSION}}
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    volumes:
+    - redmine-mysql-db-data:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: redmine
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_PASSWORD}}'
+  redmine-mysql:
+    depends_on:
+    - redmine-mysql-db
+    image: redmine:{{REDMINE_VERSION}}
+    environment:
+      REDMINE_DB_MYSQL: redmine-mysql-db
+      REDMINE_DB_PORT: 3306
+      REDMINE_DB_PASSWORD: '{{MYSQL_PASSWORD}}'
+      REDMINE_SECRET_KEY_BASE: '{{KEY_BASE}}'
+    restart: always
+    volumes:
+    - redmine-mysql-data:/usr/src/redmine/files
+    - redmine-mysql-themes:/usr/src/redmine/public/themes
+    - redmine-mysql-plugins:/usr/src/redmine/plugins
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  redmine-mysql-db-data:
+  redmine-mysql-data:
+  redmine-mysql-themes:
+  redmine-mysql-plugins:
+'''
+
+[[variables]]
+key = "KEY_BASE"
+label = "Redmine Secret Key Base"
+generate = true
+
+[[variables]]
+key = "MYSQL_PASSWORD"
+label = "MySQL Password"
+generate = true
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "5.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mysql?tab=tags"
+
+[[variables]]
+key = "REDMINE_VERSION"
+label = "Redmine Version"
+default = "5.0.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redmine?tab=tags"

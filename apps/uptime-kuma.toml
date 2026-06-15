@@ -1,0 +1,23 @@
+slug = "uptime-kuma"
+name = "Uptime Kuma"
+category = "Monitoring"
+description = "A fancy self-hosted monitoring tool"
+keywords = ["kuma", "uptime"]
+compose = '''
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:{{KUMA_VERSION}}
+    restart: unless-stopped
+    volumes:
+    - uptime-kuma-data:/app/data
+    ports:
+    - '{{HTTP_PORT}}:3001'
+volumes:
+  uptime-kuma-data:
+'''
+
+[[variables]]
+key = "KUMA_VERSION"
+label = "Uptime Kuma Version"
+default = "2.3.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/louislam/uptime-kuma/tags"

@@ -1,0 +1,61 @@
+slug = "onlyoffice-documentserver"
+name = "ONLYOFFICE Document Server"
+category = "App"
+description = "Online office suite comprising viewers and editors for texts, spreadsheets and presentations"
+keywords = ["document", "documentserver", "onlyoffice", "server"]
+compose = '''
+services:
+  onlyoffice-documentserver:
+    image: onlyoffice/documentserver:{{APP_VERSION}}
+    environment:
+      JWT_ENABLED: '{{SECRET_ENABLE}}'
+      JWT_SECRET: '{{SECRET_PASS}}'
+      JWT_HEADER: '{{HEADER}}'
+      JWT_IN_BODY: '{{BODY}}'
+    volumes:
+    - onlyoffice-documentserver-logs:/var/log/onlyoffice
+    - onlyoffice-documentserver-data:/var/www/onlyoffice/Data
+    - onlyoffice-documentserver-lib:/var/lib/onlyoffice
+    - onlyoffice-documentserver-rabbitmq:/var/lib/rabbitmq
+    - onlyoffice-documentserver-redis:/var/lib/redis
+    - onlyoffice-documentserver-postgresql:/var/lib/postgresql
+    - onlyoffice-documentserver-fonts:/usr/share/fonts/truetype/custom
+volumes:
+  onlyoffice-documentserver-logs:
+  onlyoffice-documentserver-data:
+  onlyoffice-documentserver-lib:
+  onlyoffice-documentserver-rabbitmq:
+  onlyoffice-documentserver-redis:
+  onlyoffice-documentserver-postgresql:
+  onlyoffice-documentserver-fonts:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "Document Server Version"
+default = "7.3.3.50"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/onlyoffice/documentserver/tags"
+
+[[variables]]
+key = "BODY"
+label = "Body"
+default = "True"
+description = "Specifies the enabling the token validation in the request body to the ONLYOFFICE Docs."
+
+[[variables]]
+key = "HEADER"
+label = "Header"
+default = "Authorization"
+description = "Defines the HTTP header that will be used to send the JSON web token."
+
+[[variables]]
+key = "SECRET_ENABLE"
+label = "Enable secret key"
+default = "True"
+description = "Specifies the enabling the JSON web token validation by ONLYOFFICE Docs."
+
+[[variables]]
+key = "SECRET_PASS"
+label = "Secret key"
+generate = true
+description = "Defines the secret key to validate the JSON web token in the request to ONLYOFFICE Docs."

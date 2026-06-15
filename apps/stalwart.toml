@@ -1,0 +1,27 @@
+slug = "stalwart"
+name = "Stalwart Mail Server"
+category = "Communication"
+description = "Modern, All-in-One Mail Server written in Rust (JMAP, IMAP, SMTP). Faster and lighter than Postal/Poste.io."
+keywords = ["mail", "server", "stalwart"]
+compose = '''
+services:
+  stalwart:
+    image: stalwartlabs/stalwart:{{STALWART_VERSION}}
+    restart: always
+    volumes:
+    - stalwart-data:/opt/stalwart
+    ports:
+    - '{{HTTP_PORT}}:8080'
+    - '25:25'
+    - 587:587
+    - 465:465
+    - 993:993
+volumes:
+  stalwart-data:
+'''
+
+[[variables]]
+key = "STALWART_VERSION"
+label = "Stalwart Version"
+default = "v0.15.4"
+description = "Check Docker Hub for tags https://hub.docker.com/r/stalwartlabs/stalwart/tags. Default is v0.15.4 ."

@@ -1,0 +1,73 @@
+slug = "nocodb"
+name = "NocoDB"
+category = "Database"
+description = "The Open Source Airtable Alternative - Turns any MySQL, PostgreSQL, SQL Server, SQLite & MariaDB into a smart-spreadsheet."
+keywords = ["nocodb"]
+compose = '''
+services:
+  nocodb:
+    image: nocodb/nocodb:{{VERSION}}
+    restart: always
+    environment:
+      NC_DB: '{{NC_DB}}'
+      DATABASE_URL: '{{DATABASE_URL}}'
+      NC_PUBLIC_URL: '{{PUBLIC_URL}}'
+      NC_AUTH_JWT_SECRET: '{{AUTH_JWT_SECRET}}'
+      NC_SENTRY_DSN: '{{SENTRY_DSN}}'
+      NC_CONNECT_TO_EXTERNAL_DB_DISABLED: '{{CONNECT_TO_EXTERNAL_DB_DISABLED}}'
+      NC_DISABLE_TELE: '{{DISABLE_TELE}}'
+    volumes:
+    - nocodb-data:/usr/app/data
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  nocodb-data:
+'''
+
+[[variables]]
+key = "AUTH_JWT_SECRET"
+label = "NC_AUTH_JWT_SECRET"
+generate = true
+description = "JWT secret used for auth and storing other secrets. If absent: A Random secret will be generated"
+
+[[variables]]
+key = "CONNECT_TO_EXTERNAL_DB_DISABLED"
+label = "NC_CONNECT_TO_EXTERNAL_DB_DISABLED"
+default = ""
+description = "Disable Project creation with external database. (Enter \"1\" to disable)"
+
+[[variables]]
+key = "DATABASE_URL"
+label = "DATABASE_URL"
+default = ""
+description = "JDBC URL Format. Can be used instead of NC_DB. Used in 1-Click Heroku deployment"
+
+[[variables]]
+key = "DISABLE_TELE"
+label = "NC_DISABLE_TELE"
+default = ""
+description = "Disable telemetry (Enter \"1\" to disable)"
+
+[[variables]]
+key = "NC_DB"
+label = "NC_DB"
+default = ""
+description = "MySQL, PostgreSQL and MSSQL connection urls supported. If absent: A local SQLite will be created in root folder"
+
+[[variables]]
+key = "PUBLIC_URL"
+label = "NC_PUBLIC_URL"
+default = ""
+description = "Used for sending Email invitations. If absent: Best guess from http request params"
+
+[[variables]]
+key = "SENTRY_DSN"
+label = "NC_SENTRY_DSN"
+default = ""
+description = "For Sentry monitoring"
+
+[[variables]]
+key = "VERSION"
+label = "NocoDB Version"
+default = "0.83.8"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/nocodb/nocodb/tags"

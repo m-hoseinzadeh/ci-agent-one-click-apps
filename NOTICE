@@ -1,0 +1,21 @@
+ci-agent-one-click-apps
+=======================
+
+This repository contains one-click application templates for the ci-agent
+deployment tool, in ci-agent's TOML catalog format.
+
+The app templates under apps/ are derived from the CapRover One-Click Apps
+project (https://github.com/caprover/one-click-apps), which is licensed under
+the Apache License, Version 2.0. They were mechanically converted from
+CapRover's captain-definition v4 YAML format into ci-agent's catalog TOML
+format. The original copyright remains with the CapRover project and its
+contributors. A copy of the Apache License 2.0 is included in LICENSE.
+
+Conversion notes (see README.md for details): CapRover routes traffic through
+its own reverse proxy using internal `srv-captain--` DNS names and a
+`containerHttpPort`, whereas ci-agent publishes a host port on plain docker
+compose. The conversion strips the `srv-captain--` prefix, publishes the web
+port (or a known database/cache port) as `{{HTTP_PORT}}`, maps `$$cap_*`
+variables to `{{...}}` placeholders, and escapes shell `$` so docker compose
+does not interpolate it. Templates are best-effort and should be reviewed and
+tested before production use.

@@ -1,0 +1,79 @@
+slug = "yagpdb"
+name = "Yagpdb"
+category = "App"
+description = "Yet another general purpose discord bot"
+keywords = ["yagpdb"]
+compose = '''
+services:
+  yagpdb:
+    depends_on:
+    - yagpdb-redis
+    - yagpdb-postgres
+    environment:
+      YAGPDB_OWNER: '{{YAGPDB_BOT_OWNER}}'
+      YAGPDB_CLIENTID: '{{YAGPDB_BOT_CLIENT_ID}}'
+      YAGPDB_CLIENTSECRET: '{{YAGPDB_BOT_CLIENT_SECRET}}'
+      YAGPDB_BOTTOKEN: Bot {{YAGPDB_BOT_TOKEN}}
+      YAGPDB_HOST: yagpdb.{{ROOT_DOMAIN}}
+      YAGPDB_PQHOST: yagpdb-postgres
+      YAGPDB_PQUSERNAME: yagpdb
+      YAGPDB_PQDB: yagpdb_production
+      YAGPDB_PQPASSWORD: '{{POSTGRES_PASSWORD}}'
+      YAGPDB_REDIS: yagpdb-redis:6379
+    volumes:
+    - yagpdb-soundboard:/app/soundboard
+  yagpdb-redis:
+    image: redis:6.2.5-alpine
+    volumes:
+    - yagpdb-redis-data:/data
+    ports:
+    - '{{HTTP_PORT}}:6379'
+  yagpdb-postgres:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_USER: yagpdb
+      POSTGRES_DB: yagpdb_production
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - yagpdb-db-data:/var/lib/postgresql/data
+volumes:
+  yagpdb-soundboard:
+  yagpdb-redis-data:
+  yagpdb-db-data:
+'''
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+description = "Password must be at least 12 characters. Please use a random string."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "YAGPDB_BOT_CLIENT_ID"
+label = "Discord bot OAuth2 client ID"
+default = "Insert bot OAuth2 client id here"
+description = "https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token"
+
+[[variables]]
+key = "YAGPDB_BOT_CLIENT_SECRET"
+label = "Discord bot OAuth2 client secret"
+default = "Insert bot OAuth2 client secret here"
+description = "https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token"
+
+[[variables]]
+key = "YAGPDB_BOT_OWNER"
+label = "Discord server owner ID"
+default = "Insert your server owner id here"
+description = "https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-"
+
+[[variables]]
+key = "YAGPDB_BOT_TOKEN"
+label = "Discord bot token"
+default = "Insert bot token here"
+description = "https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token"

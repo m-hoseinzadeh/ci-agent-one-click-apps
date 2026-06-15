@@ -1,0 +1,109 @@
+slug = "orangehrm"
+name = "OrangeHRM"
+category = "App"
+description = "OrangeHRM Open Source is a free HR management system that offers a wealth of modules to suit the needs of your business."
+keywords = ["orangehrm"]
+compose = '''
+services:
+  orangehrm-db:
+    documentation: Taken from https://hub.docker.com/_/mariadb
+    image: mariadb:{{MARIADB_VERSION}}
+    volumes:
+    - orangehrm-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: '{{DB_NAME}}'
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  orangehrm:
+    documentation: Taken from https://hub.docker.com/r/orangehrm/orangehrm
+    depends_on:
+    - orangehrm-db
+    image: orangehrm/orangehrm:{{ORANGEHRM_VERSION}}
+    volumes:
+    - orangehrm-data:/orangehrm
+    restart: always
+    environment:
+      ORANGEHRM_USERNAME: '{{ADMIN_NAME}}'
+      ORANGEHRM_PASSWORD: '{{ADMIN_PASS}}'
+      MARIADB_HOST: orangehrm-db
+      ORANGEHRM_DATABASE_NAME: '{{DB_NAME}}'
+      ORANGEHRM_DATABASE_USER: '{{DB_USER}}'
+      ORANGEHRM_DATABASE_PASSWORD: '{{DB_PASS}}'
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_USER: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASS}}'
+      PUID: 998
+      PGID: 100
+volumes:
+  orangehrm-db-data:
+  orangehrm-data:
+'''
+
+[[variables]]
+key = "ADMIN_NAME"
+label = "OrangeHRM default admin name"
+default = "admin"
+description = "Admin username for OrangeHRM."
+
+[[variables]]
+key = "ADMIN_PASS"
+label = "admin password"
+description = "Password for the admin user."
+
+[[variables]]
+key = "DB_NAME"
+label = "database name"
+default = "orangehrm"
+description = "name for the database."
+
+[[variables]]
+key = "DB_PASS"
+label = "database password"
+description = "Password for the database user and root using mysql."
+
+[[variables]]
+key = "DB_USER"
+label = "database user"
+default = "orangehrm"
+description = "Username for the database using mysql."
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB (database) version"
+default = "10.11.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"
+
+[[variables]]
+key = "ORANGEHRM_VERSION"
+label = "OrangeHRM Version"
+default = "5.4"
+description = "https://hub.docker.com/r/orangehrm/orangehrm/tags"
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMPT host"
+default = "smtp.gmail.com"
+description = "The host for your smtp server"
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+default = "sTr0nG_p@s$wo%d"
+description = "The password for your smtp server"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP port"
+default = "587"
+description = "The port for your smtp server"
+
+[[variables]]
+key = "SMTP_USER"
+label = "SMTP user"
+default = "your_email@gmail.com"
+description = "The user for your smtp server"

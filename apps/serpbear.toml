@@ -1,0 +1,65 @@
+slug = "serpbear"
+name = "SerpBear"
+category = "App"
+description = "SerpBear is an Open Source Search Engine Position Tracking App. It allows you to track your website's keyword positions in Google and get notified of their positions."
+keywords = ["serpbear"]
+compose = '''
+services:
+  serpbear:
+    restart: always
+    image: towfiqi/serpbear:{{SERPBEAR_VERSION}}
+    environment:
+      NEXT_PUBLIC_APP_URL: http://serpbear.{{ROOT_DOMAIN}}
+      USER: '{{SERPBEAR_USER}}'
+      PASSWORD: '{{SERPBEAR_PASSWORD}}'
+      SECRET: '{{SERPBEAR_SECRET}}'
+      APIKEY: '{{SERPBEAR_APIKEY}}'
+      SESSION_DURATION: '{{SERPBEAR_SESSION}}'
+    volumes:
+    - serpbear-serpbear-data:/app/data
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  serpbear-serpbear-data:
+'''
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SERPBEAR_APIKEY"
+label = "SerpBear API Key"
+generate = true
+description = "API key that will be used to access the apps API (min 32 characters)"
+
+[[variables]]
+key = "SERPBEAR_PASSWORD"
+label = "Password"
+generate = true
+description = "The password you want to use to login to the app (min 12 characters)"
+
+[[variables]]
+key = "SERPBEAR_SECRET"
+label = "encryption secret"
+generate = true
+description = "A secret key which will be used for encrypting 3rd party api keys & passwords (min 32 characters)"
+
+[[variables]]
+key = "SERPBEAR_SESSION"
+label = "Session Duration"
+default = "24"
+description = "The duration (in hour) of the user's logged in session"
+
+[[variables]]
+key = "SERPBEAR_USER"
+label = "Username"
+default = "admin"
+description = "the username you want to use to login to the app"
+
+[[variables]]
+key = "SERPBEAR_VERSION"
+label = "SerpBear Version"
+description = "Check out the docker page for valid tags https://hub.docker.com/r/towfiqi/serpbear"

@@ -1,0 +1,50 @@
+slug = "shiori"
+name = "Shiori"
+category = "App"
+description = "A simple bookmark manager built with Go."
+keywords = ["shiori"]
+compose = '''
+services:
+  shiori:
+    image: ghcr.io/go-shiori/shiori:{{SHIORI_VERSION}}
+    environment:
+      SHIORI_DBMS: mysql
+      SHIORI_MYSQL_USER: '{{MARIADB}}-user'
+      SHIORI_MYSQL_PASS: '{{MARIADB}}-pass'
+      SHIORI_MYSQL_NAME: '{{MARIADB}}-db'
+      SHIORI_MYSQL_ADDRESS: tcp(shiori-mariadb)
+    volumes:
+    - shiori-data:/shiori
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  shiori-mariadb:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: '{{MARIADB}}-db'
+      MYSQL_USER: '{{MARIADB}}-user'
+      MYSQL_PASSWORD: '{{MARIADB}}-pass'
+    volumes:
+    - shiori-mariadb-data:/var/lib/mysql
+    restart: unless-stopped
+volumes:
+  shiori-data:
+  shiori-mariadb-data:
+'''
+
+[[variables]]
+key = "MARIADB"
+label = "Mariadb"
+default = ""
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "11.0.2"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags/"
+
+[[variables]]
+key = "SHIORI_VERSION"
+label = "Shiori Version Tag"
+default = "v1.5.5"
+description = "Check out their Docker page for the valid tags https://github.com/go-shiori/shiori/pkgs/container/shiori/versions?filters%5Bversion_type%5D=tagged"

@@ -1,0 +1,113 @@
+slug = "mixpost"
+name = "Mixpost"
+category = "App"
+description = "Self-Hosted Social Media Management Software"
+keywords = ["mixpost"]
+compose = '''
+services:
+  mixpost:
+    image: inovector/mixpost:{{MIXPOST_VERSION}}
+    environment:
+      APP_NAME: '{{MIXPOST_APP_NAME}}'
+      APP_KEY: '{{MIXPOST_APP_KEY}}'
+      APP_URL: http://mixpost.{{ROOT_DOMAIN}}
+      DB_DATABASE: '{{MYSQL_DATABASE}}'
+      DB_USERNAME: '{{MYSQL_USER}}'
+      DB_PASSWORD: '{{MYSQL_PASSWORD}}'
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      APP_ENV: '{{MIXPOST_APP_ENV}}'
+      APP_DEBUG: '{{MIXPOST_APP_DEBUG}}'
+      DB_HOST: mixpost-db
+      REDIS_HOST: mixpost-cache
+    depends_on:
+    - mixpost-db
+    - mixpost-cache
+    volumes:
+    - mixpost-storage:/var/www/html/storage/app
+    - mixpost-logs:/var/www/html/storage/logs
+  mixpost-db:
+    image: mysql:{{MYSQL_VERSION}}
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_PASSWORD}}'
+      MYSQL_DATABASE: '{{MYSQL_DATABASE}}'
+      MYSQL_USER: '{{MYSQL_USER}}'
+      MYSQL_PASSWORD: '{{MYSQL_PASSWORD}}'
+    volumes:
+    - mixpost-db:/var/lib/mysql
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  mixpost-cache:
+    volumes:
+    - mixpost-cache:/data
+volumes:
+  mixpost-storage:
+  mixpost-logs:
+  mixpost-db:
+  mixpost-cache:
+'''
+
+[[variables]]
+key = "MIXPOST_APP_DEBUG"
+label = "Application | Debug Information"
+default = "false"
+description = "Whether to show debug information."
+
+[[variables]]
+key = "MIXPOST_APP_ENV"
+label = "Application | Environment"
+default = "production"
+description = "Application environment. Possible values are `local`, `production` and `testing`."
+
+[[variables]]
+key = "MIXPOST_APP_KEY"
+label = "Application | Key"
+default = "base64:d3p4OHptbnFvZXA4bjlieW5wa284MmdlaTY3NjMxa3E="
+description = "Base64 encoded application key for encryption. Use `https://generate-random.org/laravel-key-generator?count=1` to generate a key."
+
+[[variables]]
+key = "MIXPOST_APP_NAME"
+label = "Application | Name"
+default = "Mixpost"
+description = "Name of the application."
+
+[[variables]]
+key = "MIXPOST_VERSION"
+label = "Application | Version"
+default = "v1.1.3"
+description = "Mixpost version. Check out their valid tags at https://hub.docker.com/r/inovector/mixpost"
+
+[[variables]]
+key = "MYSQL_DATABASE"
+label = "Database | Name"
+default = "mixpost"
+description = "Name of the MySQL database."
+
+[[variables]]
+key = "MYSQL_PASSWORD"
+label = "Database | User Password"
+generate = true
+description = "Password of the MySQL user."
+
+[[variables]]
+key = "MYSQL_USER"
+label = "Database | User Name"
+default = "mixpost"
+description = "Name of the MySQL user."
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "Database | Version"
+default = "8.0.32"
+description = "MySQL version. Check out their valid tags at https://hub.docker.com/_/mysql/tags"
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Cache | Password"
+generate = true
+description = "Password of the Redis instance."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

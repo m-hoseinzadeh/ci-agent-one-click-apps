@@ -1,0 +1,59 @@
+slug = "maybe-finance"
+name = "Maybe Finance"
+category = "App"
+description = "Self-hosted personal finance management tool"
+keywords = ["finance", "maybe"]
+compose = '''
+services:
+  maybe-finance:
+    image: ghcr.io/maybe-finance/maybe:{{APP_VERSION}}
+    volumes:
+    - maybe-finance-storage:/rails/storage
+    restart: unless-stopped
+    environment:
+      SELF_HOSTED: 'true'
+      RAILS_FORCE_SSL: 'false'
+      RAILS_ASSUME_SSL: 'false'
+      GOOD_JOB_EXECUTION_MODE: async
+      SECRET_KEY_BASE: '{{PASS}}'
+      SYNTH_API_KEY: '{{API_KEY}}'
+      DATABASE_URL: postgresql://maybe_user:{{PG_PASS}}@maybe-finance-db:5432/maybe_production
+    depends_on:
+      maybe-finance-db:
+        condition: service_healthy
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  maybe-finance-db:
+    image: postgres:16
+    restart: always
+    volumes:
+    - maybe-finance-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: maybe_user
+      POSTGRES_DB: maybe_production
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+volumes:
+  maybe-finance-storage:
+  maybe-finance-postgres-data:
+'''
+
+[[variables]]
+key = "API_KEY"
+label = "API Key"
+generate = true
+
+[[variables]]
+key = "APP_VERSION"
+label = "Version"
+default = "0.4.3"
+description = "Check out their Docker page for the valid tags ghcr.io/maybe-finance/maybe"
+
+[[variables]]
+key = "PASS"
+label = "Secret Key Base"
+generate = true
+
+[[variables]]
+key = "PG_PASS"
+label = "Postgres password"
+generate = true

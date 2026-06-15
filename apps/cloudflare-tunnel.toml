@@ -1,0 +1,10 @@
+slug = "cloudflare-tunnel"
+name = "Cloudflare Tunnel"
+category = "App"
+description = "Secure your web servers with a Cloudflare Tunnel. This creates an encrypted connection without exposing your server directly."
+keywords = ["cloudflare", "tunnel"]
+compose = '''
+services:
+  cloudflare-tunnel:
+    restart: always
+'''

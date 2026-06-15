@@ -1,0 +1,69 @@
+slug = "poste-io"
+name = "Poste.io"
+category = "Communication"
+description = "Complete mail server built in one container"
+keywords = ["io", "poste", "poste.io"]
+compose = '''
+services:
+  poste-io:
+    image: analogic/poste.io:{{POSTE_VERSION}}
+    hostname: '{{POSTE_HOSTNAME}}'
+    environment:
+      TZ: '{{POSTE_TZ}}'
+      HTTPS: '{{POSTE_HTTPS}}'
+      DISABLE_CLAMAV: '{{POSTE_DISABLE_CLAMAV}}'
+      DISABLE_RSPAMD: '{{POSTE_DISABLE_RSPAMD}}'
+      DISABLE_ROUNDCUBE: '{{POSTE_DISABLE_ROUNDCUBE}}'
+      VIRTUAL_HOST: '{{POSTE_HOSTNAME}}'
+    ports:
+    - '25:25'
+    - 110:110
+    - 143:143
+    - 465:465
+    - 587:587
+    - 993:993
+    - 995:995
+    - 4190:4190
+    volumes:
+    - poste-io:/data
+volumes:
+  poste-io:
+'''
+
+[[variables]]
+key = "POSTE_DISABLE_CLAMAV"
+label = "Features | Disable ClamAV"
+description = "Whether to disable ClamAV anti-virus. Useful for low memory usage. Set value `TRUE` to disable."
+
+[[variables]]
+key = "POSTE_DISABLE_ROUNDCUBE"
+label = "Features | Disable Roundcube"
+description = "Whether to disable Roundcube webmail. Set value `TRUE` to disable."
+
+[[variables]]
+key = "POSTE_DISABLE_RSPAMD"
+label = "Features | Disable Rspamd"
+description = "Whether to disable Rspamd spam filter. Useful for low memory usage. Set value `TRUE` to disable."
+
+[[variables]]
+key = "POSTE_HOSTNAME"
+label = "Networking | Hostname"
+description = "Hostname of your mail server. **This is required**. It is usually `mail.mydomain.com`."
+
+[[variables]]
+key = "POSTE_HTTPS"
+label = "Networking | Use HTTPS"
+default = "OFF"
+description = "Whether to redirect to encrypted HTTP. It's recommended to leave it to `OFF` since CapRover acts as reverse proxy and handles HTTPS. If you want to enable it, remove the value and leave it blank and then to change the configuration and ports accordingly."
+
+[[variables]]
+key = "POSTE_TZ"
+label = "General | Timezone"
+default = "UTC"
+description = "Timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "POSTE_VERSION"
+label = "General | Version"
+default = "2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/analogic/poste.io/tags"

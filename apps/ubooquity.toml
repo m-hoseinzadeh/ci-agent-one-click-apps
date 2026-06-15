@@ -1,0 +1,53 @@
+slug = "ubooquity"
+name = "Ubooquity"
+category = "App"
+description = "Ubooquity is an online cross-platform content server for reading e-books"
+keywords = ["ubooquity"]
+compose = '''
+services:
+  ubooquity:
+    image: lscr.io/linuxserver/ubooquity:{{UBOOQUITY_VERSION}}
+    environment:
+      PUID: '1000'
+      PGID: '1000'
+      TZ: '{{TZ}}'
+      MAXMEM: ''
+    hostname: ubooquity.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:2202'
+    - '{{ADMIN_PORT}}:2203'
+    volumes:
+    - ubooquity-config:/config
+    - ubooquity-books:/books
+    - ubooquity-comics:/comics
+    - ubooquity-files:/files
+volumes:
+  ubooquity-config:
+  ubooquity-books:
+  ubooquity-comics:
+  ubooquity-files:
+'''
+
+[[variables]]
+key = "ADMIN_PORT"
+label = "Administration Panel Port"
+default = "2203"
+description = "The port on which to run the administration panel page."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Paris"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "UBOOQUITY_VERSION"
+label = "Ubooquity Version"
+default = "2.1.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/ubooquity/tags"

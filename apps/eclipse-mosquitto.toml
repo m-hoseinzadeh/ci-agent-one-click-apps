@@ -1,0 +1,26 @@
+slug = "eclipse-mosquitto"
+name = "Eclipse Mosquitto - A MQTT Broker"
+category = "App"
+description = "Eclipse Mosquitto is an open source message broker which implements MQTT version 5, 3.1.1 and 3.1"
+keywords = ["broker", "eclipse", "mosquitto", "mqtt"]
+compose = '''
+services:
+  eclipse-mosquitto:
+    image: eclipse-mosquitto:{{ECLIPSE_VERSION}}
+    volumes:
+    - eclipse-mosquitto-eclipse-config:/mosquitto/config/
+    - eclipse-mosquitto-eclipse-data:/mosquitto/data/
+    - eclipse-mosquitto-eclipse-log:/mosquitto/log/
+    ports:
+    - '{{HTTP_PORT}}:1883'
+    restart: always
+volumes:
+  eclipse-mosquitto-eclipse-config:
+  eclipse-mosquitto-eclipse-data:
+  eclipse-mosquitto-eclipse-log:
+'''
+
+[[variables]]
+key = "ECLIPSE_VERSION"
+label = "Eclipes-Mosquitto Image Version"
+default = "latest"

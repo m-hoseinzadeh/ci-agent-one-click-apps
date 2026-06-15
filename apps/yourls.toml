@@ -1,0 +1,77 @@
+slug = "yourls"
+name = "yourls"
+category = "App"
+description = "YOURLS is a set of PHP scripts that will allow you to run Your Own URL Shortener."
+keywords = ["yourls"]
+compose = '''
+services:
+  yourls-db:
+    image: mysql:{{DATABASE_VERSION}}
+    volumes:
+    - yourls-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: '{{YOURLS_DB_NAME}}'
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  yourls:
+    depends_on:
+    - yourls-db
+    image: yourls:{{YOURLS_VERSION}}
+    volumes:
+    - yourls-plugins:/usr/src/yourls/plugins
+    restart: always
+    environment:
+      YOURLS_SITE: '{{YOURLS_SITE}}'
+      YOURLS_USER: '{{YOURLS_USER}}'
+      YOURLS_PASS: '{{YOURLS_PASS}}'
+      YOURLS_DB_HOST: yourls-db:3306
+      YOURLS_DB_NAME: '{{YOURLS_DB_NAME}}'
+      YOURLS_DB_USER: '{{DB_USER}}'
+      YOURLS_DB_PASS: '{{DB_PASS}}'
+volumes:
+  yourls-db-data:
+  yourls-plugins:
+'''
+
+[[variables]]
+key = "DATABASE_VERSION"
+label = "Database Version"
+default = "5.7"
+description = "Check out the Docker pages for the valid tags https://hub.docker.com/r/library/mysql/tags/"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "yourls"
+
+[[variables]]
+key = "YOURLS_DB_NAME"
+label = "Database name"
+default = "yourls"
+
+[[variables]]
+key = "YOURLS_PASS"
+label = "YOURLS instance password"
+
+[[variables]]
+key = "YOURLS_SITE"
+label = "YOURLS instance URL"
+
+[[variables]]
+key = "YOURLS_USER"
+label = "YOURLS instance username"
+
+[[variables]]
+key = "YOURLS_VERSION"
+label = "yourls Version"
+default = "1.9.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/yourls/tags/"

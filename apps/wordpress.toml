@@ -1,0 +1,60 @@
+slug = "wordpress"
+name = "WordPress"
+category = "Database"
+description = "WordPress is a content management system based on PHP and MySQL that is usually used with the MySQL or MariaDB database"
+keywords = ["wordpress"]
+compose = '''
+services:
+  wordpress-db:
+    image: '{{DB_TYPE}}:{{DATABASE_VERSION}}'
+    volumes:
+    - wordpress-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+  wordpress-wordpress:
+    depends_on:
+    - wordpress-db
+    image: wordpress:{{WP_VERSION}}
+    volumes:
+    - wordpress-wp-data:/var/www/html
+    restart: always
+    environment:
+      WORDPRESS_DB_HOST: wordpress-db:3306
+      WORDPRESS_DB_USER: '{{DB_USER}}'
+      WORDPRESS_DB_PASSWORD: '{{DB_PASS}}'
+volumes:
+  wordpress-db-data:
+  wordpress-wp-data:
+'''
+
+[[variables]]
+key = "DATABASE_VERSION"
+label = "Database Version, default is MySQL"
+default = "8.4.8"
+description = "Check out the Docker pages for the valid tags https://hub.docker.com/r/library/mysql/tags/ or https://hub.docker.com/_/mariadb?tab=tags"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_TYPE"
+label = "Database Type"
+default = "mysql"
+description = "You can either choose mariadb or mysql, you need to change the version according to which DB is selected. It is case sensitive."
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "wordpressuser"
+
+[[variables]]
+key = "WP_VERSION"
+label = "WordPress Version"
+default = "6.9.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/wordpress/tags/"

@@ -1,0 +1,55 @@
+slug = "vvveb-only"
+name = "Vvveb CMS - No Database"
+category = "Database"
+description = "This will create a Vvveb CMS instance only. You will need to create and configure the database information manually. Intended for advanced users."
+keywords = ["cms", "database", "no", "only", "vvveb"]
+compose = '''
+services:
+  vvveb-only-vvveb:
+    image: vvveb/vvvebcms:{{VVVEB_VERSION}}
+    volumes:
+    - vvveb-only-vvveb-data:/var/www/html
+    restart: always
+    environment:
+      DB_ENGINE: '{{DB_TYPE}}'
+      DB_HOST: '{{DB_HOST}}'
+      DB_DATABASE: '{{DB_NAME}}'
+      DB_USER: '{{DB_USER}}'
+      DB_PASSWORD: '{{DB_PASS}}'
+volumes:
+  vvveb-only-vvveb-data:
+'''
+
+[[variables]]
+key = "DB_HOST"
+label = "Database Host"
+default = "srv-captain--xxx"
+description = "Database host"
+
+[[variables]]
+key = "DB_NAME"
+label = "DB Name"
+default = "vvveb"
+description = "Database name"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_TYPE"
+label = "Database Type"
+default = "mysqli"
+description = "You can either choose mysqli, sqlite or pgsql. It is case sensitive. SQLite does not need further database configuration."
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "vvvebuser"
+
+[[variables]]
+key = "VVVEB_VERSION"
+label = "Vvveb Version"
+default = "php8.3-fpm-alpine"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/vvveb/vvvebcms/tags"

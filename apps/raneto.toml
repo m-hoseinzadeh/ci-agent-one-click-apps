@@ -1,0 +1,39 @@
+slug = "raneto"
+name = "Raneto"
+category = "App"
+description = "Raneto - is an open source Knowledgebase platform that uses static Markdown files to power your Knowledgebase."
+keywords = ["raneto"]
+compose = '''
+services:
+  raneto:
+    image: linuxserver/raneto:{{RANETO_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '1000'
+      GUID: '1000'
+    hostname: raneto.{{ROOT_DOMAIN}}
+    volumes:
+    - raneto-config:/config
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  raneto-config:
+'''
+
+[[variables]]
+key = "RANETO_VERSION"
+label = "Raneto Version"
+default = "0.17.0-ls49"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/raneto/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Brussels"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

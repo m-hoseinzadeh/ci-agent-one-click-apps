@@ -1,0 +1,102 @@
+slug = "plausible"
+name = "Plausible v2.1.4"
+category = "Analytics"
+description = "Plausible is a lightweight and open-source website analytics tool."
+keywords = ["plausible", "v2.1.4"]
+compose = '''
+services:
+  plausible-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - plausible-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: plausible
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+  plausible-clickhouse:
+    image: clickhouse/clickhouse-server:{{CLICKHOUSE_VERSION}}
+    volumes:
+    - plausible-clickhouse-data:/var/lib/clickhouse
+  plausible:
+    depends_on:
+    - plausible-postgres
+    - plausible-clickhouse
+    environment:
+      BASE_URL: http://plausible.{{ROOT_DOMAIN}}
+      SECRET_KEY_BASE: '{{GEN_RANDOM_HEX}}(64)'
+      DATABASE_URL: postgres://plausible:{{POSTGRES_PASSWORD}}@plausible-postgres:5432/plausible
+      CLICKHOUSE_DATABASE_URL: http://plausible-clickhouse:8123/plausible
+      DISABLE_REGISTRATION: 'true'
+      MAILER_EMAIL: '{{MAILER_EMAIL}}'
+      SMTP_HOST_ADDR: '{{RELAY_HOST}}'
+      SMTP_HOST_PORT: '{{RELAY_PORT}}'
+      SMTP_USER_NAME: '{{RELAY_USERNAME}}'
+      SMTP_USER_PWD: '{{RELAY_PASSWORD}}'
+      TOTP_VAULT_KEY: '{{TOTP_VAULT_KEY}}'
+      MAILER_ADAPTER: Bamboo.Mua
+    ports:
+    - '{{HTTP_PORT}}:8000'
+volumes:
+  plausible-postgres-data:
+  plausible-clickhouse-data:
+'''
+
+[[variables]]
+key = "CLICKHOUSE_VERSION"
+label = "CLICKHOUSE_VERSION"
+default = "24.3.3.102-alpine"
+description = "Clickhouse version (from https://hub.docker.com/r/clickhouse/clickhouse-server/tags, e.g. 24.3.3.102-alpine)"
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "MAILER_EMAIL"
+label = "MAILER_EMAIL"
+description = "This is the email which will be used to send mail from often same as the username for logging into the SMTP host."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "POSTGRES_PASSWORD"
+default = "plausible"
+description = "This is the PostgreSQL password for user 'plausible'. Please change it."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "POSTGRES_VERSION"
+default = "16-alpine"
+description = "Postgres version (from https://hub.docker.com/_/postgres?tab=tags, Plausible v2.1.1 was tested against PostgreSQL versions 15 and 16)"
+
+[[variables]]
+key = "RELAY_HOST"
+label = "RELAY_HOST"
+default = "smtp.mailgun.org"
+description = "This is the SMTP host for sending email. Use Mailgun or whatever other service."
+
+[[variables]]
+key = "RELAY_PASSWORD"
+label = "RELAY_PASSWORD"
+description = "This is the password for logging into the SMTP host. Please change it according to your host."
+
+[[variables]]
+key = "RELAY_PORT"
+label = "RELAY_PORT"
+default = "587"
+description = "This is the port for the SMTP host. Please change it if needed."
+
+[[variables]]
+key = "RELAY_USERNAME"
+label = "RELAY_USERNAME"
+description = "This is the username for logging into the SMTP host. Please change it according to your host."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TOTP_VAULT_KEY"
+label = "TOTP_VAULT_KEY"
+description = "This new key is used to encrypt TOTP secrets at rest. Generate by running $ openssl rand -base64 32"

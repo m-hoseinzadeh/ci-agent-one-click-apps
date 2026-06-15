@@ -1,0 +1,45 @@
+slug = "bitwardenrs"
+name = "vaultwarden"
+category = "App"
+description = "Lightweight fully featured Rust implementation of Bitwarden."
+keywords = ["bitwardenrs", "vaultwarden"]
+compose = '''
+services:
+  bitwardenrs:
+    image: vaultwarden/server:{{BITWARDENRS_VERSION}}
+    environment:
+      DOMAIN: https://bitwardenrs.{{ROOT_DOMAIN}}
+      WEBSOCKET_ENABLED: true
+      SIGNUPS_ALLOWED: '{{REGISTER_ENABLED}}'
+      ADMIN_TOKEN: '{{ADMIN_TOKEN}}'
+    ports:
+    - 3012:3012
+    volumes:
+    - bitwardenrs-data:/data
+    restart: unless-stopped
+volumes:
+  bitwardenrs-data:
+'''
+
+[[variables]]
+key = "ADMIN_TOKEN"
+label = "admin password"
+description = "this password enables the admin zone on /admin. If you let this password empty, the admin interface will be disabled and it will be the best safety option."
+
+[[variables]]
+key = "BITWARDENRS_VERSION"
+label = "vaultwarden Version"
+default = "1.30.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/vaultwarden/server/tags"
+
+[[variables]]
+key = "REGISTER_ENABLED"
+label = "enabled open registration"
+default = "True"
+description = "If field is true, all visitors can create an account. If false, only the administrator can invite other users."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

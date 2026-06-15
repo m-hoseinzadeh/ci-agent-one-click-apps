@@ -1,0 +1,33 @@
+slug = "filezilla"
+name = "Filezilla"
+category = "App"
+description = "FileZilla is a free and open-source, cross-platform FTP application"
+keywords = ["filezilla"]
+compose = '''
+services:
+  filezilla:
+    image: linuxserver/filezilla:{{FZ_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '1000'
+      PGID: '1000'
+    restart: unless-stopped
+    volumes:
+    - filezilla-config:/config
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  filezilla-config:
+'''
+
+[[variables]]
+key = "FZ_VERSION"
+label = "Filezilla Version"
+default = "3.51.0-r1-ls6"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/filezilla/tags"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Asia/Kolkata"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

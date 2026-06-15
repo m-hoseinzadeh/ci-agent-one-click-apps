@@ -1,0 +1,37 @@
+slug = "linkding"
+name = "Linkding"
+category = "App"
+description = "Self-hosted bookmark manager that is designed be to be minimal, fast, and easy to set up"
+keywords = ["linkding"]
+compose = '''
+services:
+  linkding:
+    image: sissbruecker/linkding:{{N8N_VERSION}}
+    environment:
+      LD_SUPERUSER_NAME: '{{LD_SUPERUSER_NAME}}'
+      LD_SUPERUSER_PASSWORD: '{{LD_SUPERUSER_PASSWORD}}'
+      LD_DISABLE_BACKGROUND_TASKS: 'False'
+      LD_DISABLE_URL_VALIDATION: 'False'
+    volumes:
+    - linkding:/etc/linkding/data
+    ports:
+    - '{{HTTP_PORT}}:9090'
+volumes:
+  linkding:
+'''
+
+[[variables]]
+key = "LD_SUPERUSER_NAME"
+label = "Superuser name"
+description = "Username of the initial superuser to create, leave empty to not create one"
+
+[[variables]]
+key = "LD_SUPERUSER_PASSWORD"
+label = "Superuser password"
+description = "Password for the initial superuser, leave empty to disable authentication and rely on proxy authentication instead"
+
+[[variables]]
+key = "N8N_VERSION"
+label = "Application | linkding"
+default = "1.23.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/sissbruecker/linkding/tags"

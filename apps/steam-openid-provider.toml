@@ -1,0 +1,48 @@
+slug = "steam-openid-provider"
+name = "Steam OpenID Connect Provider"
+category = "App"
+description = "This server allows you to use Steam as an OpenID Connect Identity provider (OIDC IDP). This way you can use Steam logins in KeyCloak or any other OpenID Connect based authentication client."
+keywords = ["connect", "openid", "provider", "steam"]
+compose = '''
+services:
+  steam-openid-provider:
+    image: ghcr.io/byo-software/steam-openid-connect-provider:sha-c8305ce
+    restart: always
+    environment:
+      OpenID__RedirectUri: '{{REDIRECT_URI}}'
+      OpenID__ClientID: '{{CLIENT_ID}}'
+      OpenID__ClientSecret: '{{CLIENT_SECRET}}'
+      Hosting__PublicOrigin: '{{ORIGIN}}'
+      Steam__ApplicationKey: '{{API_KEY}}'
+    ports:
+    - '{{HTTP_PORT}}:80'
+'''
+
+[[variables]]
+key = "API_KEY"
+label = "Steam API Key"
+description = "A working Steam API Key for this app. (https://steamcommunity.com/dev/apikey)"
+
+[[variables]]
+key = "CLIENT_ID"
+label = "OAuth Client ID"
+default = "steamidp"
+description = "OpenID ClientID used to initiate authorization."
+
+[[variables]]
+key = "CLIENT_SECRET"
+label = "OpenID Client Secret"
+generate = true
+description = "OpenID Client Secret used to initiate authorization."
+
+[[variables]]
+key = "ORIGIN"
+label = "OpenID Origin URL"
+default = "http://openid.example.com"
+description = "The base URL of where this app is hosted. Eg: https://openid.example.com or https://example.org. If left blank, it will be inferred."
+
+[[variables]]
+key = "REDIRECT_URI"
+label = "Post login redirect URL"
+default = "http://example.com/callback"
+description = "URL the user will be redirected after login is authorized through Steam."

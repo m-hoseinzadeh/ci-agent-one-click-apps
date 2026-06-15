@@ -1,0 +1,60 @@
+slug = "claper"
+name = "Claper"
+category = "App"
+description = "Claper turns your presentations into an interactive, engaging and exciting experience."
+keywords = ["claper"]
+compose = '''
+services:
+  claper-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_USER: claper
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWD}}'
+    volumes:
+    - claper-postgres-data:/var/lib/postgresql/data
+  claper:
+    image: ghcr.io/claperco/claper:{{CLAPER_VER}}
+    container_name: claper
+    volumes:
+    - claper-uploads:/app/priv/static/uploads
+    environment:
+      DATABASE_URL: postgres://claper:{{POSTGRES_PASSWD}}@claper-postgres:5432/claper
+      MAIL_TRANSPORT: local
+      ENDPOINT_HOST: claper.{{ROOT_DOMAIN}}
+      ENDPOINT_PORT: 443
+      SECRET_KEY_BASE: '{{GEN_RANDOM_HEX}}(64)'
+    ports:
+    - '{{HTTP_PORT}}:4000'
+volumes:
+  claper-postgres-data:
+  claper-uploads:
+'''
+
+[[variables]]
+key = "CLAPER_VER"
+label = "Claper Version"
+default = "1.4.0"
+description = "Check out their page for the valid tags https://github.com/ClaperCo/Claper/pkgs/container/claper"
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "POSTGRES_PASSWD"
+label = "Postgres User Password"
+generate = true
+description = "User password for the database instance."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "15-alpine"
+description = "Version of PostgreSQL. Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

@@ -1,0 +1,159 @@
+slug = "zammad"
+name = "Zammad"
+category = "App"
+description = "Zammad is a web-based, open source user support/ticketing solution."
+keywords = ["zammad"]
+compose = '''
+services:
+  zammad-backup:
+    restart: always
+    depends_on:
+    - zammad-railsserver
+    environment:
+      BACKUP_SLEEP: 86400
+      HOLD_DAYS: 10
+      POSTGRESQL_HOST: zammad-postgresql
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USER: '{{ZAMMAD_POSTGRESQL_USER}}'
+      POSTGRESQL_PASSWORD: '{{ZAMMAD_POSTGRESQL_PASS}}'
+      POSTGRESQL_DB: '{{ZAMMAD_POSTGRESQL_DB}}'
+      ZAMMAD_RAILSSERVER_HOST: zammad-railsserver
+      ZAMMAD_RAILSSERVER_PORT: 3000
+    volumes:
+    - zammad-backup:/var/tmp/zammad
+    - zammad-data:/opt/zammad
+  zammad-elasticsearch:
+    restart: always
+    image: zammad/zammad-docker-compose:zammad-elasticsearch-{{ZAMMAD_VERSION}}
+    environment:
+      discovery.type: single-node
+    volumes:
+    - zammad-elasticsearch-data:/usr/share/elasticsearch/data
+  zammad-init:
+    restart: on-failure
+    depends_on:
+    - zammad-postgresql
+    environment:
+      AUTOWIZARD_JSON: ''
+      ELASTICSEARCH_ENABLED: '{{ZAMMAD_ELASTICSEARCH_ENABLED}}'
+      ELASTICSEARCH_HOST: zammad-elasticsearch
+      ELASTICSEARCH_PORT: 9200
+      ELASTICSEARCH_SCHEMA: http
+      ELASTICSEARCH_NAMESPACE: zammad
+      ELASTICSEARCH_REINDEX: true
+      ELASTICSEARCH_SSL_VERIFY: true
+      MEMCACHED_HOST: zammad-memcached
+      MEMCACHED_PORT: 11211
+      NGINX_PORT: 8080
+      NGINX_SERVER_NAME: _
+      NGINX_SERVER_SCHEME: \$$scheme
+      POSTGRESQL_HOST: zammad-postgresql
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_USER: '{{ZAMMAD_POSTGRESQL_USER}}'
+      POSTGRESQL_PASS: '{{ZAMMAD_POSTGRESQL_PASS}}'
+      POSTGRESQL_DB: '{{ZAMMAD_POSTGRESQL_DB}}'
+      POSTGRESQL_DB_CREATE: '{{ZAMMAD_POSTGRESQL_CREATEDB}}'
+      RAILS_TRUSTED_PROXIES: '{{ZAMMAD_RAILS_TRUSTED_PROXIES}}'
+      RSYNC_ADDITIONAL_PARAMS: --no-perms --no-owner
+      ZAMMAD_RAILSSERVER_HOST: zammad-railsserver
+      ZAMMAD_RAILSSERVER_PORT: 3000
+      ZAMMAD_WEBSOCKET_HOST: zammad-websocket
+      ZAMMAD_WEBSOCKET_PORT: 6042
+    volumes:
+    - zammad-data:/opt/zammad
+  zammad-memcached:
+    restart: always
+  zammad-nginx:
+    ports:
+    - '{{HTTP_PORT}}:8080'
+    - 8080:8080
+    depends_on:
+    - zammad-railsserver
+    environment:
+      ZAMMAD_RAILSSERVER_HOST: zammad-railsserver
+      ZAMMAD_RAILSSERVER_PORT: 3000
+      ZAMMAD_WEBSOCKET_HOST: zammad-websocket
+      ZAMMAD_WEBSOCKET_PORT: 6042
+    restart: always
+    volumes:
+    - zammad-data:/opt/zammad
+  zammad-postgresql:
+    environment:
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: '{{ZAMMAD_POSTGRESQL_USER}}'
+      POSTGRES_PASSWORD: '{{ZAMMAD_POSTGRESQL_PASS}}'
+    image: zammad/zammad-docker-compose:zammad-postgresql-{{ZAMMAD_VERSION}}
+    restart: always
+    volumes:
+    - zammad-postgresql-data:/var/lib/postgresql/data
+  zammad-railsserver:
+    depends_on:
+    - zammad-memcached
+    - zammad-postgresql
+    environment:
+      ZAMMAD_RAILSSERVER_PORT: 3000
+    restart: always
+    volumes:
+    - zammad-data:/opt/zammad
+  zammad-scheduler:
+    depends_on:
+    - zammad-memcached
+    - zammad-railsserver
+    restart: always
+    volumes:
+    - zammad-data:/opt/zammad
+  zammad-websocket:
+    depends_on:
+    - zammad-memcached
+    - zammad-railsserver
+    environment:
+      ZAMMAD_WEBSOCKET_PORT: 6042
+    restart: always
+    volumes:
+    - zammad-data:/opt/zammad
+volumes:
+  zammad-backup:
+  zammad-data:
+  zammad-elasticsearch-data:
+  zammad-postgresql-data:
+'''
+
+[[variables]]
+key = "ZAMMAD_ELASTICSEARCH_ENABLED"
+label = "ELASTICSEARCH_ENABLED"
+default = "true"
+description = "Setting this variable to false will allow you to run your Zammad without Elasticsearch. Please note that we strongly advise against doing so."
+
+[[variables]]
+key = "ZAMMAD_POSTGRESQL_CREATEDB"
+label = "POSTGRESQL_DB_CREATE"
+default = "true"
+description = "By default we will create the required database."
+
+[[variables]]
+key = "ZAMMAD_POSTGRESQL_DB"
+label = "POSTGRESQL_DB"
+default = "zammad_production"
+
+[[variables]]
+key = "ZAMMAD_POSTGRESQL_PASS"
+label = "POSTGRESQL_PASS"
+generate = true
+description = "The password of Zammads database user."
+
+[[variables]]
+key = "ZAMMAD_POSTGRESQL_USER"
+label = "POSTGRESQL_USER"
+default = "postgresuser"
+
+[[variables]]
+key = "ZAMMAD_RAILS_TRUSTED_PROXIES"
+label = "RAILS_TRUSTED_PROXIES"
+default = "['127.0.0.1', '::1']"
+description = "By default Zammad trusts localhost proxies only. ⚠ Only change this option if you know what you’re doing! ⚠"
+
+[[variables]]
+key = "ZAMMAD_VERSION"
+label = "Zammad Version"
+default = "5.1.0-48"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/zammad/zammad-docker-compose/tags"

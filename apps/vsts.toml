@@ -1,0 +1,42 @@
+slug = "vsts"
+name = "VSTS"
+category = "App"
+description = "VSTS is an integrated development environment (IDE) developed as a software product by Microsoft Corp"
+keywords = ["vsts"]
+compose = '''
+services:
+  vsts:
+    image: microsoft/vsts-agent:{{VSTS_VERSION}}
+    restart: always
+    environment:
+      VSTS_ACCOUNT: '{{VSTS_ACCOUNT}}'
+      VSTS_TOKEN: '{{VSTS_TOKEN}}'
+      VSTS_AGENT: '{{VSTS_NAME}}'
+      VSTS_POOL: '{{VSTS_POOL}}'
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+'''
+
+[[variables]]
+key = "VSTS_ACCOUNT"
+label = "VSTS Account"
+description = "The name of the Visual Studio account. Take only the account part from your address, e.g. http://{account}.visualstudio.com"
+
+[[variables]]
+key = "VSTS_NAME"
+label = "VSTS Agent Name"
+
+[[variables]]
+key = "VSTS_POOL"
+label = "VSTS Pool"
+
+[[variables]]
+key = "VSTS_TOKEN"
+label = "VSTS Token"
+description = "A personal access token (PAT) for the Visual Studio account that has been given at least the Agent Pools (read, manage) scope."
+
+[[variables]]
+key = "VSTS_VERSION"
+label = "VSTS Version Tag"
+default = "ubuntu-16.04-standard"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/microsoft/vsts-agent/tags/"

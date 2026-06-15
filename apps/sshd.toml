@@ -1,0 +1,39 @@
+slug = "sshd"
+name = "SSH Container"
+category = "App"
+description = "Just a simple container that has sshd installed so you can SSH directly into this container."
+keywords = ["container", "ssh", "sshd"]
+compose = '''
+services:
+  sshd:
+    image: lscr.io/linuxserver/openssh-server:version-9.7_p1-r4
+    environment:
+      PUID: 1001
+      PGID: 1001
+      TZ: Europe/London
+      PUBLIC_KEY: '{{SSHD_PUBLIC_KEY}}'
+      DOCKER_MODS: linuxserver/mods:openssh-server-ssh-tunnel
+      USER_NAME: '{{SSHD_USERNAME}}'
+    volumes:
+    - sshd-config:/config
+    ports:
+    - '{{SSHD_PORT}}:2222'
+volumes:
+  sshd-config:
+'''
+
+[[variables]]
+key = "SSHD_PORT"
+label = "Your SSH exposed port (your host mapped port)"
+default = "4646"
+description = "Enter a port number"
+
+[[variables]]
+key = "SSHD_PUBLIC_KEY"
+label = "Your SSH public key"
+description = "Enter your public key"
+
+[[variables]]
+key = "SSHD_USERNAME"
+label = "Your SSH Username"
+default = "caprover"

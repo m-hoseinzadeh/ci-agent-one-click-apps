@@ -1,0 +1,47 @@
+slug = "wiki-js"
+name = "wiki.js"
+category = "CMS"
+description = "The most powerful and extensible open source Wiki software"
+keywords = ["js", "wiki", "wiki.js"]
+compose = '''
+services:
+  wiki-js-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: wiki
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_USER: wikijs
+    volumes:
+    - wiki-js-db-data:/var/lib/postgresql/data
+  wiki-js:
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: wiki-js-postgres
+      DB_PORT: '5432'
+      DB_USER: wikijs
+      DB_PASS: '{{DB_PASS}}'
+      DB_NAME: wiki
+    image: requarks/wiki:{{VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  wiki-js-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+default = "daTaBaSePaSsWorD"
+description = "Password to connect to the database"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "14.1-alpine"
+
+[[variables]]
+key = "VERSION"
+label = "Wiki.js Version"
+default = "2.5"
+description = "It's highly recommended that you don't use the latest tag but instead the major version you need, e.g. requarks/wiki:2"

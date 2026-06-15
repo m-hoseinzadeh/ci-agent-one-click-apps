@@ -1,0 +1,15 @@
+slug = "ntfy"
+name = "ntfy.sh"
+category = "App"
+description = "Send push notifications to your phone or desktop via PUT/POST"
+keywords = ["ntfy", "ntfy.sh"]
+compose = '''
+services:
+  ntfy:
+    volumes:
+    - ntfy-cache:/var/cache/ntfy
+    - ntfy-etc:/etc/ntfy
+volumes:
+  ntfy-cache:
+  ntfy-etc:
+'''

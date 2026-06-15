@@ -1,0 +1,102 @@
+slug = "minecraft-bedrock"
+name = "Minecraft Bedrock Server"
+category = "App"
+description = "Minecraft Dedicated Server software for linux"
+keywords = ["bedrock", "minecraft", "server"]
+compose = '''
+services:
+  minecraft-bedrock:
+    ports:
+    - '{{PORT}}:19132'
+    environment:
+      EULA: '{{EULA}}'
+      VERSION: '{{BS_VERSION}}'
+      SERVER_PORT: '{{PORT}}'
+      PACKAGE_BACKUP_KEEP: 2
+      SERVER_NAME: '{{BS_NAME}}'
+      OPS: '{{BS_OPS}}'
+      GAMEMODE: '{{BS_GAMEMODE}}'
+      DIFFICULTY: '{{BS_DIFFICULTY}}'
+      ALLOW_LIST: '{{BS_ALLOWLIST}}'
+      ALLOW_LIST_USERS: '{{BS_ALLOWLIST_USERS}}'
+      PLAYER_IDLE_TIMEOUT: '{{BS_IDLE}}'
+      ALLOW_CHEATS: '{{BS_CHEATS}}'
+    image: itzg/minecraft-bedrock-server:{{VERSION}}
+    restart: always
+    volumes:
+    - minecraft-bedrock-data:/data
+volumes:
+  minecraft-bedrock-data:
+'''
+
+[[variables]]
+key = "BS_ALLOWLIST"
+label = "Allowlist?"
+default = "true"
+description = "If true then all connected players must be listed on variable 'ALLOW_LIST_USERS'"
+
+[[variables]]
+key = "BS_ALLOWLIST_USERS"
+label = "Allow list users"
+default = "some_user_name"
+description = "This list is player names, not XUIs"
+
+[[variables]]
+key = "BS_CHEATS"
+label = "Allow Cheats"
+default = "true"
+description = "After a player has idled for this many minutes they will be kicked. If set to 0 then players can idle indefinitely."
+
+[[variables]]
+key = "BS_DIFFICULTY"
+label = "Difficulty"
+default = "normal"
+description = "Sets the difficulty of the world. peaceful, easy, normal, hard"
+
+[[variables]]
+key = "BS_GAMEMODE"
+label = "Game Mode"
+default = "survival"
+description = "Defines the mode of gameplay. survival, creative, adventure, spectator"
+
+[[variables]]
+key = "BS_IDLE"
+label = "Player Idle time"
+default = "0"
+description = "After a player has idled for this many minutes they will be kicked. If set to 0 then players can idle indefinitely."
+
+[[variables]]
+key = "BS_NAME"
+label = "Game Server Name"
+default = ""
+description = "Used as the server name. Cannot contain a \":\" (colon)."
+
+[[variables]]
+key = "BS_OPS"
+label = "Server OPs"
+default = ""
+description = "Comma Separated list of XUIs that will be the server OPs"
+
+[[variables]]
+key = "BS_VERSION"
+label = "Bedrock Server Version"
+default = "LATEST"
+description = "Can be set to a specific server version or the following special values can be used, check https://github.com/itzg/docker-minecraft-bedrock-server#container-specific"
+
+[[variables]]
+key = "EULA"
+label = "EULA"
+default = ""
+description = "IMPORTANT: Read the EULA at https://account.mojang.com/documents/minecraft_eula and set this field to true if you agree. This is a prerequisite to use this software."
+
+[[variables]]
+key = "PORT"
+label = "Game Server Port (TCP/UDP)"
+default = "19132"
+description = "This is the port the server will expose for players to join."
+
+[[variables]]
+key = "VERSION"
+label = "Docker Image Version"
+default = "2022.1.0"
+description = "Choose a Tag from https://hub.docker.com/r/itzg/minecraft-bedrock-server/tags"

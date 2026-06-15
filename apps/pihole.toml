@@ -1,0 +1,46 @@
+slug = "pihole"
+name = "Pi-hole"
+category = "App"
+description = "The Pi-hole® is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software."
+keywords = ["hole", "pi", "pihole"]
+compose = '''
+services:
+  pihole:
+    image: pihole/pihole:{{VERSION}}
+    ports:
+    - '53:53'
+    environment:
+      TZ: '{{TZ}}'
+      WEBPASSWORD: '{{WEBPASSWORD}}'
+      VIRTUAL_HOST: pihole.{{ROOT_DOMAIN}}
+    volumes:
+    - pihole-pihole:/etc/pihole
+    - pihole-dnsmasq:/etc/dnsmasq.d
+volumes:
+  pihole-pihole:
+  pihole-dnsmasq:
+'''
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/Los_Angeles"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "VERSION"
+label = "PiHole Version"
+default = "2024.07.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/pihole/pihole/tags"
+
+[[variables]]
+key = "WEBPASSWORD"
+label = "Web Admin Password"
+generate = true
+description = "Password for the Pi-hole web interface - MAKE SURE TO WRITE THIS DOWN!"

@@ -1,0 +1,52 @@
+slug = "odoo"
+name = "Odoo"
+category = "App"
+description = "Odoo, formerly known as OpenERP, is a suite of open-source business apps written in Python and released under the AGPL license."
+keywords = ["odoo"]
+compose = '''
+services:
+  odoo-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - odoo-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: odoo
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: postgres
+  odoo:
+    image: odoo:{{ODOO_VERSION}}
+    depends_on:
+    - odoo-db
+    volumes:
+    - odoo-odoo-web-data:/var/lib/odoo
+    - odoo-config:/etc/odoo
+    - odoo-addons:/mnt/extra-addons
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      HOST: odoo-db
+    ports:
+    - '{{HTTP_PORT}}:8069'
+volumes:
+  odoo-db-data:
+  odoo-odoo-web-data:
+  odoo-config:
+  odoo-addons:
+'''
+
+[[variables]]
+key = "ODOO_VERSION"
+label = "Odoo Version"
+default = "13.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/_/odoo?tab=tags"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "9.6.18-alpine"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"

@@ -1,0 +1,26 @@
+slug = "phpmyadmin"
+name = "phpMyAdmin"
+category = "Database"
+description = "phpMyAdmin is a free software tool written in PHP, intended to handle the administration of MySQL over the Web"
+keywords = ["phpmyadmin"]
+compose = '''
+services:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:{{PMA_VERSION}}
+    restart: always
+    environment:
+      PMA_ARBITRARY: '1'
+      UPLOAD_LIMIT: '{{UPLOAD_LIMIT}}'
+'''
+
+[[variables]]
+key = "PMA_VERSION"
+label = "PHP My Admin Version Tag"
+default = "5.0.2"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/phpmyadmin/phpmyadmin/tags/"
+
+[[variables]]
+key = "UPLOAD_LIMIT"
+label = "File size upload limit"
+default = "2M"
+description = "It will override the default value for apache and php-fpm inside the container. Default size is 2M"

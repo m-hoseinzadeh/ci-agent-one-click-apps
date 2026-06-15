@@ -1,0 +1,138 @@
+slug = "freshrss"
+name = "FreshRSS"
+category = "App"
+description = "FreshRSS is a self-hosted RSS feed aggregator like Leed or Kriss Feed."
+keywords = ["freshrss"]
+compose = '''
+services:
+  freshrss-postgresql:
+    environment:
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: '{{FRESHRSS_POSTGRESQL_USER}}'
+      POSTGRES_PASSWORD: '{{FRESHRSS_POSTGRESQL_PASS}}'
+    image: postgres:{{FRESRSS_PSQL_VERSION}}
+    restart: always
+    volumes:
+    - freshrss-postgresql-data:/var/lib/postgresql/data
+  freshrss:
+    image: freshrss/freshrss:{{VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      CRON_MIN: '{{CRON}}'
+      FRESHRSS_ENV: '{{ENV}}'
+      PUBLISHED_PORT: '80'
+      ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      ADMIN_PASSWORD: '{{ADMIN_PASS}}'
+      ADMIN_API_PASSWORD: '{{API_PASS}}'
+      DB_HOST: freshrss-postgresql
+      DB_BASE: '{{FRESHRSS_POSTGRESQL_DB}}'
+      DB_PASSWORD: '{{FRESHRSS_POSTGRESQL_PASS}}'
+      DB_USER: '{{FRESHRSS_POSTGRESQL_USER}}'
+      FRESHRSS_INSTALL: '--api_enabled
+
+        --base_url https://freshrss.{{ROOT_DOMAIN}}
+
+        --db-base {{FRESHRSS_POSTGRESQL_DB}}
+
+        --db-host freshrss-postgresql
+
+        --db-password {{FRESHRSS_POSTGRESQL_PASS}}
+
+        --db-type pgsql
+
+        --db-user {{FRESHRSS_POSTGRESQL_USER}}
+
+        --default_user admin
+
+        --language en'
+      FRESHRSS_USER: '--api_password {{API_PASS}}
+
+        --email {{ADMIN_EMAIL}}
+
+        --language en
+
+        --password {{ADMIN_PASS}}
+
+        --user admin'
+    volumes:
+    - freshrss-data:/var/www/FreshRSS/data
+    - freshrss-extensions:/var/www/FreshRSS/extensions
+    depends_on:
+    - freshrss-postgresql
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  freshrss-postgresql-data:
+  freshrss-data:
+  freshrss-extensions:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Admin Email"
+default = "admin@example.net"
+description = "Email Address for Admin login"
+
+[[variables]]
+key = "ADMIN_PASS"
+label = "Admin Password"
+generate = true
+description = "The password of the admin user."
+
+[[variables]]
+key = "API_PASS"
+label = "API Password"
+generate = true
+description = "The password of the admin API."
+
+[[variables]]
+key = "CRON"
+label = "Cron Minutes"
+default = "2,32"
+description = "a valid cron minute definition such as '13,43' (recommended) or '*/20'. Not passing the CRON_MIN environment variable – or setting it to empty string – will disable the cron daemon."
+
+[[variables]]
+key = "ENV"
+label = "Environment"
+default = "production"
+description = "Enables additional development information if set to development (increases the level of logging and ensures that errors are displayed)"
+
+[[variables]]
+key = "FRESHRSS_POSTGRESQL_DB"
+label = "POSTGRESQL_DB"
+default = "freshrss_production"
+
+[[variables]]
+key = "FRESHRSS_POSTGRESQL_PASS"
+label = "POSTGRESQL_PASS"
+generate = true
+description = "The password of freshrsss database user."
+
+[[variables]]
+key = "FRESHRSS_POSTGRESQL_USER"
+label = "POSTGRESQL_USER"
+default = "postgresuser"
+
+[[variables]]
+key = "FRESRSS_PSQL_VERSION"
+label = "PotgreSQL Version"
+default = "15.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Vienna"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "VERSION"
+label = "FreshRSS Version"
+default = "1.20.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/freshrss/freshrss/tags"

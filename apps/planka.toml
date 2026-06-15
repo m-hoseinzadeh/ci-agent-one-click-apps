@@ -1,0 +1,85 @@
+slug = "planka"
+name = "Planka"
+category = "App"
+description = "Realtime Kanban Board for Workgroups"
+keywords = ["planka"]
+compose = '''
+services:
+  planka:
+    environment:
+      BASE_URL: http://planka.{{ROOT_DOMAIN}}
+      TRUST_PROXY: '{{PLANKA_TRUST_PROXY}}'
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@planka-db/{{POSTGRES_DB}}
+      SECRET_KEY: '{{PLANKA_SECRET_KEY}}'
+    hostname: planka.{{ROOT_DOMAIN}}
+    depends_on:
+    - planka-db
+    volumes:
+    - planka-user-avatars:/app/public/user-avatars
+    - planka-project-background-images:/app/public/project-background-images
+    - planka-attachments:/app/private/attachments
+    ports:
+    - '{{HTTP_PORT}}:$$cap_PLANKA_PORT'
+  planka-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - planka-db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_HOST_AUTH_METHOD: '{{POSTGRES_HOST_AUTH_METHOD}}'
+volumes:
+  planka-user-avatars:
+  planka-project-background-images:
+  planka-attachments:
+  planka-db:
+'''
+
+[[variables]]
+key = "PLANKA_SECRET_KEY"
+label = "Application | Secret Key"
+generate = true
+description = "Secret key for data encryption."
+
+[[variables]]
+key = "PLANKA_TRUST_PROXY"
+label = "Application | Trust Proxy"
+default = "false"
+description = "Whether to trust proxy in Planka."
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database | Name"
+default = "planka"
+description = "Name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_HOST_AUTH_METHOD"
+label = "Database | Host Authentication Method"
+default = "trust"
+description = "Method of the PostgreSQL host authentication."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database | User Password"
+generate = true
+description = "User password of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User Name"
+default = "planka"
+description = "User name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "General | PostgreSQL Version"
+default = "13.7"
+description = "Check out their valid tags at https://hub.docker.com/r/btcpayserver/postgres/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

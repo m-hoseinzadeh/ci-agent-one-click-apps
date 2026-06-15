@@ -1,0 +1,44 @@
+slug = "etesync"
+name = "ETESync"
+category = "App"
+description = "ETESync is a self hosted syncing solution, it is secure, end-to-end encrypted, and privacy respecting sync for your contacts, calendars and tasks."
+keywords = ["etesync"]
+compose = '''
+services:
+  etesync:
+    image: grburst/etesync:{{VERSION}}
+    volumes:
+    - etesync-data:/data
+    restart: always
+    environment:
+      SUPER_USER: '{{SUPER_USER}}'
+      SUPER_EMAIL: '{{SUPER_EMAIL}}'
+      SUPER_PASS: '{{SUPER_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3735'
+volumes:
+  etesync-data:
+'''
+
+[[variables]]
+key = "SUPER_EMAIL"
+label = "email"
+default = "x@x.com"
+description = "etesync super user email"
+
+[[variables]]
+key = "SUPER_PASS"
+label = "password"
+description = "etesync super user password"
+
+[[variables]]
+key = "SUPER_USER"
+label = "user name"
+default = "root"
+description = "etesync super user name"
+
+[[variables]]
+key = "VERSION"
+label = "version tag"
+default = "alpine"
+description = "Check out their docker page for the valid tags @ https://hub.docker.com/r/grburst/etesync"

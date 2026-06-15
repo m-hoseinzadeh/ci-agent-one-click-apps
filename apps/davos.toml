@@ -1,0 +1,38 @@
+slug = "davos"
+name = "Davos"
+category = "Automation"
+description = "Davos is an FTP automation tool that periodically scans given host locations for new files."
+keywords = ["davos"]
+compose = '''
+services:
+  davos-davos:
+    container_name: davos
+    environment:
+      PGID: '{{DAVOS_PGID}}'
+      PUID: '{{DAVOS_PUID}}'
+    image: lscr.io/linuxserver/davos:{{DAVOS_VERSION}}
+    restart: unless-stopped
+    volumes:
+    - davos-config:/config
+    - davos-download:/download
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  davos-config:
+  davos-download:
+'''
+
+[[variables]]
+key = "DAVOS_PGID"
+label = "Pgid"
+default = "1000"
+
+[[variables]]
+key = "DAVOS_PUID"
+label = "Puid"
+default = "1000"
+
+[[variables]]
+key = "DAVOS_VERSION"
+label = "Davos Version"
+default = "2.2.1"

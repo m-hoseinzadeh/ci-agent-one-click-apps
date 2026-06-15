@@ -1,0 +1,23 @@
+slug = "the-lounge"
+name = "The Lounge"
+category = "App"
+description = "The Lounge is a self-hosted web IRC client with modern features, persistent connections, and multi-user support."
+keywords = ["lounge", "the"]
+compose = '''
+services:
+  the-lounge:
+    image: thelounge/thelounge:{{LOUNGE_VERSION}}
+    restart: always
+    volumes:
+    - the-lounge-data:/var/opt/thelounge
+    ports:
+    - '{{HTTP_PORT}}:9000'
+volumes:
+  the-lounge-data:
+'''
+
+[[variables]]
+key = "LOUNGE_VERSION"
+label = "The Lounge Version Tag"
+default = "4.1.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/thelounge/thelounge/tags"

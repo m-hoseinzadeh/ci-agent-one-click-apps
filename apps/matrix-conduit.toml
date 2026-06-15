@@ -1,0 +1,61 @@
+slug = "matrix-conduit"
+name = "Matrix Conduit"
+category = "Communication"
+description = "Server for the matrix protocol, written in Rust"
+keywords = ["conduit", "matrix"]
+compose = '''
+services:
+  matrix-conduit:
+    image: matrixconduit/matrix-conduit:{{CONDUIT_VERSION}}
+    restart: unless-stopped
+    environment:
+      CONDUIT_SERVER_NAME: '{{CONDUIT_SERVER_NAME}}'
+      CONDUIT_DATABASE_BACKEND: rocksdb
+      CONDUIT_ALLOW_REGISTRATION: '{{CONDUIT_ALLOW_REGISTRATION}}'
+      CONDUIT_ALLOW_FEDERATION: '{{CONDUIT_ALLOW_FEDERATION}}'
+      CONDUIT_MAX_REQUEST_SIZE: '{{CONDUIT_MAX_REQUEST_SIZE}}'
+      CONDUIT_TRUSTED_SERVERS: '["matrix.org"]'
+      CONDUIT_MAX_CONCURRENT_REQUESTS: '{{CONDUIT_MAX_CONCURRENT_REQUESTS}}'
+      CONDUIT_LOG: info,rocket=off,_=off,sled=off
+    volumes:
+    - matrix-conduit-data:/var/lib/matrix-conduit
+    ports:
+    - '{{HTTP_PORT}}:6167'
+volumes:
+  matrix-conduit-data:
+'''
+
+[[variables]]
+key = "CONDUIT_ALLOW_FEDERATION"
+label = "Enable federation with other homeservers"
+default = "true"
+description = "Set this to false if you don't want your users to talk to users on other Matrix servers."
+
+[[variables]]
+key = "CONDUIT_ALLOW_REGISTRATION"
+label = "Enable public registration"
+default = "false"
+description = "Set this to true if you want EVERYONE to be able to register. It's recommended to set this to false as soon as possible. Otherwise, your server might be used by spammers to mass-register accounts, which will risk your server being banned by other servers."
+
+[[variables]]
+key = "CONDUIT_MAX_CONCURRENT_REQUESTS"
+label = "Maximum number of concurrent requests"
+default = "100"
+
+[[variables]]
+key = "CONDUIT_MAX_REQUEST_SIZE"
+label = "Max request size"
+default = "20000000"
+description = "The maximum allowed size for incoming requests, in bytes. If you set this higher than 500000000, you will will also need to increase the nginx \"client_max_body_size\"."
+
+[[variables]]
+key = "CONDUIT_SERVER_NAME"
+label = "Conduit server name"
+default = "example.com"
+description = "The domain part for your usernames (e.g. @myusername:example.com). You will need to set up .well-known files on that domain (for our example https://example.com/.well-known/matrix/...) to point to your actual domain (which will probably be something like appname.apps.your-caprover-domain.com). You might find the Synapse documentation useful for this: https://matrix-org.github.io/synapse/latest/setup/installation.html#client-well-known-uri"
+
+[[variables]]
+key = "CONDUIT_VERSION"
+label = "Conduit Version"
+default = "v0.6.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/matrixconduit/matrix-conduit/tags"

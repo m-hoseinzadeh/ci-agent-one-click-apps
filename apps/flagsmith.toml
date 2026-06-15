@@ -1,0 +1,50 @@
+slug = "flagsmith"
+name = "Flagsmith"
+category = "App"
+description = "Flagsmith - an open source, fully featured, Feature Flag and Remote Config service. Use our hosted API, deploy to your own private cloud, or run on-premise."
+keywords = ["flagsmith"]
+compose = '''
+services:
+  flagsmith-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - flagsmith-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: flagsmith
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+  flagsmith:
+    image: flagsmith/flagsmith:{{FLAGSMITH_TAG}}
+    depends_on:
+    - flagsmith-db
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://flagsmith:{{POSTGRES_PASSWORD}}@flagsmith-db/{{POSTGRES_DB}}?sslmode=disable
+      DJANGO_ALLOWED_HOSTS: '*'
+    ports:
+    - '{{HTTP_PORT}}:8000'
+volumes:
+  flagsmith-db-data:
+'''
+
+[[variables]]
+key = "FLAGSMITH_TAG"
+label = "Flagsmith Version"
+default = "2.14.3"
+description = "Check out our docker page for the valid tags https://hub.docker.com/r/flagsmith/flagsmith/tags"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Postgres DB"
+default = "flagsmith"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "13.1"

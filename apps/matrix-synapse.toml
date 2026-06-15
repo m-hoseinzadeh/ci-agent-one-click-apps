@@ -1,0 +1,47 @@
+slug = "matrix-synapse"
+name = "Matrix Synapse"
+category = "Communication"
+description = "Server for the matrix protocol"
+keywords = ["matrix", "synapse"]
+compose = '''
+services:
+  matrix-synapse-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: synapse_db
+      POSTGRES_PASSWORD: '{{DB_PASSWORD}}'
+      POSTGRES_USER: synapse_user
+      POSTGRES_INITDB_ARGS: --encoding='UTF8' --lc-collate='C' --lc-ctype='C'
+    volumes:
+    - matrix-synapse-db:/var/lib/postgresql/data
+  matrix-synapse:
+    restart: unless-stopped
+    environment:
+      TZ: '{{TIME_ZONE}}'
+    volumes:
+    - matrix-synapse-data:/data
+    ports:
+    - '{{HTTP_PORT}}:8008'
+volumes:
+  matrix-synapse-db:
+  matrix-synapse-data:
+'''
+
+[[variables]]
+key = "DB_PASSWORD"
+label = "Database password"
+generate = true
+description = "The password for the Synapse database."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres version"
+default = "14"
+description = "The version of postgres that you want to use. You can find the valid versions here: https://hub.docker.com/r/postgres/postgres/tags"
+
+[[variables]]
+key = "TIME_ZONE"
+label = "Time zone"
+default = "Europe/Berlin"
+description = "The time zone of your server https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

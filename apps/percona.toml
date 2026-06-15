@@ -1,0 +1,30 @@
+slug = "percona"
+name = "Percona Server"
+category = "Database"
+description = "Percona Server for MySQL is a fork of the MySQL relational database management system created by Percona."
+keywords = ["percona", "server"]
+compose = '''
+services:
+  percona:
+    image: percona:{{PERCONA_VERSION}}
+    volumes:
+    - percona-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3306'
+volumes:
+  percona-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Percona Root password"
+generate = true
+
+[[variables]]
+key = "PERCONA_VERSION"
+label = "Percona Version"
+default = "ps-8.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/percona"

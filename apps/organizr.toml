@@ -1,0 +1,44 @@
+slug = "organizr"
+name = "Organizr"
+category = "App"
+description = "An HTPC/Homelab services organizer that is written in PHP."
+keywords = ["organizr"]
+compose = '''
+services:
+  organizr:
+    image: organizr/organizr:{{VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PHP_TZ: '{{TZ}}'
+      fpm: '{{FPM}}'
+      branch: '{{BRANCH}}'
+      PUID: 1000
+      PGID: 1000
+    volumes:
+    - organizr-config:/config
+volumes:
+  organizr-config:
+'''
+
+[[variables]]
+key = "BRANCH"
+label = "Organizr branch"
+default = "v2-master"
+description = "Branch name to use"
+
+[[variables]]
+key = "FPM"
+label = "Set FPM to True or False"
+default = "true"
+description = "Should Organizr us a socket connection instead of TCP?"
+
+[[variables]]
+key = "TZ"
+label = "Tz"
+default = ""
+
+[[variables]]
+key = "VERSION"
+label = "Organizr Version"
+default = "amd64"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/organizr/organizr/tags"

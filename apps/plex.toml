@@ -1,0 +1,57 @@
+slug = "plex"
+name = "Plex Media Server"
+category = "App"
+description = "Plex organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices."
+keywords = ["media", "plex", "server"]
+compose = '''
+services:
+  plex:
+    image: plexinc/pms-docker:{{PLEX_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PLEX_CLAIM: '{{PLEX_TOKEN}}'
+      ADVERTISE_IP: http://plex.{{ROOT_DOMAIN}}/
+    ports:
+    - '{{HTTP_PORT}}:32400'
+    - 32400:32400
+    - 3005:3005
+    - 8324:8324
+    - 32469:32469
+    - 1900:1900
+    - 32410:32410
+    - 32412:32412
+    - 32413:32413
+    - 32414:32414
+    hostname: plex.{{ROOT_DOMAIN}}
+    volumes:
+    - plex-config:/config
+    - plex-transcode:/transcode
+    - plex-media:/data
+volumes:
+  plex-config:
+  plex-transcode:
+  plex-media:
+'''
+
+[[variables]]
+key = "PLEX_TOKEN"
+label = "Plex Claim Token"
+description = "Get your token from https://www.plex.tv/claim"
+
+[[variables]]
+key = "PLEX_VERSION"
+label = "Plex Version"
+default = "1.19.2.2737-b69929dab"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/plexinc/pms-docker/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/New_York"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

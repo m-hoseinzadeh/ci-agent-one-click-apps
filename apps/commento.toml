@@ -1,0 +1,44 @@
+slug = "commento"
+name = "Commento"
+category = "App"
+description = "Commento is a fast, privacy-focused commenting platform."
+keywords = ["commento"]
+compose = '''
+services:
+  commento:
+    image: registry.gitlab.com/commento/commento@{{COMMENTO_VERSION}}
+    restart: always
+    environment:
+      COMMENTO_ORIGIN: https://commento.{{ROOT_DOMAIN}}
+      COMMENTO_POSTGRES: postgres://commento:{{COMMENTO_POSTGRES_PASSWORD}}@commento-postgres:5432/commento?sslmode=disable
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  commento-postgres:
+    image: postgres:12
+    volumes:
+    - commento-postgres-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: commento
+      POSTGRES_PASSWORD: '{{COMMENTO_POSTGRES_PASSWORD}}'
+      POSTGRES_DB: commento
+volumes:
+  commento-postgres-data:
+'''
+
+[[variables]]
+key = "COMMENTO_POSTGRES_PASSWORD"
+label = "Postgres Password"
+description = "Password must be at least 12 characters.  Please use a random string."
+
+[[variables]]
+key = "COMMENTO_VERSION"
+label = "Commento Manifest digest"
+default = "sha256:e792ac5c384ca7d45bfc228ef6ec3084a54af98847ee75a8aac7aa720f4f87a2"
+description = "Starts with 'sha256:'.  Find on https://gitlab.com/commento/commento/container_registry/337942"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

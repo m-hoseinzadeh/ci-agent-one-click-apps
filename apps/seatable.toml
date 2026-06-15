@@ -1,0 +1,69 @@
+slug = "seatable"
+name = "SeaTable"
+category = "App"
+description = "SeaTable is the new flexible way for teams to work on tasks, projects or ideas."
+keywords = ["seatable"]
+compose = '''
+services:
+  seatable-db:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PASSWD}}'
+    volumes:
+    - seatable-db-data:/var/lib/mysql
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  seatable-memcached:
+    image: memcached:{{MEMCACHED_VERSION}}
+    entrypoint: memcached -m 256
+  seatable-redis:
+    image: redis:{{REDIS_VERSION}}
+  seatable:
+    volumes:
+    - seatable-data:/shared
+    environment:
+      DB_HOST: seatable-db
+      DB_ROOT_PASSWD: '{{MARIADB_ROOT_PASSWD}}'
+      SEATABLE_SERVER_LETSENCRYPT: 'False'
+      SEATABLE_SERVER_HOSTNAME: seatable.{{ROOT_DOMAIN}}
+      TIME_ZONE: '{{TIMEZONE}}'
+    depends_on:
+    - seatable-db
+    - seatable-memcached
+    - seatable-redis
+volumes:
+  seatable-db-data:
+  seatable-data:
+'''
+
+[[variables]]
+key = "MARIADB_ROOT_PASSWD"
+label = "MariaDB Root Password"
+generate = true
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.5"
+
+[[variables]]
+key = "MEMCACHED_VERSION"
+label = "Memcached Version"
+default = "1.5.6"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "5.0.7"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TIMEZONE"
+label = "Time zone"
+default = "Etc/UTC"
+description = "List of tz database time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

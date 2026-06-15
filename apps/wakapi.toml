@@ -1,0 +1,89 @@
+slug = "wakapi"
+name = "wakapi"
+category = "App"
+description = "Wakapi is an open-source tool that helps you keep track of the time you have spent coding on different projects in different programming languages and more."
+keywords = ["wakapi"]
+compose = '''
+services:
+  wakapi:
+    image: ghcr.io/muety/wakapi:{{WAKAPI_VERSION}}
+    restart: always
+    volumes:
+    - wakapi-data:/data
+    environment:
+      ENVIRONMENT: production
+      WAKAPI_SUPPORT_CONTACT: '{{WAKAPI_EMAIL}}'
+      WAKAPI_PASSWORD_SALT: '{{WAKAPI_SALT}}'
+      WAKAPI_PUBLIC_URL: wakapi.{{ROOT_DOMAIN}}
+      WAKAPI_ALLOW_SIGNUP: '{{WAKAPI_SIGNUP}}'
+      WAKAPI_DB_HOST: wakapi-db
+      WAKAPI_DB_USER: wakapi
+      WAKAPI_DB_PORT: 5432
+      WAKAPI_DB_PASSWORD: '{{POSTGRES_PASS}}'
+      WAKAPI_DB_NAME: wakapi
+      WAKAPI_DB_TYPE: postgres
+    depends_on:
+    - wakapi-db
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  wakapi-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - wakapi-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_DB: wakapi
+      POSTGRES_USER: wakapi
+      POSTGRES_PASSWORD: '{{POSTGRES_PASS}}'
+      POSTGRES_INITDB_ARGS: '{{PG_INITDB_ARGS}}'
+volumes:
+  wakapi-data:
+  wakapi-db-data:
+'''
+
+[[variables]]
+key = "PG_INITDB_ARGS"
+label = "OPTIONAL: Arguments for 'postgres initdb'"
+description = "For example, --data-checksums"
+
+[[variables]]
+key = "POSTGRES_PASS"
+label = "Potgress Database password"
+generate = true
+description = "Password for postgres"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "16.1-alpine"
+description = "Checkout their page for the valid tags https://hub.docker.com/_/postgres"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "WAKAPI_EMAIL"
+label = "Wakapi support email"
+default = "hostmaster@wakapi.dev"
+description = "The email that will shown in site as support email"
+
+[[variables]]
+key = "WAKAPI_SALT"
+label = "Wakapi Salt for hashing password"
+generate = true
+description = "salt for wakapi password hash"
+
+[[variables]]
+key = "WAKAPI_SIGNUP"
+label = "enable signup"
+default = "true"
+description = "enable signup in wakapi"
+
+[[variables]]
+key = "WAKAPI_VERSION"
+label = "Wakapi Version"
+default = "2.9.3"
+description = "Checkout their github page for the valid tags https://github.com/muety/wakapi/pkgs/container/wakapi"

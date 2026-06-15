@@ -1,0 +1,22 @@
+slug = "countly"
+name = "Countly"
+category = "App"
+description = "Countly helps you get insights from your application"
+keywords = ["countly"]
+compose = '''
+services:
+  countly:
+    image: countly/countly-server:{{COUNTLY_VERSION}}
+    volumes:
+    - countly-data:/var/lib/mongodb
+    restart: always
+    environment: {}
+volumes:
+  countly-data:
+'''
+
+[[variables]]
+key = "COUNTLY_VERSION"
+label = "What version/tag do you want?"
+default = "19.08.1"
+description = "Go here to see all versions https://hub.docker.com/r/countly/countly-server/tags"

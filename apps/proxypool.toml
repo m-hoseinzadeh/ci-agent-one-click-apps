@@ -1,0 +1,35 @@
+slug = "proxypool"
+name = "Proxy Pool"
+category = "App"
+description = "Python crawler proxy IP pool (proxy pool)"
+keywords = ["pool", "proxy", "proxypool"]
+compose = '''
+services:
+  proxypool-redis:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - proxypool-cache-data:/app/data
+  proxypool:
+    image: jhao104/proxy_pool:{{APP_VERSION}}
+    depends_on:
+    - proxypool-redis
+    restart: always
+    environment:
+      DB_CONN: redis://proxypool-redis:6379/0
+    ports:
+    - '{{HTTP_PORT}}:5010'
+volumes:
+  proxypool-cache-data:
+'''
+
+[[variables]]
+key = "APP_VERSION"
+label = "Proxy Pool version"
+default = "2.2.0"
+description = "https://hub.docker.com/r/jhao104/proxy_pool/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Docker version"
+default = "6-alpine"
+description = "Check out their Docker page for the valid versions https://hub.docker.com/r/library/redis/tags"

@@ -1,0 +1,40 @@
+slug = "sinusbot"
+name = "SinusBot"
+category = "Storage"
+description = "Music bot for TS3 and Discord."
+keywords = ["sinusbot"]
+compose = '''
+services:
+  sinusbot:
+    environment:
+      UID: '{{UID}}'
+      GID: '{{GID}}'
+    image: sinusbot/docker:{{VERSION}}
+    restart: always
+    volumes:
+    - sinusbot-data:/opt/sinusbot/data
+    - sinusbot-scripts:/opt/sinusbot/scripts
+    ports:
+    - '{{HTTP_PORT}}:8087'
+volumes:
+  sinusbot-data:
+  sinusbot-scripts:
+'''
+
+[[variables]]
+key = "GID"
+label = "GID"
+default = "1000"
+description = "Group ID to run the service as (using root is not recommended), see https://github.com/SinusBot/docker#unprivileged-user"
+
+[[variables]]
+key = "UID"
+label = "UID"
+default = "1000"
+description = "User ID to run the service as (using root is not recommended), see https://github.com/SinusBot/docker#unprivileged-user"
+
+[[variables]]
+key = "VERSION"
+label = "SinusBot Docker Version"
+default = "1.0.0-beta.10-202ee4d"
+description = "It's highly recommended that you don't use the latest tag but instead the major version you need."

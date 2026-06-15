@@ -1,0 +1,19 @@
+slug = "openspeedtest"
+name = "OpenSpeedTest"
+category = "App"
+description = "OpenSpeedTest is a self-hosted network speedtest written in vanilla Javascript."
+keywords = ["openspeedtest"]
+compose = '''
+services:
+  openspeedtest:
+    image: index.docker.io/openspeedtest/latest:{{OPENSPEEDTEST_VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3000'
+'''
+
+[[variables]]
+key = "OPENSPEEDTEST_VERSION"
+label = "OpenSpeedTest Version"
+default = "speedtest"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/openspeedtest/latest/tags"

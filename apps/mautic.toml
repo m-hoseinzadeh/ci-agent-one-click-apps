@@ -1,0 +1,71 @@
+slug = "mautic"
+name = "Mautic"
+category = "Automation"
+description = "Mautic is an open source marketing automation platform."
+keywords = ["mautic"]
+compose = '''
+services:
+  mautic-db:
+    documentation: Taken from https://hub.docker.com/_/percona
+    image: percona/percona-server:{{PERCONA_VERSION}}
+    volumes:
+    - mautic-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: mautic
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+  mautic:
+    depends_on:
+    - mautic-db
+    image: mautic/mautic:{{MAUTIC_VERSION}}
+    volumes:
+    - mautic-config:/var/www/html/config
+    - mautic-logs:/var/www/html/var/logs
+    - mautic-media:/var/www/html/docroot/media
+    restart: always
+    environment:
+      MAUTIC_DB_HOST: mautic-db
+      MYSQL_DB_PORT: '3306'
+      MAUTIC_DB_USER: '{{DB_USER}}'
+      MAUTIC_DB_PASSWORD: '{{DB_PASS}}'
+      MAUTIC_DB_NAME: mautic
+      MAUTIC_RUN_CRON_JOBS: 'true'
+      APACHE_SERVER_NAME: '{{APACHE_SERVER_NAME}}'
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  mautic-db-data:
+  mautic-config:
+  mautic-logs:
+  mautic-media:
+'''
+
+[[variables]]
+key = "APACHE_SERVER_NAME"
+label = "Apache Server Name"
+default = "mautic.apps.domain.co.uk"
+description = "The domain name for your Mautic instance"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "mauticuser"
+
+[[variables]]
+key = "MAUTIC_VERSION"
+label = "Mautic Version"
+default = "5.1.0-apache"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mautic/mautic/tags."
+
+[[variables]]
+key = "PERCONA_VERSION"
+label = "Percona Version (database)"
+default = "8.3.0-1.1-multi"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/percona?tab=tags"

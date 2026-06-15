@@ -1,0 +1,284 @@
+slug = "boxy-hq-only"
+name = "BoxyHQ Jackson (SAML to OAuht) - No Database"
+category = "Database"
+description = "This will create a BoxyHQ Jackson only. You will need to create and configure the database information manually. Intended for advanced users."
+keywords = ["(saml", "boxy", "boxyhq", "database", "hq", "jackson", "no", "oauht)", "only", "to"]
+compose = '''
+services:
+  boxy-hq-only:
+    image: boxyhq/jackson:{{BOXYHQ_JACKSON_VERSION}}
+    restart: always
+    environment:
+      EXTERNAL_URL: '{{EXTERNAL_URL}}'
+      SAML_AUDIENCE: '{{SAML_AUDIENCE}}'
+      JACKSON_API_KEYS: '{{JACKSON_API_KEYS}}'
+      ADMIN_PORTAL_SSO_TENANT: '{{ADMIN_PORTAL_SSO_TENANT}}'
+      ADMIN_PORTAL_SSO_PRODUCT: '{{ADMIN_PORTAL_SSO_PRODUCT}}'
+      IDP_ENABLED: '{{IDP_ENABLED}}'
+      PRE_LOADED_CONNECTION: '{{PRE_LOADED_CONNECTION}}'
+      CLIENT_SECRET_VERIFIER: '{{CLIENT_SECRET_VERIFIER}}'
+      DB_ENGINE: '{{DB_ENGINE}}'
+      DB_URL: '{{DB_URL}}'
+      DB_TYPE: '{{DB_TYPE}}'
+      DB_TTL: '{{DB_TTL}}'
+      DB_CLEANUP_LIMIT: '{{DB_CLEANUP_LIMIT}}'
+      DB_PAGE_LIMIT: '{{DB_PAGE_LIMIT}}'
+      DB_ENCRYPTION_KEY: '{{DB_ENCRYPTION_KEY}}'
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_USER: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      SMTP_FROM: '{{SMTP_FROM}}'
+      NEXTAUTH_ACL: '{{NEXTAUTH_ACL}}'
+      NEXTAUTH_URL: '{{NEXTAUTH_URL}}'
+      NEXTAUTH_SECRET: '{{NEXTAUTH_SECRET}}'
+      NEXTAUTH_ADMIN_CREDENTIALS: '{{NEXTAUTH_ADMIN_CREDENTIALS}}'
+      RETRACED_HOST_URL: '{{RETRACED_HOST_URL}}'
+      RETRACED_EXTERNAL_URL: '{{RETRACED_EXTERNAL_URL}}'
+      RETRACED_ADMIN_ROOT_TOKEN: '{{RETRACED_ADMIN_ROOT_TOKEN}}'
+      TERMINUS_PROXY_HOST_URL: '{{TERMINUS_PROXY_HOST_URL}}'
+      TERMINUS_ADMIN_ROOT_TOKEN: '{{TERMINUS_ADMIN_ROOT_TOKEN}}'
+      OTEL_EXPORTER_OTLP_METRICS_ENDPOINT: '{{OTEL_EXPORTER_OTLP_METRICS_ENDPOINT}}'
+      OTEL_EXPORTER_OTLP_METRICS_HEADERS: '{{OTEL_EXPORTER_OTLP_METRICS_HEADERS}}'
+      OPENID_JWS_ALG: '{{OPENID_JWS_ALG}}'
+      OPENID_RSA_PRIVATE_KEY: '{{OPENID_RSA_PRIVATE_KEY}}'
+      OPENID_RSA_PUBLIC_KEY: '{{OPENID_RSA_PUBLIC_KEY}}'
+      PUBLIC_KEY: '{{PUBLIC_KEY}}'
+      PRIVATE_KEY: '{{PRIVATE_KEY}}'
+      BOXYHQ_LICENSE_KEY: '{{BOXYHQ_LICENSE_KEY}}'
+      WEBHOOK_URL: '{{WEBHOOK_URL}}'
+      WEBHOOK_SECRET: '{{WEBHOOK_SECRET}}'
+      node_options: '{{NODE_OPTIONS}}'
+      NEXT_TELEMETRY_DISABLED: '{{NEXT_TELEMETRY_DISABLED}}'
+    ports:
+    - '{{HTTP_PORT}}:5225'
+'''
+
+[[variables]]
+key = "ADMIN_PORTAL_SSO_PRODUCT"
+label = "Admin Portal SSO Product"
+default = "_jackson_admin_portal"
+description = "This will be used as the product for the SSO connections (added from Settings tab) used to login into the Admin portal itself. Set this to a value that is less likely to conflict with the main Enterprise SSO connections. (https://boxyhq.com/docs/jackson/deploy/env-variables#admin_portal_sso_product)"
+
+[[variables]]
+key = "ADMIN_PORTAL_SSO_TENANT"
+label = "Admin Portal SSO Tenant"
+default = "_jackson_boxyhq"
+description = "This will be used as the tenant for the SSO connections (added from Settings tab) used to login into the Admin portal itself. Set this to a value that is less likely to conflict with the main Enterprise SSO connections. (https://boxyhq.com/docs/jackson/deploy/env-variables#admin_portal_sso_tenant)"
+
+[[variables]]
+key = "BOXYHQ_JACKSON_VERSION"
+label = "BoxyHQ Jackson Version"
+default = "1.13.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/boxyhq/jackson/tags/"
+
+[[variables]]
+key = "BOXYHQ_LICENSE_KEY"
+label = "BoxyHQ License key"
+
+[[variables]]
+key = "CLIENT_SECRET_VERIFIER"
+label = "Client secret verifier"
+generate = true
+description = "When tenant and product are used for the SAML flow (and PKCE is not being used) then we use dummy as placeholders for client_id and client_secret. This is not a security issue because SAML is tenanted and hence your Identity Provider will block access to anyone trying to log into your SAML tenant. However for additional security you should set CLIENT_SECRET_VERIFIER to a random secret and use that value as the client_secret during the OAuth 2.0 flow. (https://boxyhq.com/docs/jackson/deploy/env-variables#client_secret_verifier)"
+
+[[variables]]
+key = "DB_CLEANUP_LIMIT"
+label = "DB Cleanup limit"
+default = "1000"
+description = "Limit cleanup of TTL entries to this number. (https://boxyhq.com/docs/jackson/deploy/env-variables#db_cleanup_limit)"
+
+[[variables]]
+key = "DB_ENCRYPTION_KEY"
+label = "DB Encryption key"
+description = "To encrypt data at rest specify a 32 character key. You can use openssl to generate a random 32 character key 'openssl rand -base64 24' (https://boxyhq.com/docs/jackson/deploy/env-variables#db_encryption_key)"
+
+[[variables]]
+key = "DB_ENGINE"
+label = "DB Engine"
+default = "sql"
+description = "Supported values are redis, sql, mongo, mem, planetscale, dynamodb (https://boxyhq.com/docs/jackson/deploy/env-variables#db_engine)"
+
+[[variables]]
+key = "DB_PAGE_LIMIT"
+label = "DB Page limit"
+default = "50"
+description = "Page limit"
+
+[[variables]]
+key = "DB_TTL"
+label = "DB TTL"
+default = "300"
+description = "TTL for the code, session and token stores (in seconds). (https://boxyhq.com/docs/jackson/deploy/env-variables#db_ttl)"
+
+[[variables]]
+key = "DB_TYPE"
+label = "DB Type"
+default = "postgres"
+description = "Only needed when DB_ENGINE is sql. Supported values are postgres, mysql, mariadb, mssql (https://boxyhq.com/docs/jackson/deploy/env-variables#db_type)"
+
+[[variables]]
+key = "DB_URL"
+label = "DB URL"
+default = "postgres://postgres_user:postgres_password@localhost:5432/postgres_db"
+description = "The database URL to connect to. If you are using self-signed certificates then pass sslmode=no-verify instead of sslmode=require in the DB_URL. This is because self-signed certs will be rejected as unauthorized in strict mode. Also, set DB_SSL=true and DB_SSL_REJECT_UNAUTHORIZED=false (see env vars below for more details). (https://boxyhq.com/docs/jackson/deploy/env-variables#db_url)"
+
+[[variables]]
+key = "EXTERNAL_URL"
+label = "External URL"
+default = "$$cap_appname.$$cap_root_domain"
+description = "The public URL to reach this service. This is used internally to construct the callback url at which the SAML/OIDC IdP sends back the authorization response. (https://boxyhq.com/docs/jackson/deploy/env-variables#external_url)"
+
+[[variables]]
+key = "IDP_ENABLED"
+label = "IDP Enabled"
+default = "True"
+description = "Set to true to enable IdP initiated login for SAML. SP initiated login is the only recommended flow but you might have to support IdP login at times. (https://boxyhq.com/docs/jackson/deploy/env-variables#idp_enabled)"
+
+[[variables]]
+key = "JACKSON_API_KEYS"
+label = "API Keys"
+generate = true
+description = "A comma separated list of API keys that will be validated when serving the API requests for SSO connection (/api/v1/connections) and Directory Sync (/api/v1/directory-sync). (https://boxyhq.com/docs/jackson/deploy/env-variables#jackson_api_keys)"
+
+[[variables]]
+key = "NEXTAUTH_ACL"
+label = "NextAuth ACL"
+default = "tonystark@gmail.com,*@marvel.com"
+description = "Set this to a comma separated string of email addresses or glob patterns like tonystark@gmail.com,*@marvel.com. Access will be denied to email addresses which don't match. If you don't specify any value access is denied to all. (https://boxyhq.com/docs/jackson/deploy/env-variables#nextauth_acl)"
+
+[[variables]]
+key = "NEXTAUTH_ADMIN_CREDENTIALS"
+label = "NextAuth Admin credentials"
+description = "Set this to a comma separated string of the pattern email:password to enable login to the Admin Portal, for example NEXTAUTH_ADMIN_CREDENTIALS=deepak@boxyhq.com:Password123. If you don't specify any value access is denied to all. (https://boxyhq.com/docs/jackson/deploy/env-variables#nextauth_admin_credentials)"
+
+[[variables]]
+key = "NEXTAUTH_SECRET"
+label = "NextAuth Secret"
+generate = true
+description = "Set this to a random string. You can use openssl rand -base64 32 to get one. This secret is used to encrypt JWT and hash the email verification token. (https://boxyhq.com/docs/jackson/deploy/env-variables#nextauth_secret)"
+
+[[variables]]
+key = "NEXTAUTH_URL"
+label = "NextAuth URL"
+default = "$$cap_appname.$$cap_root_domain"
+description = "When running locally this will point to the local server https://boxyhq.my-domain.com. When deploying to production, set this to the canonical URL of the site. (https://boxyhq.com/docs/jackson/deploy/env-variables#nextauth_url)"
+
+[[variables]]
+key = "NEXT_TELEMETRY_DISABLED"
+label = "Next Telemetry disabled"
+default = "1"
+
+[[variables]]
+key = "NODE_OPTIONS"
+label = "Node Options"
+default = "--max-http-header-size=81920 --dns-result-order=ipv4first"
+
+[[variables]]
+key = "OPENID_JWS_ALG"
+label = "OpenID JWS algorithms"
+default = "RS256"
+description = "The algorithm used to sign the id_token. Jackson uses jose to create the ID token. Supported algorithms can be found at https://github.com/panva/jose/issues/114#digital-signatures. (https://boxyhq.com/docs/jackson/deploy/env-variables#openid_jws_alg)"
+
+[[variables]]
+key = "OPENID_RSA_PRIVATE_KEY"
+label = "OpenID RSA Private key"
+description = "Base64 value of private key. To generate one 'openssl genrsa -out private-key.pem 3072' then 'openssl pkcs8 -topk8 -inform PEM -outform PEM -nocrypt -in private-key.pem -out private_key.pem' and 'cat private_key.pem | base64'. (https://boxyhq.com/docs/jackson/deploy/env-variables#openid_rsa_private_key)"
+
+[[variables]]
+key = "OPENID_RSA_PUBLIC_KEY"
+label = "OpenID RSA Public key"
+description = "Base64 value of public key. You can generate the public key from the private key as shown below 'openssl rsa -in private_key.pem -pubout -out public_key.pem' and than 'cat public_key.pem | base64'. (https://boxyhq.com/docs/jackson/deploy/env-variables#openid_rsa_public_key)"
+
+[[variables]]
+key = "OTEL_EXPORTER_OTLP_METRICS_ENDPOINT"
+label = "OTEL Exporter OTLP Metrics endpoint"
+description = "Target URL to which the exporter is going to send metrics.. (https://boxyhq.com/docs/jackson/deploy/env-variables#otel_exporter_otlp_endpoint-or-otel_exporter_otlp_metrics_endpoint)"
+
+[[variables]]
+key = "OTEL_EXPORTER_OTLP_METRICS_HEADERS"
+label = "OTEL Exporter OTLP Metrics headers"
+description = "Headers relevant for the endpoint, useful for specifying authentication details for providers. (https://boxyhq.com/docs/jackson/deploy/env-variables#otel_exporter_otlp_headers-or-otel_exporter_otlp_metrics_headers)"
+
+[[variables]]
+key = "PRE_LOADED_CONNECTION"
+label = "Pre loaded connection"
+description = "If you only need a single tenant or a handful of pre-configured tenants then this config will help you read and load IdP (both OpenID and SAML)connections. It works well with the mem DB engine so you don't have to configure any external databases for this to work (though it works with those as well). This is a path (absolute or relative) to a directory that contains files organized in the format described in the next section. (https://boxyhq.com/docs/jackson/deploy/env-variables#pre_loaded_connection)"
+
+[[variables]]
+key = "PRIVATE_KEY"
+label = "Private key"
+description = "This is the private key used to sign the SAML requests. Jackson expects the private key to be base64 encoded. To generate a private key and public key pair you can use the following command 'openssl req -x509 -newkey rsa:2048 -keyout key.pem -out public.crt -sha256 -days 365 -nodes' then 'cat public.crt | base64' and that 'cat key.pem | base64' (https://boxyhq.com/docs/jackson/deploy/env-variables#private_key)"
+
+[[variables]]
+key = "PUBLIC_KEY"
+label = "Public key"
+description = "This is the public key of the private key used to sign the SAML requests. Jackson expects the public key to be base64 encoded. (https://boxyhq.com/docs/jackson/deploy/env-variables#public_key)"
+
+[[variables]]
+key = "RETRACED_ADMIN_ROOT_TOKEN"
+label = "Retraced Admin root token"
+description = "you need to set the admin root token for Retraced so that we can connect to Retraced and fetch projects and audit logs. (https://boxyhq.com/docs/jackson/deploy/env-variables#retraced_admin_root_token)"
+
+[[variables]]
+key = "RETRACED_EXTERNAL_URL"
+label = "Retraced External URL"
+description = "If you'd like to use the Admin Portal to manage our Audit Logs service (Retraced) then set this env var to the Public URL of the service. If this is the same as RETRACED_HOST_URL above then you can skip this and it will default to the value of RETRACED_HOST_URL. (https://boxyhq.com/docs/jackson/deploy/env-variables#retraced_external_url)"
+
+[[variables]]
+key = "RETRACED_HOST_URL"
+label = "Retraced Host URL"
+description = "If you'd like to use the Admin Portal to manage our Audit Logs service (Retraced) then set this env var to the URL of the service. (https://boxyhq.com/docs/jackson/deploy/env-variables#retraced_host_url)"
+
+[[variables]]
+key = "SAML_AUDIENCE"
+label = "SAML Audience"
+default = "$$cap_appname.$$cap_root_domain"
+description = "The value of this setting (same as SP EntityID of Jackson) allows the Jackson instance to verify that it is the intended recipient of a SAML response. The same value is also set in the SAML App created on the IdP end by your customers. Once set do not change this value unless you get your customers to reconfigure their SAML App again. It is case-sensitive. This does not have to be a real URL. (https://boxyhq.com/docs/jackson/deploy/env-variables#saml_audience)"
+
+[[variables]]
+key = "SMTP_FROM"
+label = "SMTP From"
+default = "noreply@example.com"
+description = "From address used to send mail. (https://boxyhq.com/docs/jackson/deploy/env-variables#smtp_from)"
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMTP Host"
+default = "smtp.example.com"
+description = "The SMTP host. (https://boxyhq.com/docs/jackson/deploy/env-variables#smtp_host)"
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP Password"
+description = "Password for the SMTP server. (https://boxyhq.com/docs/jackson/deploy/env-variables#smtp_password)"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP Port"
+default = "587"
+description = "The SMTP server port. (https://boxyhq.com/docs/jackson/deploy/env-variables#smtp_port)"
+
+[[variables]]
+key = "SMTP_USER"
+label = "SMTP User"
+default = "info@example.com"
+description = "Username for the SMTP server. (https://boxyhq.com/docs/jackson/deploy/env-variables#smtp_user)"
+
+[[variables]]
+key = "TERMINUS_ADMIN_ROOT_TOKEN"
+label = "Terminus Admin root token"
+
+[[variables]]
+key = "TERMINUS_PROXY_HOST_URL"
+label = "Terminus Proxy Host URL"
+
+[[variables]]
+key = "WEBHOOK_SECRET"
+label = "Webhook Secret"
+description = "Specify a secret to be used to sign the webhook payload. This is used to verify the authenticity of the webhook payload. (https://boxyhq.com/docs/jackson/deploy/env-variables#webhook_secret)"
+
+[[variables]]
+key = "WEBHOOK_URL"
+label = "Webhook URL"
+description = "Specify a webhook URL to receive events about sso and directory connections. (https://boxyhq.com/docs/jackson/deploy/env-variables#webhook_url)"

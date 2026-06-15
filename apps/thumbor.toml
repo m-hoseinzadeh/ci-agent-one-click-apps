@@ -1,0 +1,23 @@
+slug = "thumbor"
+name = "thumbor"
+category = "App"
+description = "Thumbor is a smart imaging service that enables on-demand cropping, resizing, applying filters and optimizing images."
+keywords = ["thumbor"]
+compose = '''
+services:
+  thumbor:
+    image: minimalcompact/thumbor:{{THUMBOR_VERSION}}
+    volumes:
+    - thumbor-data:/data
+    restart: always
+    environment:
+      THUMBOR_PORT: '80'
+volumes:
+  thumbor-data:
+'''
+
+[[variables]]
+key = "THUMBOR_VERSION"
+label = "Thumbor Version"
+default = "6.7.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/minimalcompact/thumbor/tags/"

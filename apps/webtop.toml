@@ -1,0 +1,72 @@
+slug = "webtop"
+name = "Webtop"
+category = "App"
+description = "Linux in a web browser supporting popular desktop environments."
+keywords = ["webtop"]
+compose = '''
+services:
+  webtop:
+    image: lscr.io/linuxserver/webtop:{{WEBTOP_VERSION}}
+    hostname: webtop.{{ROOT_DOMAIN}}
+    environment:
+      TZ: '{{WEBTOP_TZ}}'
+      PUID: '{{WEBTOP_PUID}}'
+      PGID: '{{WEBTOP_PGID}}'
+      CUSTOM_USER: '{{WEBTOP_CUSTOM_USER}}'
+      PASSWORD: '{{WEBTOP_PASSWORD}}'
+      TITLE: '{{WEBTOP_TITLE}}'
+    volumes:
+    - webtop-config:/config
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  webtop-config:
+'''
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "WEBTOP_CUSTOM_USER"
+label = "User"
+default = "abc"
+description = "HTTP basic authentication user name. Default is `abc`"
+
+[[variables]]
+key = "WEBTOP_PASSWORD"
+label = "Password"
+generate = true
+description = "HTTP basic authentication password. Default is `abc`. If unset there will be no authentication."
+
+[[variables]]
+key = "WEBTOP_PGID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) on your instance to see the ID"
+
+[[variables]]
+key = "WEBTOP_PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) on your instance to see the ID"
+
+[[variables]]
+key = "WEBTOP_TITLE"
+label = "Title"
+default = "KasmVNC Client"
+description = "The page title displayed on the web browser, default is \"KasmVNC Client\"."
+
+[[variables]]
+key = "WEBTOP_TZ"
+label = "Timezone"
+default = "Etc/UTC"
+description = "Timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "WEBTOP_VERSION"
+label = "Version Tag"
+default = "ubuntu-xfce"
+description = "Check out their documentation for the valid tags https://docs.linuxserver.io/images/docker-webtop#version-tags"

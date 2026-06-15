@@ -1,0 +1,132 @@
+slug = "invoiceninja"
+name = "Invoice Ninja"
+category = "App"
+description = "Small Business Invoicing & Payments."
+keywords = ["invoice", "invoiceninja", "ninja"]
+compose = '''
+services:
+  invoiceninja-app:
+    restart: always
+    depends_on:
+    - invoiceninja-db
+    user:
+    environment:
+      APP_URL: http://invoiceninja.{{ROOT_DOMAIN}}
+      APP_KEY: '{{INVOICENINJA_APP_KEY}}'
+      APP_DEBUG: '{{INVOICENINJA_DEBUGMODE}}'
+      REQUIRE_HTTPS: false
+      PHANTOMJS_PDF_GENERATION: false
+      PDF_GENERATOR: snappdf
+      QUEUE_CONNECTION: database
+      DB_HOST: invoiceninja-db
+      DB_PORT: 3306
+      DB_DATABASE: '{{INVOICENINJA_DB_DATABASE}}'
+      DB_USERNAME: '{{INVOICENINJA_DB_USERNAME}}'
+      DB_PASSWORD: '{{INVOICENINJA_DB_PASSWORD}}'
+      MAIL_DRIVER: ''
+      MAIL_PORT: ''
+      MAIL_ENCRYPTION: ''
+      MAIL_HOST: ''
+      MAIL_USERNAME: ''
+      MAIL_FROM_ADDRESS: ''
+      MAIL_FROM_NAME: ''
+      MAIL_PASSWORD: ''
+      TRUSTED_PROXIES: 10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+      NORDIGEN_SECRET_ID: ''
+      NORDIGEN_SECRET_KEY: ''
+      IN_USER_EMAIL: '{{INVOICENINJA_ADMIN_USER_EMAIL}}'
+      IN_PASSWORD: '{{INVOICENINJA_ADMIN_PASS}}'
+    volumes:
+    - invoiceninja-app-public:/var/www/app/public
+    - invoiceninja-app-storage:/var/www/app/storage
+  invoiceninja-db:
+    restart: always
+    image: mariadb:10.4
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{INVOICENINJA_DB_ROOT_PASSWORD}}'
+      MYSQL_USER: '{{INVOICENINJA_DB_USERNAME}}'
+      MYSQL_PASSWORD: '{{INVOICENINJA_DB_PASSWORD}}'
+      MYSQL_DATABASE: '{{INVOICENINJA_DB_DATABASE}}'
+    volumes:
+    - invoiceninja-db:/var/lib/mysql
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  invoiceninja:
+    restart: always
+    depends_on:
+    - invoiceninja-app
+    environment:
+      APP_CONTAINER: invoiceninja-app:9000
+    volumes:
+    - invoiceninja-app-public:/var/www/app/public
+  invoiceninja-db-backup:
+    restart: always
+    image: selim13/automysqlbackup:2.6-9
+    depends_on:
+    - invoiceninja-db
+    environment:
+      USERNAME: root
+      PASSWORD: '{{INVOICENINJA_DB_ROOT_PASSWORD}}'
+      DBHOST: invoiceninja-db
+      DBEXCLUDE: performance_schema information_schema
+      CRON_SCHEDULE: 0 0 * * *
+      EXTRA_OPTS: --single-transaction
+    volumes:
+    - invoiceninja-db-backup:/backup
+volumes:
+  invoiceninja-app-public:
+  invoiceninja-app-storage:
+  invoiceninja-db:
+  invoiceninja-db-backup:
+'''
+
+[[variables]]
+key = "INVOICENINJA_ADMIN_PASS"
+label = "ADMIN_USER_PASS"
+generate = true
+description = "Admin password for Invoice Ninja"
+
+[[variables]]
+key = "INVOICENINJA_ADMIN_USER_EMAIL"
+label = "ADMIN_USER_EMAIL"
+default = "admin@example.com"
+description = "Admin user for Invoice Ninja"
+
+[[variables]]
+key = "INVOICENINJA_APP_KEY"
+label = "Invoice App Key"
+description = "Your own App Key by Invoice Ninja generated from the terminal. See description above."
+
+[[variables]]
+key = "INVOICENINJA_DB_DATABASE"
+label = "DB_DATABASE"
+default = "ninja"
+
+[[variables]]
+key = "INVOICENINJA_DB_PASSWORD"
+label = "DB_PASSWORD"
+generate = true
+description = "The password of the Invoice Ninja database user."
+
+[[variables]]
+key = "INVOICENINJA_DB_ROOT_PASSWORD"
+label = "DB_ROOT_PASSWORD"
+generate = true
+description = "The password of DB superuser."
+
+[[variables]]
+key = "INVOICENINJA_DB_USERNAME"
+label = "DB_USERNAME"
+default = "ninja"
+
+[[variables]]
+key = "INVOICENINJA_DEBUGMODE"
+label = "Debug Mode"
+default = "false"
+description = "Useful for debugging, not suitable for production"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

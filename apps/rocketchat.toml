@@ -1,0 +1,117 @@
+slug = "rocketchat"
+name = "Rocket.Chat"
+category = "Communication"
+description = "Slack like online chat, built with Meteor. Real-time conversations with your colleagues, other companies or customers."
+keywords = ["rocket.chat", "rocketchat"]
+compose = '''
+services:
+  rocketchat:
+    image: registry.rocket.chat/rocketchat/rocket.chat:{{APP_VERSION}}
+    volumes:
+    - rocketchat-data:/app/uploads
+    depends_on:
+    - rocketchat-db
+    environment:
+      PORT: 3000
+      ROOT_URL: http://rocketchat.{{ROOT_DOMAIN}}
+      MONGO_URL: mongodb://{{MONGODB_DB_USERNAME}}:{{MONGODB_DB_PASSWORD}}@rocketchat-db:27017/rocketchat?replicaSet=rs0
+      MONGO_OPLOG_URL: mongodb://{{MONGODB_ROOT_USERNAME}}:{{MONGODB_ROOT_PASSWORD}}@rocketchat-db:27017/local?replicaSet=rs0&authSource=admin
+      ADMIN_NAME: '{{ADMIN_NAME}}'
+      ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      ADMIN_USERNAME: '{{ADMIN_USERNAME}}'
+      ADMIN_PASS: '{{ADMIN_PASSWORD}}'
+      OVERWRITE_SETTING_Site_Url: http://rocketchat.{{ROOT_DOMAIN}}
+      DEPLOY_METHOD: docker
+      DEPLOY_PLATFORM: caprover
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  rocketchat-db:
+    image: bitnamilegacy/mongodb:{{APP_DB_VERSION}}
+    volumes:
+    - rocketchat-db-data:/bitnami/mongodb
+    environment:
+      MONGODB_REPLICA_SET_MODE: primary
+      MONGODB_REPLICA_SET_NAME: rs0
+      MONGODB_PORT_NUMBER: 27017
+      MONGODB_INITIAL_PRIMARY_HOST: rocketchat-db
+      MONGODB_INITIAL_PRIMARY_PORT_NUMBER: 27017
+      MONGODB_ADVERTISED_HOSTNAME: rocketchat-db
+      MONGODB_REPLICA_SET_KEY: '{{MONGODB_DB_REPLICASET_KEY}}'
+      MONGODB_ROOT_USER: '{{MONGODB_ROOT_USERNAME}}'
+      MONGODB_ROOT_PASSWORD: '{{MONGODB_ROOT_PASSWORD}}'
+      MONGODB_USERNAME: '{{MONGODB_DB_USERNAME}}'
+      MONGODB_PASSWORD: '{{MONGODB_DB_PASSWORD}}'
+      MONGODB_DATABASE: rocketchat
+volumes:
+  rocketchat-data:
+  rocketchat-db-data:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Rocket.Chat Admin Email Account"
+description = "Email address of Rocket.Chat instance's Admin user"
+
+[[variables]]
+key = "ADMIN_NAME"
+label = "Rocket.Chat Admin Real Name"
+default = "Captain"
+description = "Real name of your Rocket.Chat instance's Admin user"
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Rocket.Chat Admin Password"
+generate = true
+description = "Password of your Rocket.Chat instance's Admin user. Must be at least 8 characters long"
+
+[[variables]]
+key = "ADMIN_USERNAME"
+label = "Rocket.Chat Admin Username"
+default = "captain"
+description = "Username of your Rocket.Chat instance's Admin user"
+
+[[variables]]
+key = "APP_DB_VERSION"
+label = "MongoDB Version"
+default = "5.0"
+description = "See https://docs.rocket.chat/quick-start/installing-and-updating/manual-installation/mongo-versions for supported MongoDB versions. See https://hub.docker.com/r/bitnamilegacy/mongodb/tags/ for MongoDB image tags. Version must be at least `4.0.0`."
+
+[[variables]]
+key = "APP_VERSION"
+label = "Rocket.Chat Version"
+default = "5.2.0"
+description = "See version numbers at https://hub.docker.com/r/rocketchat/rocket.chat/tags or https://github.com/RocketChat/Rocket.Chat/releases. Version must be at least `5.0.0`."
+
+[[variables]]
+key = "MONGODB_DB_PASSWORD"
+label = "Password of the MongoDB user with permissions to Rocket.Chat database"
+generate = true
+description = "Must be at least 8 characters long. Recommended to leave the default generated"
+
+[[variables]]
+key = "MONGODB_DB_REPLICASET_KEY"
+label = "MongoDB replicaset key"
+generate = true
+description = "Must be at least 5 characters long. Recommended to leave the default generated"
+
+[[variables]]
+key = "MONGODB_DB_USERNAME"
+label = "MongoDB user with permissions to Rocket.Chat database"
+default = "rocketchat"
+
+[[variables]]
+key = "MONGODB_ROOT_PASSWORD"
+label = "MongoDB root user password"
+generate = true
+description = "Must be at least 8 characters long. Recommended to leave the default generated"
+
+[[variables]]
+key = "MONGODB_ROOT_USERNAME"
+label = "MongoDB root user's username"
+default = "root"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

@@ -1,0 +1,24 @@
+slug = "home-assistant"
+name = "Home Assistant"
+category = "Automation"
+description = "🏡 Open source home automation that puts local control and privacy first."
+keywords = ["assistant", "home"]
+compose = '''
+services:
+  home-assistant:
+    image: ghcr.io/home-assistant/home-assistant:{{MYAPP_VERSION}}
+    volumes:
+    - home-assistant-config:/config
+    - /etc/localtime:/etc/localtime:ro
+    - /run/dbus:/run/dbus:ro
+    ports:
+    - '{{HTTP_PORT}}:8123'
+volumes:
+  home-assistant-config:
+'''
+
+[[variables]]
+key = "MYAPP_VERSION"
+label = "Home Assistant version"
+default = "2025.2.1"
+description = "Check out their GitHub page for the valid tags https://github.com/home-assistant/core/pkgs/container/home-assistant"

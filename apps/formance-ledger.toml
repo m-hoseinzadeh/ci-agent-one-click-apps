@@ -1,0 +1,87 @@
+slug = "formance-ledger"
+name = "Formance Ledger"
+category = "App"
+description = "Programmable Financial Ledger To Build Money-Moving Applications"
+keywords = ["formance", "ledger"]
+compose = '''
+services:
+  formance-ledger:
+    image: ghcr.io/formancehq/ledger:{{FORMANCE_LEDGER_VERSION}}
+    environment:
+      NUMARY_STORAGE_DRIVER: postgres
+      NUMARY_STORAGE_POSTGRES_CONN_STRING: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@formance-ledger-db/{{POSTGRES_DB}}
+      NUMARY_SERVER_HTTP_BIND_ADDRESS: 0.0.0.0:3068
+      NUMARY_SEGMENT_ENABLED: '{{FORMANCE_LEDGER_SEGMENT_ENABLED}}'
+      NUMARY_AUTH_BASIC_ENABLED: '{{FORMANCE_LEDGER_AUTH_BASIC_ENABLED}}'
+      NUMARY_AUTH_BASIC_CREDENTIALS: '{{FORMANCE_LEDGER_AUTH_BASIC_CREDENTIALS}}'
+    volumes:
+    - formance-ledger:/root/.numary
+    depends_on:
+    - formance-ledger-db
+    ports:
+    - '{{HTTP_PORT}}:3068'
+  formance-ledger-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - formance-ledger-db:/var/lib/postgresql/data
+  formance-ledger-ui:
+    environment:
+      NUMARY_UI_HTTP_BIND_ADDRESS: 0.0.0.0:3078
+    depends_on:
+    - formance-ledger
+volumes:
+  formance-ledger:
+  formance-ledger-db:
+'''
+
+[[variables]]
+key = "FORMANCE_LEDGER_AUTH_BASIC_CREDENTIALS"
+label = "Application | Basic Authentication Credentials"
+generate = true
+description = "Basic authentication credentials, when enabled. Format is `username:password`."
+
+[[variables]]
+key = "FORMANCE_LEDGER_AUTH_BASIC_ENABLED"
+label = "Application | Enable Basic Authentication"
+default = "true"
+description = "Whether to use basic authentication to protect your ledger."
+
+[[variables]]
+key = "FORMANCE_LEDGER_SEGMENT_ENABLED"
+label = "Application | Enable Segment"
+default = "false"
+description = "Whether to send usage statistics to Segment."
+
+[[variables]]
+key = "FORMANCE_LEDGER_VERSION"
+label = "Application | Version"
+default = "v1.8.0"
+description = "Version of Formance. Check out their valid tags at https://github.com/formancehq/ledger/pkgs/container/ledger"
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database | Name"
+default = "formance"
+description = "Name of the database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database | User Password"
+generate = true
+description = "Password of the database user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User Name"
+default = "formance"
+description = "Name of the database user."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Database | Version"
+default = "14.0-alpine"
+description = "Version of PostgreSQL. Check out their valid tags at https://hub.docker.com/_/postgres/tags"

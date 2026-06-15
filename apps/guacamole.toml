@@ -1,0 +1,59 @@
+slug = "guacamole"
+name = "Guacamole"
+category = "App"
+description = "An HTML5 remote access application."
+keywords = ["guacamole"]
+compose = '''
+services:
+  guacamole-db:
+    image: mysql:{{MYSQL_VERSION}}
+    volumes:
+    - guacamole-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_DATABASE: guacamole
+      MYSQL_USER: guacamole
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+  guacamole-guacd:
+    image: guacamole/guacd:{{GUACD_VERSION}}
+    restart: always
+  guacamole:
+    image: guacamole/guacamole:{{GUACAMOLE_VERSION}}
+    restart: always
+    depends_on:
+    - guacamole-db
+    - guacamole-guacd
+    environment:
+      GUACD_HOSTNAME: guacamole-guacd
+      MYSQL_HOSTNAME: guacamole-db
+      MYSQL_DATABASE: guacamole
+      MYSQL_USER: guacamole
+      MYSQL_PASSWORD: '{{DB_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  guacamole-db-data:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+
+[[variables]]
+key = "GUACAMOLE_VERSION"
+label = "Guacamole Version"
+default = "1.3.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/guacamole/guacamole/tags"
+
+[[variables]]
+key = "GUACD_VERSION"
+label = "Guacd Version"
+default = "1.3.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/guacamole/guacd/tags"
+
+[[variables]]
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "8.0.26"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mysql?tab=tags"

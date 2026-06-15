@@ -1,0 +1,142 @@
+slug = "peertube"
+name = "PeerTube"
+category = "App"
+description = "PeerTube is a decentralized video hosting network, based on free/libre software."
+keywords = ["peertube"]
+compose = '''
+services:
+  peertube-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - peertube-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{DB_USER}}'
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_DB: peertube
+  peertube-redis:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - peertube-redis-data:/data
+    restart: always
+  peertube:
+    depends_on:
+    - peertube-db
+    - peertube-redis
+    image: chocobozzz/peertube:{{PEERTUBE_VERSION}}
+    volumes:
+    - peertube-peertube-data:/data
+    - peertube-peertube-config:/config
+    restart: always
+    environment:
+      PEERTUBE_DB_USERNAME: '{{DB_USER}}'
+      PEERTUBE_DB_PASSWORD: '{{DB_PASS}}'
+      PEERTUBE_DB_HOSTNAME: peertube-db
+      PEERTUBE_REDIS_HOSTNAME: peertube-redis
+      PEERTUBE_WEBSERVER_HOSTNAME: peertube.{{ROOT_DOMAIN}}
+      PEERTUBE_WEBSERVER_PORT: '443'
+      PEERTUBE_WEBSERVER_HTTPS: 'true'
+      PEERTUBE_TRUST_PROXY: '["127.0.0.1", "loopback", "10.0.0.0/16"]'
+      PEERTUBE_SMTP_USERNAME: '{{SMTP_USERNAME}}'
+      PEERTUBE_SMTP_PASSWORD: '{{SMTP_PASSWORD}}'
+      PEERTUBE_SMTP_HOSTNAME: '{{SMTP_HOSTNAME}}'
+      PEERTUBE_SMTP_PORT: '{{SMTP_PORT}}'
+      PEERTUBE_SMTP_FROM: '{{SMTP_FROM}}'
+      PEERTUBE_SMTP_TLS: '{{SMTP_TLS}}'
+      PEERTUBE_SMTP_DISABLE_STARTTLS: '{{SMTP_STARTTLS}}'
+      PEERTUBE_ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
+      PT_INITIAL_ROOT_PASSWORD: '{{ADMIN_PASSWORD}}'
+      PEERTUBE_SECRET: '{{SECRET}}'
+    ports:
+    - '{{HTTP_PORT}}:9000'
+volumes:
+  peertube-db-data:
+  peertube-redis-data:
+  peertube-peertube-data:
+  peertube-peertube-config:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Administrator email"
+default = ""
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Administrator password"
+generate = true
+description = "Password use to connect as administrator under `root` username"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "peertubeuser"
+
+[[variables]]
+key = "PEERTUBE_VERSION"
+label = "Peertube Version"
+default = "v5.1.0-bullseye"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/chocobozzz/peertube/tags/"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "13.10-alpine"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "6.2.11-alpine"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/redis/tags/"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET"
+label = "Secret string"
+generate = true
+
+[[variables]]
+key = "SMTP_FROM"
+label = "SMTP from"
+default = ""
+
+[[variables]]
+key = "SMTP_HOSTNAME"
+label = "SMTP hostname"
+default = ""
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP password"
+default = ""
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP port"
+default = ""
+
+[[variables]]
+key = "SMTP_STARTTLS"
+label = "SMTP STARTTLS"
+default = "false"
+
+[[variables]]
+key = "SMTP_TLS"
+label = "SMTP TLS"
+default = "false"
+
+[[variables]]
+key = "SMTP_USERNAME"
+label = "SMTP username"
+default = ""

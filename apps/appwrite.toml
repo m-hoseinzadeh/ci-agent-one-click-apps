@@ -1,0 +1,1086 @@
+slug = "appwrite"
+name = "Appwrite"
+category = "App"
+description = "Secure Backend Server for Web, Mobile & Flutter Developers."
+keywords = ["appwrite"]
+compose = '''
+services:
+  appwrite-redis:
+    volumes:
+    - appwrite-redis:/data
+  appwrite-mariadb:
+    volumes:
+    - appwrite-mariadb:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: '{{APP_DB_ROOT_PASS}}'
+      MARIADB_DATABASE: '{{APP_DB_SCHEMA}}'
+      MARIADB_USER: '{{APP_DB_USER}}'
+      MARIADB_PASSWORD: '{{APP_DB_PASS}}'
+  appwrite-influxdb:
+    image: appwrite/influxdb:1.5.0
+    volumes:
+    - appwrite-influxdb:/var/lib/influxdb
+    ports:
+    - '{{HTTP_PORT}}:8086'
+  appwrite-telegraf:
+    image: appwrite/telegraf:1.4.0
+    environment:
+      _APP_INFLUXDB_HOST: appwrite-influxdb
+      _APP_INFLUXDB_PORT: '{{APP_INFLUXDB_PORT}}'
+  appwrite:
+    image: appwrite/appwrite:{{APP_VERSION}}
+    volumes:
+    - appwrite-uploads:/storage/uploads
+    - appwrite-cache:/storage/cache
+    - appwrite-config:/storage/config
+    - appwrite-certificates:/storage/certificates
+    - appwrite-functions:/storage/functions
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    - appwrite-influxdb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_LOCALE: '{{APP_LOCALE}}'
+      _APP_CONSOLE_WHITELIST_ROOT: '{{APP_CONSOLE_WHITELIST_ROOT}}'
+      _APP_CONSOLE_WHITELIST_EMAILS: '{{APP_CONSOLE_WHITELIST_EMAILS}}'
+      _APP_CONSOLE_WHITELIST_IPS: '{{APP_CONSOLE_WHITELIST_IPS}}'
+      _APP_SYSTEM_EMAIL_NAME: '{{APP_SYSTEM_EMAIL_NAME}}'
+      _APP_SYSTEM_EMAIL_ADDRESS: '{{APP_SYSTEM_EMAIL_ADDRESS}}'
+      _APP_SYSTEM_SECURITY_EMAIL_ADDRESS: '{{APP_SYSTEM_SECURITY_EMAIL_ADDRESS}}'
+      _APP_SYSTEM_RESPONSE_FORMAT: '{{APP_SYSTEM_RESPONSE_FORMAT}}'
+      _APP_OPTIONS_ABUSE: '{{APP_OPTIONS_ABUSE}}'
+      _APP_OPTIONS_FORCE_HTTPS: '{{APP_OPTIONS_FORCE_HTTPS}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_DOMAIN: '{{APP_DOMAIN_NAME}}'
+      _APP_DOMAIN_FUNCTIONS: '{{APP_DOMAIN_FUNCTIONS}}'
+      _APP_DOMAIN_TARGET: '{{APP_DOMAIN_TARGET}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_SMTP_HOST: '{{APP_SMTP_HOST}}'
+      _APP_SMTP_PORT: '{{APP_SMTP_PORT}}'
+      _APP_SMTP_SECURE: '{{APP_SMTP_SECURE}}'
+      _APP_SMTP_USERNAME: '{{APP_SMTP_USERNAME}}'
+      _APP_SMTP_PASSWORD: '{{APP_SMTP_PASSWORD}}'
+      _APP_USAGE_STATS: '{{APP_USAGE_STATS}}'
+      _APP_INFLUXDB_HOST: appwrite-influxdb
+      _APP_INFLUXDB_PORT: '{{APP_INFLUXDB_PORT}}'
+      _APP_STORAGE_LIMIT: '{{APP_STORAGE_LIMIT}}'
+      _APP_STORAGE_PREVIEW_LIMIT: '{{APP_STORAGE_PREVIEW_LIMIT}}'
+      _APP_STORAGE_ANTIVIRUS: '{{APP_STORAGE_ANTIVIRUS_ENABLED}}'
+      _APP_STORAGE_ANTIVIRUS_HOST: '{{APP_STORAGE_ANTIVIRUS_HOST}}'
+      _APP_STORAGE_ANTIVIRUS_PORT: '{{APP_STORAGE_ANTIVIRUS_PORT}}'
+      _APP_STORAGE_DEVICE: '{{APP_STORAGE_DEVICE}}'
+      _APP_STORAGE_S3_ACCESS_KEY: '{{APP_STORAGE_S3_ACCESS_KEY}}'
+      _APP_STORAGE_S3_SECRET: '{{APP_STORAGE_S3_SECRET}}'
+      _APP_STORAGE_S3_REGION: '{{APP_STORAGE_S3_REGION}}'
+      _APP_STORAGE_S3_BUCKET: '{{APP_STORAGE_S3_BUCKET}}'
+      _APP_STORAGE_DO_SPACES_ACCESS_KEY: '{{APP_STORAGE_DO_SPACES_ACCESS_KEY}}'
+      _APP_STORAGE_DO_SPACES_SECRET: '{{APP_STORAGE_DO_SPACES_SECRET}}'
+      _APP_STORAGE_DO_SPACES_REGION: '{{APP_STORAGE_DO_SPACES_REGION}}'
+      _APP_STORAGE_DO_SPACES_BUCKET: '{{APP_STORAGE_DO_SPACES_BUCKET}}'
+      _APP_STORAGE_BACKBLAZE_ACCESS_KEY: '{{APP_STORAGE_BACKBLAZE_ACCESS_KEY}}'
+      _APP_STORAGE_BACKBLAZE_SECRET: '{{APP_STORAGE_BACKBLAZE_SECRET}}'
+      _APP_STORAGE_BACKBLAZE_REGION: '{{APP_STORAGE_BACKBLAZE_REGION}}'
+      _APP_STORAGE_BACKBLAZE_BUCKET: '{{APP_STORAGE_BACKBLAZE_BUCKET}}'
+      _APP_STORAGE_LINODE_ACCESS_KEY: '{{APP_STORAGE_LINODE_ACCESS_KEY}}'
+      _APP_STORAGE_LINODE_SECRET: '{{APP_STORAGE_LINODE_SECRET}}'
+      _APP_STORAGE_LINODE_REGION: '{{APP_STORAGE_LINODE_REGION}}'
+      _APP_STORAGE_LINODE_BUCKET: '{{APP_STORAGE_LINODE_BUCKET}}'
+      _APP_STORAGE_WASABI_ACCESS_KEY: '{{APP_STORAGE_WASABI_ACCESS_KEY}}'
+      _APP_STORAGE_WASABI_SECRET: '{{APP_STORAGE_WASABI_SECRET}}'
+      _APP_STORAGE_WASABI_REGION: '{{APP_STORAGE_WASABI_REGION}}'
+      _APP_STORAGE_WASABI_BUCKET: '{{APP_STORAGE_WASABI_BUCKET}}'
+      _APP_FUNCTIONS_SIZE_LIMIT: '{{APP_FUNCTIONS_SIZE_LIMIT}}'
+      _APP_FUNCTIONS_TIMEOUT: '{{APP_FUNCTIONS_TIMEOUT}}'
+      _APP_FUNCTIONS_BUILD_TIMEOUT: '{{APP_FUNCTIONS_BUILD_TIMEOUT}}'
+      _APP_FUNCTIONS_CPUS: '{{APP_FUNCTIONS_CPUS}}'
+      _APP_FUNCTIONS_MEMORY: '{{APP_FUNCTIONS_MEMORY_ALLOCATED}}'
+      _APP_FUNCTIONS_RUNTIMES: '{{APP_FUNCTIONS_RUNTIMES}}'
+      _APP_EXECUTOR_SECRET: '{{APP_EXECUTOR_SECRET}}'
+      _APP_EXECUTOR_HOST: http://appwrite-executor/v1
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+      _APP_STATSD_HOST: appwrite-telegraf
+      _APP_STATSD_PORT: '{{APP_STATSD_PORT}}'
+      _APP_MAINTENANCE_INTERVAL: '{{APP_MAINTENANCE_INTERVAL}}'
+      _APP_MAINTENANCE_RETENTION_EXECUTION: '{{APP_MAINTENANCE_RETENTION_EXECUTION}}'
+      _APP_MAINTENANCE_RETENTION_CACHE: '{{APP_MAINTENANCE_RETENTION_CACHE}}'
+      _APP_MAINTENANCE_RETENTION_ABUSE: '{{APP_MAINTENANCE_RETENTION_ABUSE}}'
+      _APP_MAINTENANCE_RETENTION_AUDIT: '{{APP_MAINTENANCE_RETENTION_AUDIT}}'
+      _APP_MAINTENANCE_RETENTION_USAGE_HOURLY: '{{APP_MAINTENANCE_RETENTION_USAGE_HOURLY}}'
+      _APP_MAINTENANCE_RETENTION_SCHEDULES: '{{APP_MAINTENANCE_RETENTION_SCHEDULES}}'
+      _APP_SMS_PROVIDER: '{{APP_SMS_PROVIDER}}'
+      _APP_SMS_FROM: '{{APP_SMS_FROM}}'
+      _APP_GRAPHQL_MAX_BATCH_SIZE: '{{APP_GRAPHQL_MAX_BATCH_SIZE}}'
+      _APP_GRAPHQL_MAX_COMPLEXITY: '{{APP_GRAPHQL_MAX_COMPLEXITY}}'
+      _APP_GRAPHQL_MAX_DEPTH: '{{APP_GRAPHQL_MAX_DEPTH}}'
+      _APP_VCS_GITHUB_APP_NAME: '{{APP_VCS_GITHUB_APP_NAME}}'
+      _APP_VCS_GITHUB_PRIVATE_KEY: '{{APP_VCS_GITHUB_PRIVATE_KEY}}'
+      _APP_VCS_GITHUB_APP_ID: '{{APP_VCS_GITHUB_APP_ID}}'
+      _APP_VCS_GITHUB_WEBHOOK_SECRET: '{{APP_VCS_GITHUB_WEBHOOK_SECRET}}'
+      _APP_VCS_GITHUB_CLIENT_SECRET: '{{APP_VCS_GITHUB_CLIENT_SECRET}}'
+      _APP_VCS_GITHUB_CLIENT_ID: '{{APP_VCS_GITHUB_CLIENT_ID}}'
+      _APP_MIGRATIONS_FIREBASE_CLIENT_ID: '{{APP_MIGRATIONS_FIREBASE_CLIENT_ID}}'
+      _APP_MIGRATIONS_FIREBASE_CLIENT_SECRET: '{{APP_MIGRATIONS_FIREBASE_CLIENT_SECRET}}'
+      _APP_ASSISTANT_OPENAI_API_KEY: '{{APP_ASSISTANT_OPENAI_API_KEY}}'
+  appwrite-realtime:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPTIONS_ABUSE: '{{APP_OPTIONS_ABUSE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_USAGE_STATS: '{{APP_USAGE_STATS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-executor:
+    image: openruntimes/executor:{{OPENRUNTIMES_EXECUTOR_VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    - appwrite-functions:/storage/functions
+    - appwrite-builds:/storage/builds
+    - /tmp:/tmp
+    environment:
+      OPR_EXECUTOR_INACTIVE_TRESHOLD: '{{APP_FUNCTIONS_INACTIVE_THRESHOLD}}'
+      OPR_EXECUTOR_MAINTENANCE_INTERVAL: '{{APP_FUNCTIONS_MAINTENANCE_INTERVAL}}'
+      OPR_EXECUTOR_NETWORK: captain-overlay-network
+      OPR_EXECUTOR_DOCKER_HUB_USERNAME: '{{APP_DOCKER_HUB_USERNAME}}'
+      OPR_EXECUTOR_DOCKER_HUB_PASSWORD: '{{APP_DOCKER_HUB_PASSWORD}}'
+      OPR_EXECUTOR_ENV: '{{APP_ENV}}'
+      OPR_EXECUTOR_RUNTIMES: '{{APP_FUNCTIONS_RUNTIMES}}'
+      OPR_EXECUTOR_SECRET: '{{APP_EXECUTOR_SECRET}}'
+      OPR_EXECUTOR_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      OPR_EXECUTOR_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+      OPR_EXECUTOR_STORAGE_DEVICE: '{{APP_STORAGE_DEVICE}}'
+      OPR_EXECUTOR_STORAGE_S3_ACCESS_KEY: '{{APP_STORAGE_S3_ACCESS_KEY}}'
+      OPR_EXECUTOR_STORAGE_S3_SECRET: '{{APP_STORAGE_S3_SECRET}}'
+      OPR_EXECUTOR_STORAGE_S3_REGION: '{{APP_STORAGE_S3_REGION}}'
+      OPR_EXECUTOR_STORAGE_S3_BUCKET: '{{APP_STORAGE_S3_BUCKET}}'
+      OPR_EXECUTOR_STORAGE_DO_SPACES_ACCESS_KEY: '{{APP_STORAGE_DO_SPACES_ACCESS_KEY}}'
+      OPR_EXECUTOR_STORAGE_DO_SPACES_SECRET: '{{APP_STORAGE_DO_SPACES_SECRET}}'
+      OPR_EXECUTOR_STORAGE_DO_SPACES_REGION: '{{APP_STORAGE_DO_SPACES_REGION}}'
+      OPR_EXECUTOR_STORAGE_DO_SPACES_BUCKET: '{{APP_STORAGE_DO_SPACES_BUCKET}}'
+      OPR_EXECUTOR_STORAGE_BACKBLAZE_ACCESS_KEY: '{{APP_STORAGE_BACKBLAZE_ACCESS_KEY}}'
+      OPR_EXECUTOR_STORAGE_BACKBLAZE_SECRET: '{{APP_STORAGE_BACKBLAZE_SECRET}}'
+      OPR_EXECUTOR_STORAGE_BACKBLAZE_REGION: '{{APP_STORAGE_BACKBLAZE_REGION}}'
+      OPR_EXECUTOR_STORAGE_BACKBLAZE_BUCKET: '{{APP_STORAGE_BACKBLAZE_BUCKET}}'
+      OPR_EXECUTOR_STORAGE_LINODE_ACCESS_KEY: '{{APP_STORAGE_LINODE_ACCESS_KEY}}'
+      OPR_EXECUTOR_STORAGE_LINODE_SECRET: '{{APP_STORAGE_LINODE_SECRET}}'
+      OPR_EXECUTOR_STORAGE_LINODE_REGION: '{{APP_STORAGE_LINODE_REGION}}'
+      OPR_EXECUTOR_STORAGE_LINODE_BUCKET: '{{APP_STORAGE_LINODE_BUCKET}}'
+      OPR_EXECUTOR_STORAGE_WASABI_ACCESS_KEY: '{{APP_STORAGE_WASABI_ACCESS_KEY}}'
+      OPR_EXECUTOR_STORAGE_WASABI_SECRET: '{{APP_STORAGE_WASABI_SECRET}}'
+      OPR_EXECUTOR_STORAGE_WASABI_REGION: '{{APP_STORAGE_WASABI_REGION}}'
+      OPR_EXECUTOR_STORAGE_WASABI_BUCKET: '{{APP_STORAGE_WASABI_BUCKET}}'
+  appwrite-worker-databases:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-worker-builds:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    volumes:
+    - appwrite-functions:/storage/functions
+    - appwrite-builds:/storage/builds
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_EXECUTOR_SECRET: '{{APP_EXECUTOR_SECRET}}'
+      _APP_EXECUTOR_HOST: http://appwrite-executor/v1
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+      _APP_VCS_GITHUB_APP_NAME: '{{APP_VCS_GITHUB_APP_NAME}}'
+      _APP_VCS_GITHUB_PRIVATE_KEY: '{{APP_VCS_GITHUB_PRIVATE_KEY}}'
+      _APP_VCS_GITHUB_APP_ID: '{{APP_VCS_GITHUB_APP_ID}}'
+      _APP_FUNCTIONS_TIMEOUT: '{{APP_FUNCTIONS_TIMEOUT}}'
+      _APP_FUNCTIONS_BUILD_TIMEOUT: '{{APP_FUNCTIONS_BUILD_TIMEOUT}}'
+      _APP_FUNCTIONS_CPUS: '{{APP_FUNCTIONS_CPUS}}'
+      _APP_FUNCTIONS_MEMORY: '{{APP_FUNCTIONS_MEMORY}}'
+      _APP_FUNCTIONS_SIZE_LIMIT: '{{APP_FUNCTIONS_SIZE_LIMIT}}'
+      _APP_OPTIONS_FORCE_HTTPS: '{{APP_OPTIONS_FORCE_HTTPS}}'
+      _APP_DOMAIN: '{{APP_DOMAIN_NAME}}'
+      _APP_STORAGE_DEVICE: '{{APP_STORAGE_DEVICE}}'
+      _APP_STORAGE_S3_ACCESS_KEY: '{{APP_STORAGE_S3_ACCESS_KEY}}'
+      _APP_STORAGE_S3_SECRET: '{{APP_STORAGE_S3_SECRET}}'
+      _APP_STORAGE_S3_REGION: '{{APP_STORAGE_S3_REGION}}'
+      _APP_STORAGE_S3_BUCKET: '{{APP_STORAGE_S3_BUCKET}}'
+      _APP_STORAGE_DO_SPACES_ACCESS_KEY: '{{APP_STORAGE_DO_SPACES_ACCESS_KEY}}'
+      _APP_STORAGE_DO_SPACES_SECRET: '{{APP_STORAGE_DO_SPACES_SECRET}}'
+      _APP_STORAGE_DO_SPACES_REGION: '{{APP_STORAGE_DO_SPACES_REGION}}'
+      _APP_STORAGE_DO_SPACES_BUCKET: '{{APP_STORAGE_DO_SPACES_BUCKET}}'
+      _APP_STORAGE_BACKBLAZE_ACCESS_KEY: '{{APP_STORAGE_BACKBLAZE_ACCESS_KEY}}'
+      _APP_STORAGE_BACKBLAZE_SECRET: '{{APP_STORAGE_BACKBLAZE_SECRET}}'
+      _APP_STORAGE_BACKBLAZE_REGION: '{{APP_STORAGE_BACKBLAZE_REGION}}'
+      _APP_STORAGE_BACKBLAZE_BUCKET: '{{APP_STORAGE_BACKBLAZE_BUCKET}}'
+      _APP_STORAGE_LINODE_ACCESS_KEY: '{{APP_STORAGE_LINODE_ACCESS_KEY}}'
+      _APP_STORAGE_LINODE_SECRET: '{{APP_STORAGE_LINODE_SECRET}}'
+      _APP_STORAGE_LINODE_REGION: '{{APP_STORAGE_LINODE_REGION}}'
+      _APP_STORAGE_LINODE_BUCKET: '{{APP_STORAGE_LINODE_BUCKET}}'
+      _APP_STORAGE_WASABI_ACCESS_KEY: '{{APP_STORAGE_WASABI_ACCESS_KEY}}'
+      _APP_STORAGE_WASABI_SECRET: '{{APP_STORAGE_WASABI_SECRET}}'
+      _APP_STORAGE_WASABI_REGION: '{{APP_STORAGE_WASABI_REGION}}'
+      _APP_STORAGE_WASABI_BUCKET: '{{APP_STORAGE_WASABI_BUCKET}}'
+  appwrite-worker-audits:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-worker-webhooks:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_SYSTEM_SECURITY_EMAIL_ADDRESS: '{{APP_SYSTEM_SECURITY_EMAIL_ADDRESS}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-worker-deletes:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    volumes:
+    - appwrite-uploads:/storage/uploads
+    - appwrite-cache:/storage/cache
+    - appwrite-functions:/storage/functions
+    - appwrite-builds:/storage/builds
+    - appwrite-certificates:/storage/certificates
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_STORAGE_DEVICE: '{{APP_STORAGE_DEVICE}}'
+      _APP_STORAGE_S3_ACCESS_KEY: '{{APP_STORAGE_S3_ACCESS_KEY}}'
+      _APP_STORAGE_S3_SECRET: '{{APP_STORAGE_S3_SECRET}}'
+      _APP_STORAGE_S3_REGION: '{{APP_STORAGE_S3_REGION}}'
+      _APP_STORAGE_S3_BUCKET: '{{APP_STORAGE_S3_BUCKET}}'
+      _APP_STORAGE_DO_SPACES_ACCESS_KEY: '{{APP_STORAGE_DO_SPACES_ACCESS_KEY}}'
+      _APP_STORAGE_DO_SPACES_SECRET: '{{APP_STORAGE_DO_SPACES_SECRET}}'
+      _APP_STORAGE_DO_SPACES_REGION: '{{APP_STORAGE_DO_SPACES_REGION}}'
+      _APP_STORAGE_DO_SPACES_BUCKET: '{{APP_STORAGE_DO_SPACES_BUCKET}}'
+      _APP_STORAGE_BACKBLAZE_ACCESS_KEY: '{{APP_STORAGE_BACKBLAZE_ACCESS_KEY}}'
+      _APP_STORAGE_BACKBLAZE_SECRET: '{{APP_STORAGE_BACKBLAZE_SECRET}}'
+      _APP_STORAGE_BACKBLAZE_REGION: '{{APP_STORAGE_BACKBLAZE_REGION}}'
+      _APP_STORAGE_BACKBLAZE_BUCKET: '{{APP_STORAGE_BACKBLAZE_BUCKET}}'
+      _APP_STORAGE_LINODE_ACCESS_KEY: '{{APP_STORAGE_LINODE_ACCESS_KEY}}'
+      _APP_STORAGE_LINODE_SECRET: '{{APP_STORAGE_LINODE_SECRET}}'
+      _APP_STORAGE_LINODE_REGION: '{{APP_STORAGE_LINODE_REGION}}'
+      _APP_STORAGE_LINODE_BUCKET: '{{APP_STORAGE_LINODE_BUCKET}}'
+      _APP_STORAGE_WASABI_ACCESS_KEY: '{{APP_STORAGE_WASABI_ACCESS_KEY}}'
+      _APP_STORAGE_WASABI_SECRET: '{{APP_STORAGE_WASABI_SECRET}}'
+      _APP_STORAGE_WASABI_REGION: '{{APP_STORAGE_WASABI_REGION}}'
+      _APP_STORAGE_WASABI_BUCKET: '{{APP_STORAGE_WASABI_BUCKET}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+      _APP_EXECUTOR_SECRET: '{{APP_EXECUTOR_SECRET}}'
+      _APP_EXECUTOR_HOST: http://appwrite-executor/v1
+  appwrite-worker-functions:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    - appwrite-executor
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_FUNCTIONS_TIMEOUT: '{{APP_FUNCTIONS_TIMEOUT}}'
+      _APP_FUNCTIONS_BUILD_TIMEOUT: '{{APP_FUNCTIONS_BUILD_TIMEOUT}}'
+      _APP_FUNCTIONS_CPUS: '{{APP_FUNCTIONS_CPUS}}'
+      _APP_FUNCTIONS_MEMORY: '{{APP_FUNCTIONS_MEMORY_ALLOCATED}}'
+      _APP_EXECUTOR_SECRET: '{{APP_EXECUTOR_SECRET}}'
+      _APP_EXECUTOR_HOST: http://appwrite-executor/v1
+      _APP_USAGE_STATS: '{{APP_USAGE_STATS}}'
+      _APP_DOCKER_HUB_USERNAME: '{{APP_DOCKER_HUB_USERNAME}}'
+      _APP_DOCKER_HUB_PASSWORD: '{{APP_DOCKER_HUB_PASSWORD}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+  appwrite-worker-mails:
+    depends_on:
+    - appwrite-redis
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_SYSTEM_EMAIL_NAME: '{{APP_SYSTEM_EMAIL_NAME}}'
+      _APP_SYSTEM_EMAIL_ADDRESS: '{{APP_SYSTEM_EMAIL_ADDRESS}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_SMTP_HOST: '{{APP_SMTP_HOST}}'
+      _APP_SMTP_PORT: '{{APP_SMTP_PORT}}'
+      _APP_SMTP_SECURE: '{{APP_SMTP_SECURE}}'
+      _APP_SMTP_USERNAME: '{{APP_SMTP_USERNAME}}'
+      _APP_SMTP_PASSWORD: '{{APP_SMTP_PASSWORD}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-worker-messaging:
+    depends_on:
+    - appwrite-redis
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_SMS_PROVIDER: '{{APP_SMS_PROVIDER}}'
+      _APP_SMS_FROM: '{{APP_SMS_FROM}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-worker-certificates:
+    depends_on:
+    - appwrite-redis
+    - appwrite-mariadb
+    volumes:
+    - appwrite-config:/storage/config
+    - appwrite-certificates:/storage/certificates
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_DOMAIN: '{{APP_DOMAIN_NAME}}'
+      _APP_DOMAIN_FUNCTIONS: '{{APP_DOMAIN_FUNCTIONS}}'
+      _APP_DOMAIN_TARGET: '{{APP_DOMAIN_TARGET}}'
+      _APP_SYSTEM_SECURITY_EMAIL_ADDRESS: '{{APP_SYSTEM_SECURITY_EMAIL_ADDRESS}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-worker-migrations:
+    depends_on:
+    - appwrite-mariadb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_DOMAIN: '{{APP_DOMAIN_NAME}}'
+      _APP_DOMAIN_TARGET: '{{APP_DOMAIN_TARGET}}'
+      _APP_SYSTEM_SECURITY_EMAIL_ADDRESS: '{{APP_SYSTEM_SECURITY_EMAIL_ADDRESS}}'
+      _APP_REDIS_HOST: '{{APP_REDIS_HOST}}'
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: '{{APP_DB_HOST}}'
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+      _APP_MIGRATIONS_FIREBASE_CLIENT_ID: '{{APP_MIGRATIONS_FIREBASE_CLIENT_ID}}'
+      _APP_MIGRATIONS_FIREBASE_CLIENT_SECRET: '{{APP_MIGRATIONS_FIREBASE_CLIENT_SECRET}}'
+  appwrite-assistant:
+    image: appwrite/assistant:{{ASSISTANT_APP_VERSION}}
+    environment:
+      _APP_ASSISTANT_OPENAI_API_KEY: '{{APP_ASSISTANT_OPENAI_API_KEY}}'
+  appwrite-maintenance:
+    depends_on:
+    - appwrite-redis
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_DOMAIN: '{{APP_DOMAIN_NAME}}'
+      _APP_DOMAIN_TARGET: '{{APP_DOMAIN_TARGET}}'
+      _APP_DOMAIN_FUNCTIONS: '{{APP_DOMAIN_FUNCTIONS}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_MAINTENANCE_INTERVAL: '{{APP_MAINTENANCE_INTERVAL}}'
+      _APP_MAINTENANCE_RETENTION_EXECUTION: '{{APP_MAINTENANCE_RETENTION_EXECUTION}}'
+      _APP_MAINTENANCE_RETENTION_CACHE: '{{APP_MAINTENANCE_RETENTION_CACHE}}'
+      _APP_MAINTENANCE_RETENTION_ABUSE: '{{APP_MAINTENANCE_RETENTION_ABUSE}}'
+      _APP_MAINTENANCE_RETENTION_AUDIT: '{{APP_MAINTENANCE_RETENTION_AUDIT}}'
+      _APP_MAINTENANCE_RETENTION_USAGE_HOURLY: '{{APP_MAINTENANCE_RETENTION_USAGE_HOURLY}}'
+      _APP_MAINTENANCE_RETENTION_SCHEDULES: '{{APP_MAINTENANCE_RETENTION_SCHEDULES}}'
+  appwrite-usage:
+    depends_on:
+    - appwrite-influxdb
+    - appwrite-mariadb
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_DB_HOST: appwrite-mariadb
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+      _APP_INFLUXDB_HOST: appwrite-influxdb
+      _APP_INFLUXDB_PORT: '{{APP_INFLUXDB_PORT}}'
+      _APP_USAGE_AGGREGATION_INTERVAL: '{{APP_USAGE_AGGREGATION_INTERVAL}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_USAGE_STATS: '{{APP_USAGE_STATS}}'
+      _APP_LOGGING_PROVIDER: '{{APP_LOGGING_PROVIDER}}'
+      _APP_LOGGING_CONFIG: '{{APP_LOGGING_CONFIG}}'
+  appwrite-schedule:
+    depends_on:
+    - appwrite-redis
+    environment:
+      _APP_ENV: '{{APP_ENV}}'
+      _APP_WORKER_PER_CORE: '{{APP_WORKER_PER_CORE}}'
+      _APP_OPENSSL_KEY_V1: '{{APP_OPENSSL_KEY_V1}}'
+      _APP_REDIS_HOST: appwrite-redis
+      _APP_REDIS_PORT: '{{APP_REDIS_PORT}}'
+      _APP_REDIS_USER: '{{APP_REDIS_USER}}'
+      _APP_REDIS_PASS: '{{APP_REDIS_PASS}}'
+      _APP_DB_HOST: '{{APP_DB_HOST}}'
+      _APP_DB_PORT: '{{APP_DB_PORT}}'
+      _APP_DB_SCHEMA: '{{APP_DB_SCHEMA}}'
+      _APP_DB_USER: '{{APP_DB_USER}}'
+      _APP_DB_PASS: '{{APP_DB_PASS}}'
+volumes:
+  appwrite-redis:
+  appwrite-mariadb:
+  appwrite-influxdb:
+  appwrite-uploads:
+  appwrite-cache:
+  appwrite-config:
+  appwrite-certificates:
+  appwrite-functions:
+  appwrite-builds:
+'''
+
+[[variables]]
+key = "APP_ASSISTANT_OPENAI_API_KEY"
+label = "_APP_ASSISTANT_OPENAI_API_KEY"
+description = "OpenAI API key. You can find it in your OpenAI application settings."
+
+[[variables]]
+key = "APP_CONSOLE_WHITELIST_EMAILS"
+label = "_APP_CONSOLE_WHITELIST_EMAILS"
+description = "This option allows you to limit creation of new users on the Appwrite console. This option is very useful for small teams or sole developers. To enable it, pass a list of allowed email addresses separated by a comma."
+
+[[variables]]
+key = "APP_CONSOLE_WHITELIST_IPS"
+label = "_APP_CONSOLE_WHITELIST_IPS"
+description = "This last option allows you to limit creation of users in Appwrite console for users sharing the same set of IP addresses. This option is very useful for team working with a VPN service or a company IP.\\n\\nTo enable/activate this option, pass a list of allowed IP addresses separated by a comma."
+
+[[variables]]
+key = "APP_CONSOLE_WHITELIST_ROOT"
+label = "_APP_CONSOLE_WHITELIST_ROOT"
+default = "enabled"
+description = "This option allows you to disable the creation of new users on the Appwrite console. When enabled only 1 user will be able to use the registration form. New users can be added by inviting them to your project. By default this option is enabled."
+
+[[variables]]
+key = "APP_DB_HOST"
+label = "App Db Host"
+default = ""
+
+[[variables]]
+key = "APP_DB_PASS"
+label = "_APP_DB_PASS"
+generate = true
+description = "MariaDB server user password."
+
+[[variables]]
+key = "APP_DB_PORT"
+label = "_APP_DB_PORT"
+default = "3306"
+description = "MariaDB server TCP port."
+
+[[variables]]
+key = "APP_DB_ROOT_PASS"
+label = "_APP_DB_ROOT_PASS"
+generate = true
+description = "MariaDB server root password."
+
+[[variables]]
+key = "APP_DB_SCHEMA"
+label = "_APP_DB_SCHEMA"
+default = "appwrite"
+description = "MariaDB server database schema."
+
+[[variables]]
+key = "APP_DB_USER"
+label = "_APP_DB_USER"
+default = "user"
+description = "MariaDB server user name."
+
+[[variables]]
+key = "APP_DOCKER_HUB_PASSWORD"
+label = "_APP_DOCKER_HUB_PASSWORD"
+description = "The password for hub.docker.com. This variable is used to pull images from hub.docker.com."
+
+[[variables]]
+key = "APP_DOCKER_HUB_USERNAME"
+label = "_APP_DOCKER_HUB_USERNAME"
+description = "The username for hub.docker.com. This variable is used to pull images from hub.docker.com."
+
+[[variables]]
+key = "APP_DOMAIN_FUNCTIONS"
+label = "_APP_DOMAIN_FUNCTIONS"
+default = "localhost"
+description = "A domain to use for function preview URLs. Setting to empty turns off function preview URLs."
+
+[[variables]]
+key = "APP_DOMAIN_NAME"
+label = "_APP_DOMAIN"
+default = "localhost"
+description = "Your Appwrite domain address. When setting a public suffix domain, Appwrite will attempt to issue a valid SSL certificate automatically. When used with a dev domain, Appwrite will assign a self-signed SSL certificate. The default value is 'localhost'."
+
+[[variables]]
+key = "APP_DOMAIN_TARGET"
+label = "_APP_DOMAIN_TARGET"
+default = "localhost"
+description = "A DNS A record hostname to serve as a CNAME target for your Appwrite custom domains. You can use the same value as used for the Appwrite '_APP_DOMAIN' variable. The default value is 'localhost'."
+
+[[variables]]
+key = "APP_ENV"
+label = "_APP_ENV"
+default = "production"
+description = "Set your server running environment."
+
+[[variables]]
+key = "APP_EXECUTOR_SECRET"
+label = "_APP_EXECUTOR_SECRET"
+generate = true
+description = "The secret key used by Appwrite to communicate with the function executor."
+
+[[variables]]
+key = "APP_FUNCTIONS_BUILD_TIMEOUT"
+label = "_APP_FUNCTIONS_BUILD_TIMEOUT"
+default = "900"
+description = "The maximum number of seconds allowed as a timeout value when building a new function. The default value is 900 seconds."
+
+[[variables]]
+key = "APP_FUNCTIONS_CPUS"
+label = "_APP_FUNCTIONS_CPUS"
+description = "The maximum number of CPU core a single cloud function is allowed to use. Please note that setting a value higher than available cores will result in a function error, which might result in an error. The default value is empty. When it's empty, CPU limit will be disabled."
+
+[[variables]]
+key = "APP_FUNCTIONS_INACTIVE_THRESHOLD"
+label = "_APP_FUNCTIONS_INACTIVE_THRESHOLD"
+default = "60"
+description = "The minimum time a function can be inactive before it's container is shutdown and put to sleep. The default value is 60 seconds"
+
+[[variables]]
+key = "APP_FUNCTIONS_MAINTENANCE_INTERVAL"
+label = "_APP_FUNCTIONS_MAINTENANCE_INTERVAL"
+default = "3600"
+description = "Interval value containing the number of seconds that the executor should wait before checking for inactive runtimes. The default value is 3600 seconds (1 hour)."
+
+[[variables]]
+key = "APP_FUNCTIONS_MEMORY"
+label = "App Functions Memory"
+default = ""
+
+[[variables]]
+key = "APP_FUNCTIONS_MEMORY_ALLOCATED"
+label = "_APP_FUNCTIONS_MEMORY"
+description = "The maximum amount of memory a single cloud function is allowed to use in megabytes. The default value is empty. When it's empty, memory limit will be disabled."
+
+[[variables]]
+key = "APP_FUNCTIONS_RUNTIMES"
+label = "_APP_FUNCTIONS_RUNTIMES"
+default = "node-18.0"
+description = "This option allows you to enable or disable runtime environments for cloud functions. Disable unused runtimes to save disk space. To enable cloud function runtimes, pass a list of enabled environments separated by a comma. See https://appwrite.io/docs/products/functions/runtimes"
+
+[[variables]]
+key = "APP_FUNCTIONS_SIZE_LIMIT"
+label = "_APP_FUNCTIONS_SIZE_LIMIT"
+default = "30000000"
+description = "The maximum size deployment in bytes. The default value is 30MB."
+
+[[variables]]
+key = "APP_FUNCTIONS_TIMEOUT"
+label = "_APP_FUNCTIONS_TIMEOUT"
+default = "900"
+description = "The maximum number of seconds allowed as a timeout value when creating a new function. The default value is 900 seconds."
+
+[[variables]]
+key = "APP_GRAPHQL_MAX_BATCH_SIZE"
+label = "_APP_GRAPHQL_MAX_BATCH_SIZE"
+default = "10"
+description = "Maximum number of batched queries per request. The default value is 10."
+
+[[variables]]
+key = "APP_GRAPHQL_MAX_COMPLEXITY"
+label = "_APP_GRAPHQL_MAX_COMPLEXITY"
+default = "250"
+description = "Maximum complexity of a GraphQL query. One field adds one to query complexity. Lists multiply the complexity by the number of items requested. The default value is 250."
+
+[[variables]]
+key = "APP_GRAPHQL_MAX_DEPTH"
+label = "_APP_GRAPHQL_MAX_DEPTH"
+default = "3"
+description = "Maximum depth of a GraphQL query. One nested field level adds one to query depth. The default value is 3."
+
+[[variables]]
+key = "APP_INFLUXDB_PORT"
+label = "_APP_INFLUXDB_PORT"
+default = "8086"
+description = "InfluxDB server TCP port."
+
+[[variables]]
+key = "APP_LOCALE"
+label = "_APP_LOCALE"
+default = "en"
+description = "Set your Appwrite's locale. By default, the locale is set to 'en'."
+
+[[variables]]
+key = "APP_LOGGING_CONFIG"
+label = "_APP_LOGGING_CONFIG"
+description = "This variable configures authentication to 3rd party error logging providers. If using Sentry, this should be 'SENTRY_API_KEY;SENTRY_APP_ID'. If using Raygun, this should be Raygun API key. If using AppSignal, this should be AppSignal API key. If using LogOwl, this should be LogOwl Service Ticket."
+
+[[variables]]
+key = "APP_LOGGING_PROVIDER"
+label = "_APP_LOGGING_PROVIDER"
+description = "This variable allows you to enable logging errors to 3rd party providers. This value is empty by default, to enable the logger set the value to one of 'sentry', 'raygun', 'appsignal', 'logowl'"
+
+[[variables]]
+key = "APP_MAINTENANCE_INTERVAL"
+label = "_APP_MAINTENANCE_INTERVAL"
+default = "86400"
+description = "Interval value containing the number of seconds that the Appwrite maintenance process should wait before executing system cleanups and optimizations. The default value is 86400 seconds (1 day)."
+
+[[variables]]
+key = "APP_MAINTENANCE_RETENTION_ABUSE"
+label = "_APP_MAINTENANCE_RETENTION_ABUSE"
+default = "86400"
+description = "The maximum duration (in seconds) upto which to retain abuse logs. The default value is 86400 seconds (1 day)."
+
+[[variables]]
+key = "APP_MAINTENANCE_RETENTION_AUDIT"
+label = "_APP_MAINTENANCE_RETENTION_AUDIT"
+default = "1209600"
+description = "The maximum duration (in seconds) upto which to retain audit logs. The default value is 1209600 seconds (14 days)."
+
+[[variables]]
+key = "APP_MAINTENANCE_RETENTION_CACHE"
+label = "_APP_MAINTENANCE_RETENTION_CACHE"
+default = "2592000"
+description = "The maximum duration (in seconds) upto which to retain cached files. The default value is 2592000 seconds (30 days)."
+
+[[variables]]
+key = "APP_MAINTENANCE_RETENTION_EXECUTION"
+label = "_APP_MAINTENANCE_RETENTION_EXECUTION"
+default = "1209600"
+description = "The maximum duration (in seconds) upto which to retain execution logs. The default value is 1209600 seconds (14 days)."
+
+[[variables]]
+key = "APP_MAINTENANCE_RETENTION_SCHEDULES"
+label = "_APP_MAINTENANCE_RETENTION_SCHEDULES"
+description = "Schedules deletion interval (in seconds)."
+
+[[variables]]
+key = "APP_MAINTENANCE_RETENTION_USAGE_HOURLY"
+label = "_APP_MAINTENANCE_RETENTION_USAGE_HOURLY"
+default = "8640000"
+description = "The maximum duration (in seconds) upto which to retain hourly usage metrics. The default value is 8640000 seconds (100 days)."
+
+[[variables]]
+key = "APP_MIGRATIONS_FIREBASE_CLIENT_ID"
+label = "_APP_MIGRATIONS_FIREBASE_CLIENT_ID"
+description = "Google OAuth client ID. You can find it in your GCP application settings."
+
+[[variables]]
+key = "APP_MIGRATIONS_FIREBASE_CLIENT_SECRET"
+label = "_APP_MIGRATIONS_FIREBASE_CLIENT_SECRET"
+description = "Google OAuth client secret. You can generate secrets in your GCP application settings."
+
+[[variables]]
+key = "APP_OPENSSL_KEY_V1"
+label = "_APP_OPENSSL_KEY_V1"
+generate = true
+description = "This is your server private secret key that is used to encrypt all sensitive data on your server. Appwrite server encrypts all secret data on your server like webhooks, HTTP passwords, user sessions, and storage files. Keep it a secret and have a backup for it."
+
+[[variables]]
+key = "APP_OPTIONS_ABUSE"
+label = "_APP_OPTIONS_ABUSE"
+default = "enabled"
+description = "Allows you to disable abuse checks and API rate limiting. By default, set to 'enabled'. To cancel the abuse checking, set to 'disabled'. It is not recommended to disable this check-in a production environment."
+
+[[variables]]
+key = "APP_OPTIONS_FORCE_HTTPS"
+label = "_APP_OPTIONS_FORCE_HTTPS"
+default = "disabled"
+description = "Allows you to force HTTPS connection to your API. This feature redirects any HTTP call to HTTPS and adds the 'Strict-Transport-Security' header to all HTTP responses."
+
+[[variables]]
+key = "APP_REDIS_HOST"
+label = "App Redis Host"
+default = ""
+
+[[variables]]
+key = "APP_REDIS_PASS"
+label = "_APP_REDIS_PASS"
+description = "Redis server password. This is an optional variable. Default value is an empty string."
+
+[[variables]]
+key = "APP_REDIS_PORT"
+label = "_APP_REDIS_PORT"
+default = "6379"
+description = "Redis server TCP port."
+
+[[variables]]
+key = "APP_REDIS_USER"
+label = "_APP_REDIS_USER"
+description = "Redis server user. This is an optional variable. Default value is an empty string."
+
+[[variables]]
+key = "APP_SMS_FROM"
+label = "_APP_SMS_FROM"
+description = "Phone number used for sending out messages. Must start with a leading '+' and maximum of 15 digits without spaces (+123456789)."
+
+[[variables]]
+key = "APP_SMS_PROVIDER"
+label = "_APP_SMS_PROVIDER"
+description = "Provider used for delivering SMS for Phone authentication. Use the following format: 'sms://[USER]:[SECRET]@[PROVIDER]'. Available providers are twilio, text-magic, telesign, msg91, and vonage."
+
+[[variables]]
+key = "APP_SMTP_HOST"
+label = "_APP_SMTP_HOST"
+description = "SMTP server host name address. Use an empty string to disable all mail sending from the server. The default value for this variable is an empty string."
+
+[[variables]]
+key = "APP_SMTP_PASSWORD"
+label = "_APP_SMTP_PASSWORD"
+description = "SMTP server user password. Empty by default."
+
+[[variables]]
+key = "APP_SMTP_PORT"
+label = "_APP_SMTP_PORT"
+description = "SMTP server TCP port. Empty by default."
+
+[[variables]]
+key = "APP_SMTP_SECURE"
+label = "_APP_SMTP_SECURE"
+description = "SMTP secure connection protocol. Empty by default, change to 'tls' if running on a secure connection."
+
+[[variables]]
+key = "APP_SMTP_USERNAME"
+label = "_APP_SMTP_USERNAME"
+description = "SMTP server user name. Empty by default."
+
+[[variables]]
+key = "APP_STATSD_PORT"
+label = "_APP_STATSD_PORT"
+default = "8125"
+description = "StatsD server TCP port."
+
+[[variables]]
+key = "APP_STORAGE_ANTIVIRUS_ENABLED"
+label = "_APP_STORAGE_ANTIVIRUS"
+default = "disabled"
+description = "This variable allows you to disable the internal anti-virus scans. This value is set to 'disabled' by default, to enable the scans set the value to 'enabled'. Before enabling, you must add the ClamAV service and depend on it on main Appwrite service."
+
+[[variables]]
+key = "APP_STORAGE_ANTIVIRUS_HOST"
+label = "_APP_STORAGE_ANTIVIRUS_HOST"
+default = "clamav"
+description = "ClamAV server host name address."
+
+[[variables]]
+key = "APP_STORAGE_ANTIVIRUS_PORT"
+label = "_APP_STORAGE_ANTIVIRUS_PORT"
+default = "3310"
+description = "ClamAV server TCP port."
+
+[[variables]]
+key = "APP_STORAGE_BACKBLAZE_ACCESS_KEY"
+label = "_APP_STORAGE_BACKBLAZE_ACCESS_KEY"
+description = "Backblaze access key. Required when the storage adapter is set to Backblaze. Your Backblaze keyID will be your access key. You can get your keyID from your Backblaze console."
+
+[[variables]]
+key = "APP_STORAGE_BACKBLAZE_BUCKET"
+label = "_APP_STORAGE_BACKBLAZE_BUCKET"
+description = "Backblaze bucket. Required when storage adapter is set to Backblaze. You can create your bucket from your Backblaze console."
+
+[[variables]]
+key = "APP_STORAGE_BACKBLAZE_REGION"
+label = "_APP_STORAGE_BACKBLAZE_REGION"
+default = "us-west-004"
+description = "Backblaze region. Required when storage adapter is set to Backblaze. You can find your region info from your Backblaze console."
+
+[[variables]]
+key = "APP_STORAGE_BACKBLAZE_SECRET"
+label = "_APP_STORAGE_BACKBLAZE_SECRET"
+description = "Backblaze secret key. Required when the storage adapter is set to Backblaze. Your Backblaze applicationKey will be your secret key. You can get your applicationKey from your Backblaze console."
+
+[[variables]]
+key = "APP_STORAGE_DEVICE"
+label = "_APP_STORAGE_DEVICE"
+default = "Local"
+description = "Select default storage device. The default value is 'Local'. List of supported adapters are 'Local', 'S3', 'DOSpaces', 'Backblaze', 'Linode' and 'Wasabi'."
+
+[[variables]]
+key = "APP_STORAGE_DO_SPACES_ACCESS_KEY"
+label = "_APP_STORAGE_DO_SPACES_ACCESS_KEY"
+description = "DigitalOcean spaces access key. Required when the storage adapter is set to DOSpaces. You can get your access key from your DigitalOcean console."
+
+[[variables]]
+key = "APP_STORAGE_DO_SPACES_BUCKET"
+label = "_APP_STORAGE_DO_SPACES_BUCKET"
+description = "DigitalOcean spaces bucket. Required when storage adapter is set to DOSpaces. You can create spaces in your DigitalOcean console."
+
+[[variables]]
+key = "APP_STORAGE_DO_SPACES_REGION"
+label = "_APP_STORAGE_DO_SPACES_REGION"
+default = "us-east-1"
+description = "DigitalOcean spaces region. Required when storage adapter is set to DOSpaces. You can find your region info for your space from DigitalOcean console."
+
+[[variables]]
+key = "APP_STORAGE_DO_SPACES_SECRET"
+label = "_APP_STORAGE_DO_SPACES_SECRET"
+description = "DigitalOcean spaces secret key. Required when the storage adapter is set to DOSpaces. You can get your secret key from your DigitalOcean console."
+
+[[variables]]
+key = "APP_STORAGE_LIMIT"
+label = "_APP_STORAGE_LIMIT"
+default = "30000000"
+description = "Maximum file size allowed for file upload. The default value is 30MB. You should pass your size limit value in bytes."
+
+[[variables]]
+key = "APP_STORAGE_LINODE_ACCESS_KEY"
+label = "_APP_STORAGE_LINODE_ACCESS_KEY"
+description = "Linode object storage access key. Required when the storage adapter is set to Linode. You can get your access key from your Linode console."
+
+[[variables]]
+key = "APP_STORAGE_LINODE_BUCKET"
+label = "_APP_STORAGE_LINODE_BUCKET"
+description = "Linode object storage bucket. Required when storage adapter is set to Linode. You can create buckets in your Linode console."
+
+[[variables]]
+key = "APP_STORAGE_LINODE_REGION"
+label = "_APP_STORAGE_LINODE_REGION"
+default = "eu-central-1"
+description = "Linode object storage region. Required when storage adapter is set to Linode. You can find your region info from your Linode console."
+
+[[variables]]
+key = "APP_STORAGE_LINODE_SECRET"
+label = "_APP_STORAGE_LINODE_SECRET"
+description = "Linode object storage secret key. Required when the storage adapter is set to Linode. You can get your secret key from your Linode console."
+
+[[variables]]
+key = "APP_STORAGE_PREVIEW_LIMIT"
+label = "_APP_STORAGE_PREVIEW_LIMIT"
+default = "20000000"
+description = "Maximum file size allowed for file image preview. The default value is 20MB. You should pass your size limit value in bytes."
+
+[[variables]]
+key = "APP_STORAGE_S3_ACCESS_KEY"
+label = "_APP_STORAGE_S3_ACCESS_KEY"
+description = "AWS S3 storage access key. Required when the storage adapter is set to S3. You can get your access key from your AWS console."
+
+[[variables]]
+key = "APP_STORAGE_S3_BUCKET"
+label = "_APP_STORAGE_S3_BUCKET"
+description = "AWS S3 storage bucket. Required when storage adapter is set to S3. You can create buckets in your AWS console."
+
+[[variables]]
+key = "APP_STORAGE_S3_REGION"
+label = "_APP_STORAGE_S3_REGION"
+default = "us-east-1"
+description = "AWS S3 storage region. Required when storage adapter is set to S3. You can find your region info for your bucket from AWS console."
+
+[[variables]]
+key = "APP_STORAGE_S3_SECRET"
+label = "_APP_STORAGE_S3_SECRET"
+description = "AWS S3 storage secret key. Required when the storage adapter is set to S3. You can get your secret key from your AWS console."
+
+[[variables]]
+key = "APP_STORAGE_WASABI_ACCESS_KEY"
+label = "_APP_STORAGE_WASABI_ACCESS_KEY"
+description = "Wasabi access key. Required when the storage adapter is set to Wasabi. You can get your access key from your Wasabi console."
+
+[[variables]]
+key = "APP_STORAGE_WASABI_BUCKET"
+label = "_APP_STORAGE_WASABI_BUCKET"
+description = "Wasabi bucket. Required when storage adapter is set to Wasabi. You can create buckets in your Wasabi console."
+
+[[variables]]
+key = "APP_STORAGE_WASABI_REGION"
+label = "_APP_STORAGE_WASABI_REGION"
+default = "eu-central-1"
+description = "Wasabi region. Required when storage adapter is set to Wasabi. You can find your region info from your Wasabi console."
+
+[[variables]]
+key = "APP_STORAGE_WASABI_SECRET"
+label = "_APP_STORAGE_WASABI_SECRET"
+description = "Wasabi secret key. Required when the storage adapter is set to Wasabi. You can get your secret key from your Wasabi console."
+
+[[variables]]
+key = "APP_SYSTEM_EMAIL_ADDRESS"
+label = "_APP_SYSTEM_EMAIL_ADDRESS"
+default = "team@appwrite.io"
+description = "This is the sender email address that will appear on email messages sent to developers from the Appwrite console. You should choose an email address that is allowed to be used from your SMTP server to avoid the server email ending in the users' SPAM folders."
+
+[[variables]]
+key = "APP_SYSTEM_EMAIL_NAME"
+label = "_APP_SYSTEM_EMAIL_NAME"
+default = "Appwrite"
+description = "This is the sender name value that will appear on email messages sent to developers from the Appwrite console. You can use url encoded strings for spaces and special chars."
+
+[[variables]]
+key = "APP_SYSTEM_RESPONSE_FORMAT"
+label = "_APP_SYSTEM_RESPONSE_FORMAT"
+description = "Use this environment variable to set the default Appwrite HTTP response format to support an older version of Appwrite. This option is useful to overcome breaking changes between versions. You can also use the X-Appwrite-Response-Format HTTP request header to overwrite the response for a specific request. This variable accepts any valid Appwrite version. To use the current version format, leave the value of the variable empty."
+
+[[variables]]
+key = "APP_SYSTEM_SECURITY_EMAIL_ADDRESS"
+label = "_APP_SYSTEM_SECURITY_EMAIL_ADDRESS"
+default = "certs@appwrite.io"
+description = "This is the email address used to issue SSL certificates for custom domains or the user agent in your webhooks payload."
+
+[[variables]]
+key = "APP_USAGE_AGGREGATION_INTERVAL"
+label = "_APP_USAGE_AGGREGATION_INTERVAL"
+default = "30"
+description = "Interval value containing the number of seconds that the Appwrite usage process should wait before aggregating stats and syncing it to Database from TimeSeries data. The default value is 30 seconds. Reintroduced in 1.1.0."
+
+[[variables]]
+key = "APP_USAGE_STATS"
+label = "_APP_USAGE_STATS"
+default = "enabled"
+description = "This variable allows you to disable the collection and displaying of usage stats. This value is set to 'enabled' by default, to disable the usage stats set the value to 'disabled'. When disabled, it's recommended to turn off the Worker Usage, Influxdb and Telegraf containers for better resource usage."
+
+[[variables]]
+key = "APP_VCS_GITHUB_APP_ID"
+label = "_APP_VCS_GITHUB_APP_ID"
+description = "GitHub application ID. You can find it in your GitHub application details."
+
+[[variables]]
+key = "APP_VCS_GITHUB_APP_NAME"
+label = "_APP_VCS_GITHUB_APP_NAME"
+description = "Name of your GitHub app. This value should be set to your GitHub application's URL."
+
+[[variables]]
+key = "APP_VCS_GITHUB_CLIENT_ID"
+label = "_APP_VCS_GITHUB_CLIENT_ID"
+description = "GitHub client ID. You can find it in your GitHub application details."
+
+[[variables]]
+key = "APP_VCS_GITHUB_CLIENT_SECRET"
+label = "_APP_VCS_GITHUB_CLIENT_SECRET"
+description = "GitHub client secret. You can generate secrets in your GitHub application settings."
+
+[[variables]]
+key = "APP_VCS_GITHUB_PRIVATE_KEY"
+label = "_APP_VCS_GITHUB_PRIVATE_KEY"
+description = "GitHub app RSA private key. You can generate private keys from GitHub application settings."
+
+[[variables]]
+key = "APP_VCS_GITHUB_WEBHOOK_SECRET"
+label = "_APP_VCS_GITHUB_WEBHOOK_SECRET"
+description = "GitHub webhook secret. You can configure it in your GitHub application settings under webhook section."
+
+[[variables]]
+key = "APP_VERSION"
+label = "Appwrite Version Tag"
+default = "1.4.13"
+description = "Check out their valid tags at https://hub.docker.com/r/appwrite/appwrite/tags"
+
+[[variables]]
+key = "APP_WORKER_PER_CORE"
+label = "_APP_WORKER_PER_CORE"
+default = "6"
+description = "Internal Worker per core for the API, Realtime and Executor containers. Can be configured to optimize performance."
+
+[[variables]]
+key = "ASSISTANT_APP_VERSION"
+label = "Assistant Version Tag"
+default = "0.2.2"
+description = "Check out their valid tags at https://hub.docker.com/r/appwrite/assistant/tags"
+
+[[variables]]
+key = "OPENRUNTIMES_EXECUTOR_VERSION"
+label = "OpenRuntimes Executor Version Tag"
+default = "0.4.5"
+description = "Check out their valid tags at https://hub.docker.com/r/openruntimes/executor/tags"

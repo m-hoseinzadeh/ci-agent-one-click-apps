@@ -1,0 +1,40 @@
+slug = "umami-only"
+name = "umami-only"
+category = "Analytics"
+description = "umami is a simple, easy to use, self-hosted web analytics solution. The goal is to provide you with a friendly privacy-focused alternative to Google Analytics."
+keywords = ["only", "umami"]
+compose = '''
+services:
+  umami-only:
+    image: ghcr.io/umami-software/umami:{{UMAMI_VERSION}}
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://{{DB_USER}}:{{DB_PASS}}@{{DB_URL}}/{{DB_NAME}}
+    ports:
+    - '{{HTTP_PORT}}:3000'
+'''
+
+[[variables]]
+key = "DB_NAME"
+label = "Database Table Name"
+description = "the table that you want use for your umami app"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+description = "Password for your Database"
+
+[[variables]]
+key = "DB_URL"
+label = "Database Remote URL"
+description = "if your db is in your caprover network use srv-captain--appName"
+
+[[variables]]
+key = "DB_USER"
+label = "Database User"
+
+[[variables]]
+key = "UMAMI_VERSION"
+label = "Caprover Umami Version"
+default = "3.0.3"
+description = "Checkout their github page for the valid tags https://github.com/umami-software/umami/pkgs/container/umami"

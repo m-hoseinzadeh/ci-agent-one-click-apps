@@ -1,0 +1,80 @@
+slug = "lychee"
+name = "Lychee"
+category = "App"
+description = "A great looking and easy-to-use photo-management-system."
+keywords = ["lychee"]
+compose = '''
+services:
+  lychee:
+    depends_on:
+    - lychee-mariadb
+    image: lycheeorg/lychee:{{LYCHEE_VERSION}}
+    restart: unless-stopped
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+      DB_CONNECTION: mysql
+      DB_HOST: lychee-mariadb
+      DB_PORT: '3306'
+      DB_DATABASE: '{{MARIADB}}-db'
+      DB_USERNAME: '{{MARIADB}}-user'
+      DB_PASSWORD: '{{MARIADB}}-password'
+      STARTUP_DELAY: '30'
+    volumes:
+    - lychee-conf:/conf
+    - lychee-uploads:/uploads
+    - lychee-sym:/sym
+  lychee-mariadb:
+    image: mariadb:{{MARIADB_VERSION}}
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+      MYSQL_DATABASE: '{{MARIADB}}-db'
+      MYSQL_USER: '{{MARIADB}}-user'
+      MYSQL_PASSWORD: '{{MARIADB}}-password'
+    volumes:
+    - lychee-db-data:/var/lib/mysql
+    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:3306'
+volumes:
+  lychee-conf:
+  lychee-uploads:
+  lychee-sym:
+  lychee-db-data:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "LYCHEE_VERSION"
+label = "Lychee Version"
+default = "v4.0.7"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/lycheeorg/lychee/tags"
+
+[[variables]]
+key = "MARIADB"
+label = "Mariadb"
+default = ""
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "10.5.6"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags/"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "Europe/Brussels"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

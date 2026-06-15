@@ -1,0 +1,39 @@
+slug = "dozzle"
+name = "Dozzle"
+category = "Monitoring"
+description = "Dozzle is a small lightweight application with a web based interface to monitor Docker logs. It doesn’t store any log files. It is for live monitoring of your container logs only."
+keywords = ["dozzle"]
+compose = '''
+services:
+  dozzle:
+    image: amir20/dozzle:{{VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      DOZZLE_USERNAME: '{{USERNAME}}'
+      DOZZLE_PASSWORD: '{{PASSWORD}}'
+      DOZZLE_KEY: '{{GEN_RANDOM_HEX}}(16)'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "PASSWORD"
+label = "Password"
+generate = true
+
+[[variables]]
+key = "USERNAME"
+label = "Username"
+default = "admin"
+
+[[variables]]
+key = "VERSION"
+label = "Version Tag"
+default = "v9.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/amir20/dozzle/tags?page=1&ordering=last_updated"

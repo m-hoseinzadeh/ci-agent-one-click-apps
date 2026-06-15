@@ -1,0 +1,24 @@
+slug = "radicale"
+name = "Radicale"
+category = "App"
+description = "Radicale lightweight CalDAV and CardDAV Server"
+keywords = ["radicale"]
+compose = '''
+services:
+  radicale:
+    image: tomsquest/docker-radicale:{{IMAGE_TAG}}
+    volumes:
+    - radicale-data:/data
+    restart: always
+    environment: {}
+    ports:
+    - '{{HTTP_PORT}}:5232'
+volumes:
+  radicale-data:
+'''
+
+[[variables]]
+key = "IMAGE_TAG"
+label = "What version/tag do you want?"
+default = "2.1.12.1"
+description = "Go here to see all versions https://hub.docker.com/r/tomsquest/docker-radicale/tags"

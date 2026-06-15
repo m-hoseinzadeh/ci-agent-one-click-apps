@@ -1,0 +1,64 @@
+slug = "influxdb2"
+name = "InfluxDb2"
+category = "Database"
+description = "InfluxDB2 is a time series database. It stores large amounts of timestamped data, including DevOps monitoring, application metrics, IoT sensor data, and real-time analytics."
+keywords = ["influxdb2"]
+compose = '''
+services:
+  influxdb2:
+    image: influxdb:{{INFLUX_VERSION}}
+    volumes:
+    - influxdb2-data:/var/lib/influxdb2
+    - influxdb2-configs:/etc/influxdb2
+    environment:
+      DOCKER_INFLUXDB_INIT_USERNAME: '{{INFLUX_INIT_USERNAME}}'
+      DOCKER_INFLUXDB_INIT_PASSWORD: '{{INFLUX_INIT_PASSWORD}}'
+      DOCKER_INFLUXDB_INIT_ORG: '{{INFLUX_INIT_ORG}}'
+      DOCKER_INFLUXDB_INIT_BUCKET: '{{INFLUX_BUCKET}}'
+      DOCKER_INFLUXDB_INIT_RETENTION: '{{INFLUX_RETENTION}}'
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: '{{INFLUX_TOKEN}}'
+    ports:
+    - '{{HTTP_PORT}}:8086'
+volumes:
+  influxdb2-data:
+  influxdb2-configs:
+'''
+
+[[variables]]
+key = "INFLUX_BUCKET"
+label = "Influx Bucket"
+default = "my-bucket"
+description = "Automatically initializes a database with this bucket ID."
+
+[[variables]]
+key = "INFLUX_INIT_ORG"
+label = "Organization for intialization"
+default = "my-org"
+
+[[variables]]
+key = "INFLUX_INIT_PASSWORD"
+label = "Password for initialization"
+generate = true
+
+[[variables]]
+key = "INFLUX_INIT_USERNAME"
+label = "Username for initialization"
+default = "username"
+
+[[variables]]
+key = "INFLUX_RETENTION"
+label = "Retention for data"
+default = "52w"
+description = "The duration the system's initial bucket should retain data. If not set, the initial bucket will retain data forever."
+
+[[variables]]
+key = "INFLUX_TOKEN"
+label = "Admin Access Token"
+generate = true
+
+[[variables]]
+key = "INFLUX_VERSION"
+label = "InfluxDb Version"
+default = "2.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/influxdb/tags/"

@@ -1,0 +1,56 @@
+slug = "mssql"
+name = "Microsoft SQL"
+category = "Database"
+description = "Microsoft SQL Server is a relational database management system developed by Microsoft"
+keywords = ["microsoft", "mssql", "sql"]
+compose = '''
+services:
+  mssql-db:
+    image: mcr.microsoft.com/mssql/server:{{SERVER_VERSION}}
+    volumes:
+    - mssql-db-data:/var/opt/mssql
+    restart: always
+    environment:
+      ACCEPT_EULA: '{{ACCEPT_EULA}}'
+      MSSQL_PID: '{{PID}}'
+      MSSQL_SA_PASSWORD: '{{SA_PASS}}'
+      MSSQL_TCP_PORT: '{{CONTAINER_PORT}}'
+    ports:
+    - '{{HOST_PORT}}:{{CONTAINER_PORT}}'
+volumes:
+  mssql-db-data:
+'''
+
+[[variables]]
+key = "ACCEPT_EULA"
+label = "Accept EULA (Y/N)"
+description = "Confirms your acceptance of the End-User Licensing Agreement https://go.microsoft.com/fwlink/?linkid=857698.  By passing the value \"Y\", you are expressing that you have a valid and existing license for the edition and version of SQL Server that you intend to use. You also agree that your use of SQL Server software running in a Docker container image will be governed by the terms of your SQL Server license."
+
+[[variables]]
+key = "CONTAINER_PORT"
+label = "Container TCP Port"
+default = "1433"
+description = "Sets the TCP port that SQL Server container listens to. This is also used for creating the port mapping."
+
+[[variables]]
+key = "HOST_PORT"
+label = "Host Port"
+default = "1433"
+description = "Sets the TCP port that the host exposes. This is also used for creating the port mapping."
+
+[[variables]]
+key = "PID"
+label = "PID"
+default = "Developer"
+description = "Set the SQL Server edition or product key. This will run the container with the edition that is associated with the PID. This the Product ID (PID) or Edition that the container will run with. Acceptable values: Developer, Express, Standard, Enterprise, EnterpriseCore : More info here: https://hub.docker.com/_/microsoft-mssql-server"
+
+[[variables]]
+key = "SA_PASS"
+label = "SA Password"
+description = "The database system administrator (userid = 'sa') password used to connect to SQL Server once the container is running. Important note: This password needs to include at least 8 characters of at least three of these four categories: uppercase letters, lowercase letters, numbers and non-alphanumeric symbols."
+
+[[variables]]
+key = "SERVER_VERSION"
+label = "Version"
+default = "2017-CU12-ubuntu"
+description = "Check out this page for the valid tags https://mcr.microsoft.com/v2/mssql/server/tags/list"

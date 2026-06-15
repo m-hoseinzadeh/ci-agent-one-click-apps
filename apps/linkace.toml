@@ -1,0 +1,138 @@
+slug = "linkace"
+name = "LinkAce (v2)"
+category = "App"
+description = "LinkAce is a self-hosted tool for effortlessly archiving, organizing, and sharing your favorite web links."
+keywords = ["(v2)", "linkace"]
+compose = '''
+services:
+  linkace:
+    restart: always
+    depends_on:
+    - linkace-db
+    environment:
+      COMPOSE_PROJECT_NAME: linkace
+      APP_URL: http://linkace.{{ROOT_DOMAIN}}
+      APP_KEY: '{{GEN_RANDOM_HEX}}(32)'
+      DB_CONNECTION: mysql
+      DB_HOST: linkace-db
+      DB_PORT: 3306
+      DB_DATABASE: '{{LINKACE_DB_NAME}}'
+      DB_USERNAME: '{{LINKACE_DB_USER}}'
+      DB_PASSWORD: '{{LINKACE_DB_PASS}}'
+      SESSION_DRIVER: redis
+      CACHE_DRIVER: redis
+      REDIS_HOST: linkace-redis
+      REDIS_PASSWORD: '{{LINKACE_REDIS_PASS}}'
+      REDIS_PORT: 6379
+      MAIL_MAILER: smtp
+      MAIL_HOST: '{{LINKACE_MAIL_HOST}}'
+      MAIL_PORT: '{{LINKACE_MAIL_PORT}}'
+      MAIL_USERNAME: '{{LINKACE_MAIL_USERNAME}}'
+      MAIL_PASSWORD: '{{LINKACE_MAIL_PASSWORD}}'
+      MAIL_ENCRYPTION: '{{LINKACE_MAIL_ENCRYPTION}}'
+      MAIL_FROM_ADDRESS: '{{LINKACE_MAIL_FROM_ADDRESS}}'
+      MAIL_FROM_NAME: '{{LINKACE_MAIL_FROM_NAME}}'
+    volumes:
+    - linkace-data:/app
+    ports:
+    - '{{HTTP_PORT}}:80'
+  linkace-db:
+    image: mariadb:11.4.4
+    restart: always
+    depends_on:
+    - linkace-redis
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{GEN_RANDOM_HEX}}(32)'
+      MYSQL_DATABASE: '{{LINKACE_DB_NAME}}'
+      MYSQL_USER: '{{LINKACE_DB_USER}}'
+      MYSQL_PASSWORD: '{{LINKACE_DB_PASS}}'
+    volumes:
+    - linkace-db:/var/lib/mysql
+  linkace-redis:
+    image: bitnamilegacy/redis:{{LINKACE_REDIS_VERSION}}
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: '{{LINKACE_REDIS_PASS}}'
+volumes:
+  linkace-data:
+  linkace-db:
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "LINKACE_DB_NAME"
+label = "Database Name"
+default = "linkace"
+description = "Database name for LinkAce"
+
+[[variables]]
+key = "LINKACE_DB_PASS"
+label = "Database Password"
+generate = true
+description = "Database password for LinkAce"
+
+[[variables]]
+key = "LINKACE_DB_USER"
+label = "Database User"
+default = "linkace"
+description = "Database user for LinkAce"
+
+[[variables]]
+key = "LINKACE_MAIL_ENCRYPTION"
+label = "Mail Encryption"
+default = "ssl"
+description = "SMTP server encryption"
+
+[[variables]]
+key = "LINKACE_MAIL_FROM_ADDRESS"
+label = "Mail From Address"
+description = "Email address to send emails from"
+
+[[variables]]
+key = "LINKACE_MAIL_FROM_NAME"
+label = "Mail From Name"
+description = "Name to send emails from"
+
+[[variables]]
+key = "LINKACE_MAIL_HOST"
+label = "Mail Host"
+default = "smtp.example.com"
+description = "SMTP server hostname"
+
+[[variables]]
+key = "LINKACE_MAIL_PASSWORD"
+label = "Mail Password"
+description = "SMTP server password"
+
+[[variables]]
+key = "LINKACE_MAIL_PORT"
+label = "Mail Port"
+default = "465"
+description = "SMTP server port"
+
+[[variables]]
+key = "LINKACE_MAIL_USERNAME"
+label = "Mail Username"
+description = "SMTP server username"
+
+[[variables]]
+key = "LINKACE_REDIS_PASS"
+label = "Redis Password"
+generate = true
+description = "Redis password for LinkAce"
+
+[[variables]]
+key = "LINKACE_REDIS_VERSION"
+label = "Redis Version"
+default = "7.2"
+description = "Check out their Docker Hub page for the valid tags https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

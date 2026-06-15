@@ -1,0 +1,52 @@
+slug = "cachet"
+name = "Cachet"
+category = "App"
+description = "An open source status page system for everyone."
+keywords = ["cachet"]
+compose = '''
+services:
+  cachet-postgres:
+    image: postgres:12-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+    volumes:
+    - cachet-postgres-data:/var/lib/postgresql/data
+  cachet:
+    image: cachethq/docker:{{CACHET_VERSION}}
+    environment:
+      DB_DRIVER: pgsql
+      DB_HOST: cachet-postgres
+      DB_PORT: 5432
+      DB_DATABASE: postgres
+      DB_USERNAME: postgres
+      DB_PASSWORD: '{{DB_PASS}}'
+      DB_PREFIX: chq_
+      APP_KEY: '{{GEN_RANDOM_HEX}}(32)'
+      APP_LOG: errorlog
+      APP_ENV: production
+      APP_DEBUG: false
+      DEBUG: false
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8000'
+volumes:
+  cachet-postgres-data:
+'''
+
+[[variables]]
+key = "CACHET_VERSION"
+label = "Version Tag"
+default = "2.3.15"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/cachethq/docker/tags"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+generate = true
+description = "Password to connect to the database"
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""

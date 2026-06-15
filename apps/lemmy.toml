@@ -1,0 +1,108 @@
+slug = "lemmy"
+name = "Lemmy"
+category = "App"
+description = "Self-hosted Lemmy with persistent config volume auto-populated by a sidecar"
+keywords = ["lemmy"]
+compose = '''
+services:
+  lemmy-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: lemmy
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_DB: lemmy
+    volumes:
+    - lemmy-db-data:/var/lib/postgresql/data
+    restart: always
+  lemmy-pictrs:
+    image: asonix/pictrs:0.5.0
+    volumes:
+    - lemmy-pictrs-data:/mnt
+    restart: always
+  lemmy-config-writer-delete-me:
+    image: alpine:3.19
+    command: "sh -c '\n  CONFIG_FILE=\"/config/config.hjson\"\n  CONFIG_CONTENT=\"\n  {\n    hostname: \\\"lemmy.{{ROOT_DOMAIN}}\\\",\n    bind: \\\"0.0.0.0\\\",\n    port: 8536,\n    database: {\n      user: \\\"lemmy\\\",\n      password: \\\"{{DB_PASS}}\\\",\n      host: \\\"lemmy-db\\\",\n      port: 5432,\n      database: \\\"lemmy\\\",\n      pool_size: 5\n    },\n    pictrs: {\n      url: \\\"http://lemmy-pictrs:8080\\\"\n    },\n    email: {\n      smtp_server: \\\"{{SMTP_SERVER}}\\\",\n      smtp_login: \\\"{{SMTP_LOGIN}}\\\",\n      smtp_password: \\\"{{SMTP_PASS}}\\\",\n      smtp_from_address: \\\"{{SMTP_FROM}}\\\",\n      tls_type: \\\"{{SMTP_TLS}}\\\"\n    }\n  }\n  \";\n  if [ ! -f \\\"$$CONFIG_FILE\\\" ]; then\n    printf \"%s\\\\n\" \"$$CONFIG_CONTENT\" > \"$$CONFIG_FILE\" && chmod 644 \"$$CONFIG_FILE\" && chown 1000:1000 \"$$CONFIG_FILE\"\n  fi\n  tail -f /dev/null\n'\n"
+    volumes:
+    - lemmy-config:/config
+    restart: 'no'
+  lemmy-server:
+    image: dessalines/lemmy:{{LEMMY_VERSION}}
+    depends_on:
+    - lemmy-db
+    - lemmy-pictrs
+    - lemmy-config-writer-delete-me
+    environment:
+      RUST_LOG: warn,lemmy_server=info,lemmy_api=info
+    volumes:
+    - lemmy-config:/config
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:8536'
+  lemmy:
+    image: dessalines/lemmy-ui:{{LEMMY_UI_VERSION}}
+    depends_on:
+    - lemmy-server
+    environment:
+      LEMMY_UI_LEMMY_INTERNAL_HOST: lemmy-server:8536
+      LEMMY_UI_LEMMY_EXTERNAL_HOST: lemmy.{{ROOT_DOMAIN}}
+      LEMMY_UI_HTTPS: true
+    restart: always
+volumes:
+  lemmy-db-data:
+  lemmy-pictrs-data:
+  lemmy-config:
+'''
+
+[[variables]]
+key = "DB_PASS"
+label = "Postgres Password"
+generate = true
+description = "Auto-generated Postgres password"
+
+[[variables]]
+key = "LEMMY_UI_VERSION"
+label = "Lemmy UI version"
+default = "0.19.13"
+description = "Version tag (e.g., 0.19.13)"
+
+[[variables]]
+key = "LEMMY_VERSION"
+label = "Lemmy server version"
+default = "0.19.13"
+description = "Version tag (e.g., 0.19.13)"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SMTP_FROM"
+label = "SMTP From address"
+default = "no-reply@example.com"
+description = "Email address shown as sender"
+
+[[variables]]
+key = "SMTP_LOGIN"
+label = "SMTP login"
+default = "user@example.com"
+description = "Full username or email for SMTP"
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+default = ""
+description = "SMTP password or app password (if using Gmail/ProtonMail/etc)"
+
+[[variables]]
+key = "SMTP_SERVER"
+label = "SMTP server"
+default = "smtp.gmail.com:587"
+description = "SMTP server:port (e.g., smtp.gmail.com:587, mail.example.com:465)"
+
+[[variables]]
+key = "SMTP_TLS"
+label = "SMTP TLS type"
+default = "starttls"
+description = "TLS mode for SMTP: use \"none\", \"starttls\", or \"tls\" depending on your server"

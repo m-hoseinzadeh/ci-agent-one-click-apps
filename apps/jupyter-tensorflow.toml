@@ -1,0 +1,25 @@
+slug = "jupyter-tensorflow"
+name = "Jupyter Tensorflow"
+category = "App"
+description = "Jupyter Notebook with built in Tensorflow and Keras for your data analysis and machine learning work"
+keywords = ["jupyter", "tensorflow"]
+compose = '''
+services:
+  jupyter-tensorflow:
+    restart: always
+    environment:
+      JUPYTER_ENABLE_LAB: '{{JUPYTERLAB}}'
+      RESTARTABLE: 'yes'
+    volumes:
+    - jupyter-tensorflow:/home/jovyan/
+    ports:
+    - '{{HTTP_PORT}}:8888'
+volumes:
+  jupyter-tensorflow:
+'''
+
+[[variables]]
+key = "JUPYTERLAB"
+label = "Jupyter Lab"
+default = "yes"
+description = "Enter \"yes\" to enable JupyterLab and leave empty otherwise"

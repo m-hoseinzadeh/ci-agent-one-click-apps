@@ -1,0 +1,61 @@
+slug = "photoprism"
+name = "Photoprism (vbbot)"
+category = "App"
+description = "AI-Powered Photos App for the Decentralized Web"
+keywords = ["(vbbot)", "photoprism"]
+compose = '''
+services:
+  photoprism:
+    image: photoprism/photoprism:$$app_version
+    depends_on:
+    - photoprism-db
+    environment:
+      PHOTOPRISM_ADMIN_PASSWORD: $$app_admin_password
+      PHOTOPRISM_AUTH_MODE: password
+      PHOTOPRISM_SITE_URL: https://photoprism.{{ROOT_DOMAIN}}
+      PHOTOPRISM_ORIGINALS_LIMIT: $$app_upload_size_limit
+      PHOTOPRISM_HTTP_COMPRESSION: gzip
+      PHOTOPRISM_UPLOAD_NSFW: 'true'
+      PHOTOPRISM_DATABASE_DRIVER: mysql
+      PHOTOPRISM_DATABASE_SERVER: photoprism-db
+      PHOTOPRISM_DATABASE_NAME: photoprism
+      PHOTOPRISM_DATABASE_USER: photoprism
+      PHOTOPRISM_DATABASE_PASSWORD: $$db_password
+    volumes:
+    - photoprism-originals:/photoprism/originals
+    - photoprism-storage:/photoprism/storage
+    working_dir: /photoprism
+    labels:
+      photoprism-chadburn.enabled: $$chadburn_enabled
+      photoprism-chadburn.job-exec.photoprism_index.schedule: $$chadburn_index_schedule
+      photoprism-chadburn.job-exec.photoprism_index.command: photoprism index --cleanup
+    ports:
+    - '{{HTTP_PORT}}:2342'
+  photoprism-db:
+    restart: unless-stopped
+    image: mariadb:$$db_version
+    volumes:
+    - photoprism-db:/var/lib/mysql
+    environment:
+      MARIADB_AUTO_UPGRADE: '1'
+      MARIADB_INTDB_SKIP_TZINFO: '1'
+      MARIADB_DATABASE: photoprism
+      MARIADB_USER: photoprism
+      MARIADB_PASSWORD: $$db_password
+      MARIADB_ROOT_PASSWORD: $$db_root_password
+  photoprism-chadburn:
+    restart: unless-stopped
+    image: premoweb/chadburn:$$chadburn_version
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+volumes:
+  photoprism-originals:
+  photoprism-storage:
+  photoprism-db:
+'''
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

@@ -1,0 +1,127 @@
+slug = "saleor"
+name = "Saleor"
+category = "App"
+description = "An open-source, GraphQL-first e-commerce platform delivering ultra-fast, dynamic and personalized shopping experiences"
+keywords = ["saleor"]
+compose = '''
+services:
+  saleor-api:
+    image: ghcr.io/saleor/saleor:{{SALEOR_CORE_VERSION}}
+    environment:
+      DASHBOARD_URL: http://saleor.{{ROOT_DOMAIN}}
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@saleor-db/{{POSTGRES_DB}}
+      CELERY_BROKER_URL: redis://saleor-cache
+      DEFAULT_FROM_EMAIL: '{{SALEOR_DEFAULT_FROM_EMAIL}}'
+      SECRET_KEY: '{{SALEOR_SECRET_KEY}}'
+      DEFAULT_CHANNEL_SLUG: default-channel
+      ALLOWED_HOSTS: saleor-api.{{ROOT_DOMAIN}}
+      ALLOWED_CLIENT_HOSTS: saleor-api.{{ROOT_DOMAIN}}
+      ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL: '{{ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL}}'
+    depends_on:
+    - saleor-db
+    - saleor-cache
+    volumes:
+    - saleor-media:/app/media
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  saleor:
+    image: ghcr.io/saleor/saleor-dashboard:{{SALEOR_DASHBOARD_VERSION}}
+    environment:
+      API_URL: http://saleor-api.{{ROOT_DOMAIN}}/graphql/
+  saleor-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - saleor-db:/var/lib/postgresql/data
+  saleor-cache:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - saleor-cache:/data
+  saleor-worker:
+    environment:
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@saleor-db/{{POSTGRES_DB}}
+      CELERY_BROKER_URL: redis://saleor-cache
+      DEFAULT_FROM_EMAIL: '{{SALEOR_DEFAULT_FROM_EMAIL}}'
+      SECRET_KEY: '{{SALEOR_SECRET_KEY}}'
+      DEFAULT_CHANNEL_SLUG: default-channel
+      ALLOWED_HOSTS: saleor-api.{{ROOT_DOMAIN}}
+      ALLOWED_CLIENT_HOSTS: saleor-api.{{ROOT_DOMAIN}}
+      ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL: '{{ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL}}'
+    depends_on:
+    - saleor-cache
+    volumes:
+    - saleor-media:/app/media
+volumes:
+  saleor-media:
+  saleor-db:
+  saleor-cache:
+'''
+
+[[variables]]
+key = "ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL"
+label = "Core | Email Confirmation"
+default = "False"
+description = "Whether registering new customer accounts should require email confirmation."
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database | Name"
+default = "saleor"
+description = "Name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database | User Password"
+generate = true
+description = "Password of the PostgreSQL user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User Name"
+default = "saleor"
+description = "Name of the PostgreSQL user."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Database | Version"
+default = "15.0-alpine"
+description = "PostgreSQL version. Check out their valid tags at https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Cache | Version"
+default = "7.0-alpine"
+description = "Redis version. Check out their valid tags at https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SALEOR_CORE_VERSION"
+label = "Core | Version"
+default = "3.12.5"
+description = "Saleor core version. Check out their valid tags at https://github.com/saleor/saleor/pkgs/container/saleor"
+
+[[variables]]
+key = "SALEOR_DASHBOARD_VERSION"
+label = "Dashboard | Version"
+default = "3.12.1"
+description = "Saleor dashboard version. Check out their valid tags at https://github.com/saleor/saleor-dashboard/pkgs/container/saleor-dashboard"
+
+[[variables]]
+key = "SALEOR_DEFAULT_FROM_EMAIL"
+label = "Mail | Version"
+default = "noreply@example.com"
+description = "Sender email address."
+
+[[variables]]
+key = "SALEOR_SECRET_KEY"
+label = "Security | Secret Key"
+generate = true
+description = "Secret key."

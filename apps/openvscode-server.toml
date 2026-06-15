@@ -1,0 +1,76 @@
+slug = "openvscode-server"
+name = "OpenVSCode Server"
+category = "Dev tools"
+description = "A version of VS Code that runs a server on a remote machine and allows access through a modern web browser."
+keywords = ["openvscode", "server"]
+compose = '''
+services:
+  openvscode-server:
+    image: lscr.io/linuxserver/openvscode-server:{{OPENVSCODE_SERVER_VERSION}}
+    volumes:
+    - openvscode-server-config:/config
+    environment:
+      TZ: '{{OPENVSCODE_SERVER_TIMEZONE}}'
+      PUID: '{{OPENVSCODE_SERVER_USER_ID}}'
+      PGID: '{{OPENVSCODE_SERVER_GROUP_ID}}'
+      CONNECTION_TOKEN: '{{OPENVSCODE_SERVER_CONNECTION_TOKEN}}'
+      CONNECTION_SECRET: '{{OPENVSCODE_SERVER_CONNECTION_SECRET}}'
+      SUDO_PASSWORD: '{{OPENVSCODE_SERVER_SUDO_PASSWORD}}'
+      SUDO_PASSWORD_HASH: '{{OPENVSCODE_SERVER_SUDO_HASH}}'
+    hostname: openvscode-server.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  openvscode-server-config:
+'''
+
+[[variables]]
+key = "OPENVSCODE_SERVER_CONNECTION_SECRET"
+label = "Connection Secret"
+description = "Optional path to a file inside the container that contains the security token for accessing the Web UI (ie. /path/to/file). Overrides Connection Token. Leave empty to disable."
+
+[[variables]]
+key = "OPENVSCODE_SERVER_CONNECTION_TOKEN"
+label = "Connection Token"
+generate = true
+description = "Security token for accessing the Web UI. Should only contain alphanumeric characters or _, -. Leave empty to disable."
+
+[[variables]]
+key = "OPENVSCODE_SERVER_GROUP_ID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) on your instance to see the ID"
+
+[[variables]]
+key = "OPENVSCODE_SERVER_SUDO_HASH"
+label = "Sudo Password Hash"
+description = "Sudo password via hash (takes priority over Sudo Password). Format is \"$type$salt$hashed\". Leave empty to disable."
+
+[[variables]]
+key = "OPENVSCODE_SERVER_SUDO_PASSWORD"
+label = "Sudo Password"
+description = "User will have sudo access in the terminal with the specified password. Leave empty to disable."
+
+[[variables]]
+key = "OPENVSCODE_SERVER_TIMEZONE"
+label = "Timezone"
+default = "UTC"
+description = "Timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "OPENVSCODE_SERVER_USER_ID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) on your instance to see the ID"
+
+[[variables]]
+key = "OPENVSCODE_SERVER_VERSION"
+label = "Version Tag"
+default = "1.74.3"
+description = "Check out their documentation for the valid tags https://github.com/linuxserver/docker-openvscode-server/#version-tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

@@ -1,0 +1,26 @@
+slug = "chadburn"
+name = "Chadburn"
+category = "App"
+description = "Chadburn is a modern and low footprint job scheduler for docker environments, built on Go. Chadburn is a suitable replacement for the old fashioned cron in Docker environments."
+keywords = ["chadburn"]
+compose = '''
+services:
+  chadburn:
+    image: ghcr.io/premoweb/chadburn:{{VERSION}}
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TZ: '{{TZ}}'
+'''
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "America/Los_Angeles"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "VERSION"
+label = "Chadburn version"
+default = "1.0.1"
+description = "See https://github.com/PremoWeb/Chadburn/releases for a list of versions and changelog details."

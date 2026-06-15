@@ -1,0 +1,47 @@
+slug = "homarr"
+name = "Homarr"
+category = "App"
+description = "Simple and lightweight homepage for your server, that helps you easily access all of your services in one place."
+keywords = ["homarr"]
+compose = '''
+services:
+  homarr:
+    image: ghcr.io/ajnart/homarr:{{HOMARR_VERSION}}
+    volumes:
+    - homarr-configs:/app/data/configs
+    - homarr-icons:/app/public/icons
+    environment:
+      BASE_URL: homarr.{{ROOT_DOMAIN}}
+      TZ: '{{HOMARR_TIMEZONE}}'
+      PASSWORD: '{{HOMARR_PASSWORD}}'
+    hostname: homarr.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:7575'
+volumes:
+  homarr-configs:
+  homarr-icons:
+'''
+
+[[variables]]
+key = "HOMARR_PASSWORD"
+label = "Password"
+generate = true
+description = "Password to protect the dashboard (leave empty to disable password protection)"
+
+[[variables]]
+key = "HOMARR_TIMEZONE"
+label = "Timezone"
+default = "UTC"
+description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "HOMARR_VERSION"
+label = "Version Tag"
+default = "0.10.1"
+description = "Check out their GitHub packages page for the valid tags https://github.com/ajnart/homarr/pkgs/container/homarr"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

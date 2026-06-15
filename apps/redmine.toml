@@ -1,0 +1,68 @@
+slug = "redmine"
+name = "Redmine (PostgreSQL)"
+category = "Database"
+description = "Redmine is a flexible project management web application written using Ruby on Rails framework. This app is packaged with PostgreSQL."
+keywords = ["(postgresql)", "redmine"]
+compose = '''
+services:
+  redmine-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    restart: always
+    volumes:
+    - redmine-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: redmine
+      PGDATA: /var/lib/postgresql/data/pgdata
+  redmine:
+    depends_on:
+    - redmine-db
+    image: redmine:{{REDMINE_VERSION}}
+    environment:
+      REDMINE_DB_POSTGRES: redmine-db
+      REDMINE_DB_PORT: 5432
+      REDMINE_DB_DATABASE: redmine
+      REDMINE_DB_USERNAME: '{{POSTGRES_USER}}'
+      REDMINE_DB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      REDMINE_SECRET_KEY_BASE: '{{KEY_BASE}}'
+    restart: always
+    volumes:
+    - redmine-data:/usr/src/redmine/files
+    - redmine-themes:/usr/src/redmine/public/themes
+    - redmine-plugins:/usr/src/redmine/plugins
+    ports:
+    - '{{HTTP_PORT}}:3000'
+volumes:
+  redmine-db-data:
+  redmine-data:
+  redmine-themes:
+  redmine-plugins:
+'''
+
+[[variables]]
+key = "KEY_BASE"
+label = "Redmine Secret Key Base"
+generate = true
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL Password"
+generate = true
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "PostgreSQL username"
+default = "redmine"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "PostgreSQL Version"
+default = "15.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "REDMINE_VERSION"
+label = "Redmine Version"
+default = "5.0.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redmine?tab=tags"

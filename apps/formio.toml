@@ -1,0 +1,86 @@
+slug = "formio"
+name = "Formio"
+category = "App"
+description = "<form.io> is a combined Form and Data Management platform for form-based Progressive web applications."
+keywords = ["formio"]
+compose = '''
+services:
+  formio-mongodb:
+    documentation: Taken from https://hub.docker.com/_/mongo
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - formio-db-data:/data/db
+    restart: always
+  formio:
+    documentation: Taken from https://hub.docker.com/r/calipseo/formio
+    depends_on:
+    - formio-mongodb
+    image: calipseo/formio:{{FORMIO_VERSION}}
+    volumes:
+    - formio-data:/app
+    restart: always
+    environment:
+      APP_URL: https://formio.{{ROOT_DOMAIN}}
+      API_URL: https://formio.{{ROOT_DOMAIN}}
+      MONGO: mongodb://formio-mongodb:27017/formio
+      ROOT_EMAIL: '{{ADMIN_EMAIL}}'
+      ROOT_PASSWORD: '{{ADMIN_PASS}}'
+      SMTP_HOST: '{{SMTP_HOST}}'
+      SMTP_PORT: '{{SMTP_PORT}}'
+      SMTP_USERNAME: '{{SMTP_USER}}'
+      SMTP_PASSWORD: '{{SMTP_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:3001'
+volumes:
+  formio-db-data:
+  formio-data:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Formio default admin email"
+default = "admin@example.com"
+description = "Admin email for Formio."
+
+[[variables]]
+key = "ADMIN_PASS"
+label = "admin password"
+description = "Password for the admin user."
+
+[[variables]]
+key = "FORMIO_VERSION"
+label = "Formio Version"
+default = "1.90.7"
+description = "https://hub.docker.com/r/calipseo/formio/tags"
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "Mongo (database) version"
+default = "4.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mongo?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SMTP_HOST"
+label = "SMPT host"
+description = "The host for your smtp server"
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+description = "The password for your smtp server"
+
+[[variables]]
+key = "SMTP_PORT"
+label = "SMTP port"
+description = "The port for your smtp server"
+
+[[variables]]
+key = "SMTP_USER"
+label = "SMTP user"
+description = "The user for your smtp server"

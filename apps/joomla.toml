@@ -1,0 +1,47 @@
+slug = "joomla"
+name = "Joomla - No Database"
+category = "Database"
+description = "This will create a Joomla only. You will need to create and configure the database information manually. Intended for advanced users."
+keywords = ["database", "joomla", "no"]
+compose = '''
+services:
+  joomla-joomla:
+    image: joomla:{{JOOMLA_VERSION}}
+    volumes:
+    - joomla-joomla-data:/var/www/html
+    restart: always
+    environment:
+      JOOMLA_DB_HOST: '{{DB_HOST}}:3306'
+      JOOMLA_DB_NAME: '{{DB_NAME}}'
+      JOOMLA_DB_USER: '{{DB_USER}}'
+      JOOMLA_DB_PASSWORD: '{{DB_PASS}}'
+volumes:
+  joomla-joomla-data:
+'''
+
+[[variables]]
+key = "DB_HOST"
+label = "Database Host"
+default = "srv-captain--xxx"
+description = "Database Host"
+
+[[variables]]
+key = "DB_NAME"
+label = "DB Name"
+default = "joomla"
+description = "Database Name"
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+
+[[variables]]
+key = "DB_USER"
+label = "Database User"
+default = "joomla"
+
+[[variables]]
+key = "JOOMLA_VERSION"
+label = "Joomla Version"
+default = "php7.3-apache"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/joomla?tab=tags"

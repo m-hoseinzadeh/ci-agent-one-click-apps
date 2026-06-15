@@ -1,0 +1,32 @@
+slug = "dagu"
+name = "Dagu"
+category = "App"
+description = "Dagu is a powerful, portable, local-first workflow engine."
+keywords = ["dagu"]
+compose = '''
+services:
+  dagu:
+    image: ghcr.io/dagu-org/dagu:{{DAGU_VERSION}}
+    restart: always
+    environment:
+      DAGU_TZ: '{{DAGU_TIMEZONE}}'
+    volumes:
+    - dagu-data:/var/lib/dagu
+    - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  dagu-data:
+'''
+
+[[variables]]
+key = "DAGU_TIMEZONE"
+label = "Timezone"
+default = "UTC"
+description = "The timezone to use for the container. Find your timezone here https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+
+[[variables]]
+key = "DAGU_VERSION"
+label = "Dagu Version"
+default = "1.24.8"
+description = "Check out their docker page for the valid tags https://github.com/dagu-org/dagu/pkgs/container/dagu"

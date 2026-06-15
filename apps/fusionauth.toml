@@ -1,0 +1,121 @@
+slug = "fusionauth"
+name = "FusionAuth"
+category = "App"
+description = "FusionAuth is a scalable, identity and user management platform built for devs"
+keywords = ["fusionauth"]
+compose = '''
+services:
+  fusionauth-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_USER: '{{DB_USER}}'
+      POSTGRES_PASSWORD: '{{DB_PASS}}'
+      POSTGRES_DB: fusionauth
+    restart: unless-stopped
+    volumes:
+    - fusionauth-db-data:/var/lib/postgresql/data
+  fusionauth-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:{{ELASTICSEARCH_VERSION}}
+    volumes:
+    - fusionauth-elasticsearch-data:/usr/share/elasticsearch/data
+    restart: always
+    environment:
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      cluster.name: '{{ELASTICSEARCH_CLUSTER_NAME}}'
+      http.port: '{{CONTAINER_SEARCH_PORT}}'
+      node.master: '{{ELASTICSEARCH_NODE_MASTER}}'
+      node.data: '{{ELASTICSEARCH_NODE_DATA}}'
+      discovery.type: single-node
+      discovery.zen.minimum_master_nodes: '{{ELASTICSEARCH_MINIMUM_MASTER_NODES}}'
+      discovery.zen.ping.unicast.hosts: '{{ELASTICSEARCH_UNICAST_HOSTS}}'
+    ports:
+    - '{{HTTP_PORT}}:$$cap_container_search_port'
+  fusionauth-fusionauth:
+    image: fusionauth/fusionauth-app:{{FUSIONAUTH_VERSION}}
+    depends_on:
+    - fusionauth-db
+    - fusionauth-elasticsearch
+    environment:
+      DATABASE_URL: jdbc:postgresql://fusionauth-db:5432/fusionauth
+      DATABASE_ROOT_USER: '{{DB_USER}}'
+      DATABASE_ROOT_PASSWORD: '{{DB_PASS}}'
+      DATABASE_USER: '{{DB_USER}}'
+      DATABASE_PASSWORD: '{{DB_PASS}}'
+      FUSIONAUTH_MEMORY: '{{FUSION_MEMORY}}'
+      FUSIONAUTH_SEARCH_SERVERS: http://fusionauth-elasticsearch:9200
+      FUSIONAUTH_URL: http://fusionauth-fusionauth:9011
+    restart: unless-stopped
+    volumes:
+    - fusionauth-fusionauth-config:/usr/local/fusionauth/config
+volumes:
+  fusionauth-db-data:
+  fusionauth-elasticsearch-data:
+  fusionauth-fusionauth-config:
+'''
+
+[[variables]]
+key = "CONTAINER_SEARCH_PORT"
+label = "Container TCP Port"
+default = "9200"
+description = "Internal port for Elasticsearch the container listens to."
+
+[[variables]]
+key = "DB_PASS"
+label = "Database password"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "fusion"
+
+[[variables]]
+key = "ELASTICSEARCH_CLUSTER_NAME"
+label = "Cluster Name"
+default = "elasticsearch-cluster"
+description = "Only nodes within the same cluster name can be combined"
+
+[[variables]]
+key = "ELASTICSEARCH_MINIMUM_MASTER_NODES"
+label = "Minimum Master Nodes"
+default = "1"
+description = "Define minimum amount of master (N) ( best practice: ceil(N/2 + 1) )."
+
+[[variables]]
+key = "ELASTICSEARCH_NODE_DATA"
+label = "Node Data"
+default = "true"
+description = "Should the node used for storing data? (true / false)"
+
+[[variables]]
+key = "ELASTICSEARCH_NODE_MASTER"
+label = "Node Master"
+default = "true"
+description = "Define node as master-eligible (usual first node YES, others NO)."
+
+[[variables]]
+key = "ELASTICSEARCH_UNICAST_HOSTS"
+label = "Unicasts hosts"
+default = "false"
+description = "References to other node to attach to. (for example: srv-captain--XXX)"
+
+[[variables]]
+key = "ELASTICSEARCH_VERSION"
+label = "Elasticsearch Version Tag"
+default = "6.7.1"
+description = "Check out the releases overview: https://www.elastic.co/de/downloads/elasticsearch"
+
+[[variables]]
+key = "FUSIONAUTH_VERSION"
+label = "FusionAuth Version"
+default = "1.7.2"
+description = "See tags at: https://hub.docker.com/r/fusionauth/fusionauth-app/tags"
+
+[[variables]]
+key = "FUSION_MEMORY"
+label = "Fusion Memory"
+default = "256M"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "9.6"

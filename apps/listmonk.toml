@@ -1,0 +1,73 @@
+slug = "listmonk"
+name = "Listmonk"
+category = "Communication"
+description = "High performance, self-hosted newsletter and mailing list manager with a modern dashboard"
+keywords = ["listmonk"]
+compose = '''
+services:
+  listmonk-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - listmonk-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USERNAME}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB_NAME}}'
+  listmonk:
+    environment:
+      TZ: Etc/UTC
+      LISTMONK_db__host: listmonk-db
+      LISTMONK_db__database: '{{POSTGRES_DB_NAME}}'
+      LISTMONK_db__user: '{{POSTGRES_USERNAME}}'
+      LISTMONK_db__password: '{{POSTGRES_PASSWORD}}'
+      LISTMONK_db__ssl_mode: '{{POSTGRES_SSL_MODE}}'
+      LISTMONK_app__admin_username: '{{LISTMONK_ADMIN_USERNAME}}'
+      LISTMONK_app__admin_password: '{{LISTMONK_ADMIN_PASSWORD}}'
+      LISTMONK_app__address: 0.0.0.0:9000
+    volumes:
+    - listmonk-data:/listmonk
+    depends_on:
+    - listmonk-db
+    ports:
+    - '{{HTTP_PORT}}:9000'
+volumes:
+  listmonk-db-data:
+  listmonk-data:
+'''
+
+[[variables]]
+key = "LISTMONK_ADMIN_PASSWORD"
+label = "Listmonk Admin Password"
+generate = true
+
+[[variables]]
+key = "LISTMONK_ADMIN_USERNAME"
+label = "Listmonk Admin Username"
+default = "listmonk"
+
+[[variables]]
+key = "POSTGRES_DB_NAME"
+label = "PostgreSQL Database name"
+default = "listmonk"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL Password"
+generate = true
+
+[[variables]]
+key = "POSTGRES_SSL_MODE"
+label = "PostgreSQL SSL Mode"
+default = "disable"
+
+[[variables]]
+key = "POSTGRES_USERNAME"
+label = "PostgreSQL username"
+default = "listmonk"
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgresql Version"
+default = "14.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"

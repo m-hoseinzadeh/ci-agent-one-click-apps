@@ -1,0 +1,56 @@
+slug = "radarr"
+name = "Radarr"
+category = "App"
+description = "Radarr - A fork of Sonarr to work with movies à la Couchpotato."
+keywords = ["radarr"]
+compose = '''
+services:
+  radarr:
+    image: linuxserver/radarr:{{RADARR_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    volumes:
+    - radarr-config:/config
+    - '{{PATH_TO_MOVIES}}:/movies'
+    - '{{PATH_TO_DOWNLOADS}}:/downloads'
+    ports:
+    - '{{HTTP_PORT}}:7878'
+volumes:
+  radarr-config:
+'''
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "PATH_TO_DOWNLOADS"
+label = "Location of download managers output directory"
+description = "Location of download managers output directory"
+
+[[variables]]
+key = "PATH_TO_MOVIES"
+label = "Location of Movies library on disk"
+description = "Location of Movies library on disk"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "RADARR_VERSION"
+label = "Radarr Version"
+default = "version-3.0.1.4259"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/radarr/tags"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Brussels"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

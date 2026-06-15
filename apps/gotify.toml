@@ -1,0 +1,22 @@
+slug = "gotify"
+name = "Gotify"
+category = "App"
+description = "Gotify is a simple server for sending and receiving messages."
+keywords = ["gotify"]
+compose = '''
+services:
+  gotify:
+    image: gotify/server:{{VERSION}}
+    volumes:
+    - gotify-data:/app/data
+    - gotify-config:/etc/gotify/
+volumes:
+  gotify-data:
+  gotify-config:
+'''
+
+[[variables]]
+key = "VERSION"
+label = "Gotify Version"
+default = "2.1.7"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/gotify/server/tags"

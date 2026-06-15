@@ -1,0 +1,39 @@
+slug = "gitlab-ce"
+name = "Gitlab (CE)"
+category = "Dev tools"
+description = "CE version of GitLab for CI/CD pipeline"
+keywords = ["(ce)", "ce", "gitlab"]
+compose = '''
+services:
+  gitlab-ce:
+    image: gitlab/gitlab-ce:{{GITLAB_VERSION}}
+    hostname: gitlab-ce.{{ROOT_DOMAIN}}
+    volumes:
+    - 'gitlab-ce-config: /etc/gitlab'
+    - 'gitlab-ce-logs: /var/log/gitlab'
+    - 'gitlab-ce-data: /var/opt/gitlab'
+    restart: always
+    environment:
+      GITLAB_OMNIBUS_CONFIG: '{{GITLAB_OMNIBUS_CONFIG}}'
+volumes:
+  gitlab-ce-config:
+  gitlab-ce-logs:
+  gitlab-ce-data:
+'''
+
+[[variables]]
+key = "GITLAB_OMNIBUS_CONFIG"
+label = "Omnibus Config (Optional)"
+description = "More information here: https://docs.gitlab.com/omnibus/docker/#pre-configure-docker-container"
+
+[[variables]]
+key = "GITLAB_VERSION"
+label = "Gitlab-CE Version Tag"
+default = "11.9.8-ce.0"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/gitlab/gitlab-ce/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

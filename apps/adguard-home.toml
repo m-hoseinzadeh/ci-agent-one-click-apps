@@ -1,0 +1,29 @@
+slug = "adguard-home"
+name = "AdGuard Home"
+category = "App"
+description = "AdGuard Home is a fast and easy way to block ads on any device and protect kids online!"
+keywords = ["adguard", "home"]
+compose = '''
+services:
+  adguard-home:
+    image: adguard/adguardhome:{{ADGUARD_VERSION}}
+    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3000'
+    - '53:53'
+    - 67:67
+    - 68:68
+    - 853:853
+    volumes:
+    - adguard-home-work:/opt/adguardhome/work
+    - adguard-home-conf:/opt/adguardhome/conf
+volumes:
+  adguard-home-work:
+  adguard-home-conf:
+'''
+
+[[variables]]
+key = "ADGUARD_VERSION"
+label = "AdGuard Home Version"
+default = "v0.107.29"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/adguard/adguardhome/tags"

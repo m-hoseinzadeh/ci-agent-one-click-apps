@@ -1,0 +1,53 @@
+slug = "keycloak"
+name = "Keycloak"
+category = "App"
+description = "Keycloak is an open source identity and access management solution"
+keywords = ["keycloak"]
+compose = '''
+services:
+  keycloak-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - keycloak-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: keycloak
+  keycloak:
+    depends_on:
+    - keycloak-db
+    restart: always
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: '{{KEYCLOAK_ADMIN}}'
+      KC_BOOTSTRAP_ADMIN_PASSWORD: '{{KEYCLOAK_PASSWORD}}'
+      KC_DB_PASSWORD: '{{PG_PASS}}'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  keycloak-db-data:
+'''
+
+[[variables]]
+key = "KEYCLOAK_ADMIN"
+label = "Keycloak admin user"
+default = "admin"
+description = "Login username for the admin web user."
+
+[[variables]]
+key = "KEYCLOAK_PASSWORD"
+label = "Keycloak admin password"
+generate = true
+description = "Login password for the admin web user.  12-20 characters."
+
+[[variables]]
+key = "PG_PASS"
+label = "Postgres Password"
+generate = true
+description = "App-to-app database credential.  12-20 characters."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "16"
+description = "Check out Keycloak DB page for any valid major tested https://www.keycloak.org/server/db"

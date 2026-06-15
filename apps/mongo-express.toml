@@ -1,0 +1,65 @@
+slug = "mongo-express"
+name = "Mongo Express"
+category = "Database"
+description = "Web-based MongoDB admin interface, written with Node.js and express"
+keywords = ["express", "mongo"]
+compose = '''
+services:
+  mongo-express:
+    image: mongo-express:{{MONGOEXPRESS_VERSION}}
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_SERVER: '{{ME_SERVER_ADDRESS}}'
+      ME_CONFIG_MONGODB_ADMINUSERNAME: '{{ME_SERVER_ADMIN_USERNAME}}'
+      ME_CONFIG_MONGODB_ADMINPASSWORD: '{{ME_SERVER_ADMIN_PASSWORD}}'
+      ME_CONFIG_MONGODB_PORT: '{{ME_SERVER_PORT}}'
+      ME_CONFIG_BASICAUTH_USERNAME: '{{ME_DASHBOARD_USERNAME}}'
+      ME_CONFIG_BASICAUTH_PASSWORD: '{{ME_DASHBOARD_PASSWORD}}'
+      ME_CONFIG_SITE_COOKIESECRET: mongo-express{{GEN_RANDOM_HEX}}(16)
+      ME_CONFIG_SITE_SESSIONSECRET: mongo-express{{GEN_RANDOM_HEX}}(16)
+    ports:
+    - '{{HTTP_PORT}}:8081'
+'''
+
+[[variables]]
+key = "GEN_RANDOM_HEX"
+label = "Gen Random Hex"
+default = ""
+
+[[variables]]
+key = "ME_DASHBOARD_PASSWORD"
+label = "Mongo-Express Dashboard Password"
+default = ""
+description = "Restrict access to your Mongo Express dashboard by choosing username/pass"
+
+[[variables]]
+key = "ME_DASHBOARD_USERNAME"
+label = "Choose a Mongo-Express Dashboard Username"
+default = "admin"
+description = "Restrict access to your Mongo Express dashboard by choosing username/pass"
+
+[[variables]]
+key = "ME_SERVER_ADDRESS"
+label = "MongoDB Server Address"
+description = "If MongoDB is created by CapRover, use srv-captain--REPLACE_THIS_WITH_CONTAINER_NAME"
+
+[[variables]]
+key = "ME_SERVER_ADMIN_PASSWORD"
+label = "MongoDB Admin Password"
+default = ""
+
+[[variables]]
+key = "ME_SERVER_ADMIN_USERNAME"
+label = "MongoDB Admin Username"
+default = ""
+
+[[variables]]
+key = "ME_SERVER_PORT"
+label = "MongoDB Server Port (default is 27017)"
+default = "27017"
+
+[[variables]]
+key = "MONGOEXPRESS_VERSION"
+label = "Mongo Express Version Tag"
+default = "0.54"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo-express/tags/"

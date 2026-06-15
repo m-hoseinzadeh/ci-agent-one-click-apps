@@ -1,0 +1,42 @@
+slug = "audiobookshelf"
+name = "Audiobookshelf"
+category = "App"
+description = "Audiobookshelf is a self-hosted audiobook and podcast server."
+keywords = ["audiobookshelf"]
+compose = '''
+services:
+  audiobookshelf:
+    image: ghcr.io/advplyr/audiobookshelf:{{VERSION}}
+    volumes:
+    - audiobookshelf-config:/config
+    - '{{PATH_TO_AUDIOBOOKS}}:/audiobooks'
+    - '{{PATH_TO_PODCASTS}}:/podcasts'
+    - '{{PATH_TO_METADATA}}:/metadata'
+    restart: always
+volumes:
+  audiobookshelf-config:
+'''
+
+[[variables]]
+key = "PATH_TO_AUDIOBOOKS"
+label = "Location of audiobooks directory"
+default = "audiobooks-volume-placeholder"
+description = "full path to the directory where the audiobooks are stored. Path on host MUST exist for the app to start!"
+
+[[variables]]
+key = "PATH_TO_METADATA"
+label = "Location of metadata directory"
+default = "metadata-volume-placeholder"
+description = "full path to the directory where the metadata is stored. Path on host MUST exist for the app to start!"
+
+[[variables]]
+key = "PATH_TO_PODCASTS"
+label = "Location of podcasts directory"
+default = "podcasts-volume-placeholder"
+description = "full path to the directory where the podcasts are stored. Path on host MUST exist for the app to start!"
+
+[[variables]]
+key = "VERSION"
+label = "Audiobookshelf Version"
+default = "2.2.14"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/advplyr/audiobookshelf/tags"

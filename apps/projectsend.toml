@@ -1,0 +1,42 @@
+slug = "projectsend"
+name = "Project Send"
+category = "App"
+description = "ProjectSend is a self-hosted application that lets you upload files and assign them to specific clients that you create yourself!"
+keywords = ["project", "projectsend", "send"]
+compose = '''
+services:
+  projectsend:
+    image: linuxserver/projectsend:{{PROJECTSEND_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '1000'
+      PGID: '1000'
+      MAX_UPLOAD: '{{MAX_UPLOAD}}'
+    restart: unless-stopped
+    volumes:
+    - projectsend-config:/config
+    - projectsend-data:/data
+    ports:
+    - '{{HTTP_PORT}}:80'
+volumes:
+  projectsend-config:
+  projectsend-data:
+'''
+
+[[variables]]
+key = "MAX_UPLOAD"
+label = "Max Upload size in MB"
+default = "5000"
+description = "To set maximum upload size (in MB), default if unset is 5000."
+
+[[variables]]
+key = "PROJECTSEND_VERSION"
+label = "ProjectSend Version"
+default = "version-r1295"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/projectsend/tags. If you want MSSQL support please use the tag r1053-ls27"
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Asia/Kolkata"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

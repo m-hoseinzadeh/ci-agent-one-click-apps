@@ -1,0 +1,63 @@
+slug = "bazarr"
+name = "Bazarr"
+category = "App"
+description = "Bazarr is a companion application to Sonarr and Radarr. It can manage and download subtitles based on your requirements."
+keywords = ["bazarr"]
+compose = '''
+services:
+  bazarr:
+    image: linuxserver/bazarr:{{BAZARR_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      PUID: '{{PUID}}'
+      PGID: '{{GUID}}'
+    hostname: bazarr.{{ROOT_DOMAIN}}
+    volumes:
+    - bazarr-config:/config
+    - '{{PATH_TO_MOVIES}}:/movies'
+    - '{{PATH_TO_TV}}:/tv'
+    ports:
+    - '{{HTTP_PORT}}:6767'
+volumes:
+  bazarr-config:
+'''
+
+[[variables]]
+key = "BAZARR_VERSION"
+label = "Bazarr Version"
+default = "1.0.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/bazarr/tags"
+
+[[variables]]
+key = "GUID"
+label = "Group ID"
+default = "1000"
+description = "Group ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "PATH_TO_MOVIES"
+label = "Location of TV library on disk"
+description = "Location of TV library on disk"
+
+[[variables]]
+key = "PATH_TO_TV"
+label = "Location of movie library on disk"
+description = "Location of movie library on disk"
+
+[[variables]]
+key = "PUID"
+label = "User ID"
+default = "1000"
+description = "User ID that the process uses, run (id $user) in your instance to see the id"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "TZ"
+label = "Time Zone"
+default = "Europe/Brussels"
+description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

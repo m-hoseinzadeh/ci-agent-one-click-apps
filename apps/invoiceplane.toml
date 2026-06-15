@@ -1,0 +1,65 @@
+slug = "invoiceplane"
+name = "InvoicePlane"
+category = "App"
+description = "InvoicePlane is a self-hosted open source application for managing your quotes, invoices, clients and payments."
+keywords = ["invoiceplane"]
+compose = '''
+services:
+  invoiceplane-db:
+    image: mysql:5.7.32
+    volumes:
+    - invoiceplane-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_ROOT_PWD}}'
+      MYSQL_USER: '{{DB_USERNAME}}'
+      MYSQL_PASSWORD: '{{DB_PASSWORD}}'
+      MYSQL_DATABASE: '{{DB_DATABASE}}'
+    ports:
+    - '{{HTTP_PORT}}:3306'
+  invoiceplane:
+    image: thomascenni/alpine-invoiceplane:v1.5.11
+    volumes:
+    - invoiceplane-storage:/storage
+    - invoiceplane-config:/config
+    environment:
+      IP_URL: http://invoiceplane.{{ROOT_DOMAIN}}
+      DB_HOSTNAME: invoiceplane-db
+      DB_USERNAME: '{{DB_USERNAME}}'
+      DB_PASSWORD: '{{DB_PASSWORD}}'
+      DB_DATABASE: '{{DB_DATABASE}}'
+      DB_PORT: '3306'
+volumes:
+  invoiceplane-mysql-data:
+  invoiceplane-storage:
+  invoiceplane-config:
+'''
+
+[[variables]]
+key = "DB_DATABASE"
+label = "DB_DATABASE"
+default = "invoiceplane"
+description = "This is name for the database hosting InvoicePlane application. Can use the default provided."
+
+[[variables]]
+key = "DB_PASSWORD"
+label = "DB_PASSWORD"
+generate = true
+description = "This is password for the user accessing the invoiceplane db. Randomly generated. Can be changed also."
+
+[[variables]]
+key = "DB_USERNAME"
+label = "DB_USERNAME"
+default = "invoiceplane"
+description = "This is the username to access the invoiceplane db. Can use the default provided."
+
+[[variables]]
+key = "MYSQL_ROOT_PWD"
+label = "MYSQL_ROOT_PWD"
+generate = true
+description = "This is the MySQL root password. Randomly generated. Can be changed also."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

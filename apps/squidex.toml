@@ -1,0 +1,110 @@
+slug = "squidex"
+name = "Squidex"
+category = "CMS"
+description = "Squidex is an open source headless CMS and content management hub."
+keywords = ["squidex"]
+compose = '''
+services:
+  squidex:
+    depends_on:
+    - squidex-db
+    image: squidex/squidex:{{SQUIDEX_VERSION}}
+    volumes:
+    - squidex-data:/app/Assets
+    restart: always
+    environment:
+      URLS__BASEURL: https://squidex.{{ROOT_DOMAIN}}
+      URLS__ENFORCEHTTPS: 'True'
+      EVENTSTORE__MONGODB__CONFIGURATION: mongodb://root:{{MONGO_PASSWORD}}@squidex-db
+      STORE__MONGODB__CONFIGURATION: mongodb://root:{{MONGO_PASSWORD}}@squidex-db
+      IDENTITY__ADMINEMAIL: '{{ADMIN_EMAIL}}'
+      IDENTITY__ADMINPASSWORD: '{{ADMIN_PASSWORD}}'
+      IDENTITY__GOOGLECLIENT: '{{GOOGLE_CLIENT}}'
+      IDENTITY__GOOGLESECRET: '{{GOOGLE_SECRET}}'
+      IDENTITY__GITHUBCLIENT: '{{GITHUB_CLIENT}}'
+      IDENTITY__GITHUBSECRET: '{{GITHUB_SECRET}}'
+      IDENTITY__MICROSOFTCLIENT: '{{MICROSOFT_CLIENT}}'
+      IDENTITY__MICROSOFTSECRET: '{{MICROSOFT_SECRET}}'
+      LETSENCRYPT_HOST: squidex.{{ROOT_DOMAIN}}
+      LETSENCRYPT_EMAIL: '{{ADMIN_EMAIL}}'
+      VIRTUAL_HOST: squidex.{{ROOT_DOMAIN}}
+  squidex-db:
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - squidex-db-data:/data/db
+    - squidex-db-config:/data/configdb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: squidex
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:27017'
+volumes:
+  squidex-data:
+  squidex-db-data:
+  squidex-db-config:
+'''
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Admin Email"
+description = "The Email which is gonna be used to login as administrator."
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Admin Password"
+description = "The password which is gonna be used to login as administrator.(Minimum eight characters, at least one letter, one number and one special character:)"
+
+[[variables]]
+key = "GITHUB_CLIENT"
+label = "Github Client Id(Optional)"
+description = "The client id from Github in order to enable Github Login."
+
+[[variables]]
+key = "GITHUB_SECRET"
+label = "Github Secret Token(Optional)"
+description = "The secret token from Github in order to enable Github Login."
+
+[[variables]]
+key = "GOOGLE_CLIENT"
+label = "Google Client Id(Optional)"
+description = "The client id from Google in order to enable Google Login."
+
+[[variables]]
+key = "GOOGLE_SECRET"
+label = "Google Secret Token(Optional)"
+description = "The secret token from Google in order to enable Google Login."
+
+[[variables]]
+key = "MICROSOFT_CLIENT"
+label = "Microsoft Client Id(Optional)"
+description = "The client id from Microsoft in order to enable MS Login."
+
+[[variables]]
+key = "MICROSOFT_SECRET"
+label = "Microsoft Secret Token(Optional)"
+description = "The secret token from Microsoft in order to enable MS Login."
+
+[[variables]]
+key = "MONGO_PASSWORD"
+label = "MongoDB password"
+description = "Only use alphanumeric chars."
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "MongoDB Version"
+default = "4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SQUIDEX_VERSION"
+label = "Squidex Version"
+default = "4.6.0"
+description = "Check out their page for the valid versions https://hub.docker.com/r/squidex/squidex/tags"

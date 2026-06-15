@@ -1,0 +1,113 @@
+slug = "netbox"
+name = "Netbox"
+category = "App"
+description = "IP address management (IPAM) and data center infrastructure management (DCIM) tool"
+keywords = ["netbox"]
+compose = '''
+services:
+  netbox-db:
+    image: postgres:{{PG_VERSION}}
+    volumes:
+    - netbox-db-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      POSTGRES_USER: '{{PG_USER}}'
+      POSTGRES_PASSWORD: '{{PG_PASS}}'
+      POSTGRES_DB: '{{PG_NAME}}'
+      PGDATA: /var/lib/postgresql/data
+  netbox-redis:
+    volumes:
+    - netbox-redis-data:/data
+    restart: always
+    environment:
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+  netbox:
+    depends_on:
+    - netbox-db
+    - netbox-redis
+    image: lscr.io/linuxserver/netbox:{{NETBOX_VERSION}}
+    volumes:
+    - netbox-data:/config
+    - netbox-scripts:/app/netbox/scripts
+    - netbox-reports:/app/netbox/netbox/reports
+    restart: unless-stopped
+    environment:
+      TZ: '{{TIME_ZONE}}'
+      SUPERUSER_EMAIL: '{{SUPERUSER_EMAIL}}'
+      SUPERUSER_PASSWORD: '{{SUPERUSER_PASS}}'
+      ALLOWED_HOST: netbox.{{ROOT_DOMAIN}}
+      DB_NAME: '{{PG_NAME}}'
+      DB_USER: '{{PG_USER}}'
+      DB_PASSWORD: '{{PG_PASS}}'
+      DB_HOST: netbox-db
+      DB_PORT: 5432
+      REDIS_HOST: netbox-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      REDIS_DB_TASK: 0
+      REDIS_DB_CACHE: 1
+    ports:
+    - '{{HTTP_PORT}}:8000'
+volumes:
+  netbox-db-data:
+  netbox-redis-data:
+  netbox-data:
+  netbox-scripts:
+  netbox-reports:
+'''
+
+[[variables]]
+key = "NETBOX_VERSION"
+label = "Netbox Version Tag"
+default = "3.1.6"
+description = "Check out the Docker page for valid tags: https://hub.docker.com/r/linuxserver/netbox/tags."
+
+[[variables]]
+key = "PG_NAME"
+label = "Postgres Database"
+default = "netbox-pgsql"
+
+[[variables]]
+key = "PG_PASS"
+label = "Postgres Password"
+generate = true
+description = "Password must be at least 12 characters.  Please use a random string."
+
+[[variables]]
+key = "PG_USER"
+label = "Postgres Username"
+default = "postgres"
+
+[[variables]]
+key = "PG_VERSION"
+label = "Postgres Version Tag"
+default = "12.2"
+description = "Check out the Docker page for valid tags https://hub.docker.com/r/library/postgres/tags/."
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis Password"
+generate = true
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SUPERUSER_EMAIL"
+label = "Email for user \"admin\""
+default = "user@example.tld"
+description = "Email address for the Netbox admin account."
+
+[[variables]]
+key = "SUPERUSER_PASS"
+label = "Admin Password"
+generate = true
+description = "Password for user \"admin\"."
+
+[[variables]]
+key = "TIME_ZONE"
+label = "Time Zone"
+default = "America/New_York"

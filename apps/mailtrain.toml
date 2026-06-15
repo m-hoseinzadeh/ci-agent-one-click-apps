@@ -1,0 +1,110 @@
+slug = "mailtrain"
+name = "Mailtrain V2(Beta)"
+category = "Database"
+description = "Mailtrain is a self hosted newsletter application built on Node.js (v10+) and MySQL (v8+) or MariaDB (v10+)."
+keywords = ["mailtrain", "v2(beta)"]
+compose = '''
+services:
+  mailtrain-db:
+    image: mariadb:{{MARIADB_VERSION}}
+    volumes:
+    - mailtrain-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_PASSWORD}}'
+      MYSQL_DATABASE: mailtrain
+      MYSQL_USER: mailtrain
+      MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
+  mailtrain-redis:
+    image: redis:{{REDIS_VERSION}}
+    volumes:
+    - mailtrain-redis-data:/data
+    restart: always
+  mailtrain-mongo:
+    image: mongo:{{MONGO_VERSION}}
+    volumes:
+    - mailtrain-mongo-data:/data/db
+    restart: always
+  mailtrain:
+    image: mailtrain/mailtrain:{{MAILTRAIN_VERSION}}
+    depends_on:
+    - mailtrain-db
+    - mailtrain-redis
+    - mailtrain-mongo
+    volumes:
+    - mailtrain-files:/app/server/files
+    environment:
+      URL_BASE_TRUSTED: https://mailtrain.{{ROOT_DOMAIN}}
+      URL_BASE_SANDBOX: https://mailtrain-{{MAILTRAIN_SANDBOX}}-appname.{{ROOT_DOMAIN}}
+      URL_BASE_PUBLIC: https://mailtrain-{{MAILTRAIN_LISTS}}-appname.{{ROOT_DOMAIN}}
+      WWW_PROXY: true
+      MONGO_HOST: mailtrain-mongo
+      REDIS_HOST: mailtrain-redis
+      MYSQL_HOST: mailtrain-db
+      MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  mailtrain-{{MAILTRAIN_SANDBOX}}-appname:
+    image: caprover/nginx-reverse-proxy:1-ef5ffcb
+    restart: always
+    depends_on:
+    - mailtrain
+    environment:
+      UPSTREAM_HTTP_ADDRESS: http://mailtrain:3003
+  mailtrain-{{MAILTRAIN_LISTS}}-appname:
+    image: caprover/nginx-reverse-proxy:1-ef5ffcb
+    restart: always
+    depends_on:
+    - mailtrain
+    environment:
+      UPSTREAM_HTTP_ADDRESS: http://mailtrain:3004
+volumes:
+  mailtrain-db-data:
+  mailtrain-redis-data:
+  mailtrain-mongo-data:
+  mailtrain-files:
+'''
+
+[[variables]]
+key = "MAILTRAIN_LISTS"
+label = "Mailtrain Lists"
+default = ""
+
+[[variables]]
+key = "MAILTRAIN_SANDBOX"
+label = "Mailtrain Sandbox"
+default = ""
+
+[[variables]]
+key = "MAILTRAIN_VERSION"
+label = "Mailtrain Version"
+default = "latest"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mailtrain/mailtrain/tags"
+
+[[variables]]
+key = "MARIADB_PASSWORD"
+label = "Mariadb User password"
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "Mariadb Version"
+default = "10.5.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"
+
+[[variables]]
+key = "MONGO_VERSION"
+label = "Mongo Version"
+default = "4.4.0-rc11"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mongo?tab=tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version"
+default = "alpine3.12"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redis?tab=tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

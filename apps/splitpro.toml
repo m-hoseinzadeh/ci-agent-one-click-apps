@@ -1,0 +1,67 @@
+slug = "splitpro"
+name = "SplitPro"
+category = "Database"
+description = "Open-source expense sharing app (Splitwise alternative) running with PostgreSQL."
+keywords = ["splitpro"]
+compose = '''
+services:
+  splitpro:
+    image: ossapps/splitpro:{{SPLITPRO_VERSION}}
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgresql://postgres:{{POSTGRES_PASSWORD}}@splitpro-db:5432/splitpro
+      NEXTAUTH_URL: https://splitpro.{{ROOT_DOMAIN}}
+      NEXTAUTH_SECRET: '{{NEXTAUTH_SECRET}}'
+      GOOGLE_CLIENT_ID: '{{GOOGLE_CLIENT_ID}}'
+      GOOGLE_CLIENT_SECRET: '{{GOOGLE_CLIENT_SECRET}}'
+    depends_on:
+    - splitpro-db
+    ports:
+    - '{{HTTP_PORT}}:3000'
+  splitpro-db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: splitpro
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - splitpro-db-data:/var/lib/postgresql/data
+volumes:
+  splitpro-db-data:
+'''
+
+[[variables]]
+key = "GOOGLE_CLIENT_ID"
+label = "Google OAuth Client ID"
+default = ""
+description = "Client ID from your Google Cloud OAuth 2.0 credentials."
+
+[[variables]]
+key = "GOOGLE_CLIENT_SECRET"
+label = "Google OAuth Client Secret"
+default = ""
+description = "Client secret from your Google Cloud OAuth 2.0 credentials."
+
+[[variables]]
+key = "NEXTAUTH_SECRET"
+label = "NEXTAUTH_SECRET"
+generate = true
+description = "Secret used by NextAuth. Only change if you know what you’re doing."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL password"
+generate = true
+description = "Password for the internal SplitPro PostgreSQL database."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SPLITPRO_VERSION"
+label = "SplitPro image tag"
+default = "v1.5.8"
+description = "Docker tag for SplitPro from Docker Hub: https://hub.docker.com/r/ossapps/splitpro/tags"

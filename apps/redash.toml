@@ -1,0 +1,177 @@
+slug = "redash"
+name = "Redash"
+category = "App"
+description = "Connect to any data source, easily visualize and share your data"
+keywords = ["redash"]
+compose = '''
+services:
+  redash:
+    environment:
+      REDASH_WEB_WORKERS: '{{REDASH_WEB_WORKERS}}'
+      REDASH_HOST: http://redash.{{ROOT_DOMAIN}}
+      REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
+      REDASH_SECRET_KEY: '{{REDASH_SECRET_KEY}}'
+      REDASH_MAIL_SERVER: '{{REDASH_MAIL_SERVER}}'
+      REDASH_MAIL_PORT: '{{REDASH_MAIL_PORT}}'
+      REDASH_MAIL_USE_TLS: '{{REDASH_MAIL_USE_TLS}}'
+      REDASH_MAIL_USE_SSL: '{{REDASH_MAIL_USE_SSL}}'
+      REDASH_MAIL_USERNAME: '{{REDASH_MAIL_USERNAME}}'
+      REDASH_MAIL_PASSWORD: '{{REDASH_MAIL_PASSWORD}}'
+      REDASH_MAIL_DEFAULT_SENDER: '{{REDASH_MAIL_DEFAULT_SENDER}}'
+      REDASH_REDIS_URL: redis://redash-queue
+      REDASH_DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@redash-db/{{POSTGRES_DB}}
+    depends_on:
+    - redash-db
+    - redash-queue
+    ports:
+    - '{{HTTP_PORT}}:5000'
+  redash-scheduler:
+    environment:
+      QUEUES: celery
+      WORKERS_COUNT: '{{REDASH_SCHEDULER_WORKERS}}'
+      REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
+      REDASH_REDIS_URL: redis://redash-queue
+    depends_on:
+    - redash-db
+    - redash-queue
+  redash-scheduled-worker:
+    environment:
+      QUEUES: scheduled_queries,schemas
+      WORKERS_COUNT: '{{REDASH_SCHEDULED_WORKERS}}'
+      REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
+      REDASH_REDIS_URL: redis://redash-queue
+    depends_on:
+    - redash-db
+    - redash-queue
+  redash-adhoc-worker:
+    environment:
+      QUEUES: queries
+      WORKERS_COUNT: '{{REDASH_ADHOC_WORKERS}}'
+      REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
+      REDASH_REDIS_URL: redis://redash-queue
+    depends_on:
+    - redash-db
+    - redash-queue
+  redash-queue:
+    image: redis:{{REDIS_VERSION}}
+  redash-db:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - redash-db:/var/lib/postgresql/data
+volumes:
+  redash-db:
+'''
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Database | Name"
+default = "redash"
+description = "Name of the PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database | User Password"
+generate = true
+description = "Password of the PostgreSQL user."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Database | User Name"
+default = "redash"
+description = "Name of the PostgreSQL user."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Database | Version"
+default = "15.0-alpine"
+description = "PostgreSQL version. Check out their valid tags at https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDASH_ADHOC_WORKERS"
+label = "Application | Ad-Hoc Worker Count"
+default = "2"
+description = "Amount of ad-hoc workers."
+
+[[variables]]
+key = "REDASH_COOKIE_SECRET"
+label = "Application | Cookie Secret"
+generate = true
+description = "Secret for signing cookies."
+
+[[variables]]
+key = "REDASH_MAIL_DEFAULT_SENDER"
+label = "Application | SMTP Default Sender"
+description = "Mail address to send from. This is optional."
+
+[[variables]]
+key = "REDASH_MAIL_PASSWORD"
+label = "Application | SMTP Password"
+description = "SMTP password for system mail delivery. This is optional."
+
+[[variables]]
+key = "REDASH_MAIL_PORT"
+label = "Application | SMTP Port"
+default = "25"
+description = "SMTP port for system mail delivery."
+
+[[variables]]
+key = "REDASH_MAIL_SERVER"
+label = "Application | SMTP Host"
+description = "SMTP server for system mail delivery. This is optional."
+
+[[variables]]
+key = "REDASH_MAIL_USERNAME"
+label = "Application | SMTP Username"
+description = "SMTP user name for system mail delivery. This is optional."
+
+[[variables]]
+key = "REDASH_MAIL_USE_SSL"
+label = "Application | SMTP Use SSL"
+default = "false"
+description = "Whether to use SSL for system mail delivery through SMTP."
+
+[[variables]]
+key = "REDASH_MAIL_USE_TLS"
+label = "Application | SMTP Use TLS"
+default = "false"
+description = "Whether to use TLS for system mail delivery through SMTP."
+
+[[variables]]
+key = "REDASH_SCHEDULED_WORKERS"
+label = "Application | Scheduled Worker Count"
+default = "1"
+description = "Amount of scheduled workers."
+
+[[variables]]
+key = "REDASH_SCHEDULER_WORKERS"
+label = "Application | Scheduler Worker Count"
+default = "1"
+description = "Amount of workers for scheduler."
+
+[[variables]]
+key = "REDASH_SECRET_KEY"
+label = "Application | Application Secret"
+generate = true
+description = "Secret for encrypting settings."
+
+[[variables]]
+key = "REDASH_WEB_WORKERS"
+label = "Application | Web Worker Count"
+default = "4"
+description = "Amount of web workers."
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Queue | Version"
+default = "7.0-alpine"
+description = "Redis version. Check out their valid tags at https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

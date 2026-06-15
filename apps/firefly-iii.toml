@@ -1,0 +1,75 @@
+slug = "firefly-iii"
+name = "Firefly III"
+category = "App"
+description = "Firefly III - A free and open source personal finance manager"
+keywords = ["firefly", "iii"]
+compose = '''
+services:
+  firefly-iii:
+    image: fireflyiii/core:{{FIREFLY_VERSION}}
+    volumes:
+    - firefly-iii-export:/var/www/firefly-iii/storage/export
+    - firefly-iii-upload:/var/www/firefly-iii/storage/upload
+    restart: always
+    depends_on:
+    - firefly-iii-db
+    environment:
+      SITE_OWNER: '{{FIREFLY_SITE}}-owner'
+      TZ: '{{FIREFLY_TIME}}-zone'
+      TRUSTED_PROXIES: '**'
+      DB_CONNECTION: mysql
+      DB_PORT: 3306
+      DB_DATABASE: firefly
+      DB_USERNAME: firefly
+      DB_HOST: firefly-iii-db
+      DB_PASSWORD: '{{MARIADB_PASSWORD}}'
+      APP_KEY: '{{FIREFLY_APP}}-key'
+    ports:
+    - '{{HTTP_PORT}}:8080'
+  firefly-iii-db:
+    image: mariadb:{{MARIADB_VERSION}}
+    volumes:
+    - firefly-iii-db-data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_PASSWORD}}'
+      MYSQL_DATABASE: firefly
+      MYSQL_USER: firefly
+      MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
+volumes:
+  firefly-iii-export:
+  firefly-iii-upload:
+  firefly-iii-db-data:
+'''
+
+[[variables]]
+key = "FIREFLY_APP"
+label = "Firefly App"
+default = ""
+
+[[variables]]
+key = "FIREFLY_SITE"
+label = "Firefly Site"
+default = ""
+
+[[variables]]
+key = "FIREFLY_TIME"
+label = "Firefly Time"
+default = ""
+
+[[variables]]
+key = "FIREFLY_VERSION"
+label = "Firefly Version Tag"
+default = "version-5.5.13"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/fireflyiii/core/tags"
+
+[[variables]]
+key = "MARIADB_PASSWORD"
+label = "Mariadb Password"
+description = "The password of the Mariadb Database\""
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "Mariadb Version Tag"
+default = "10.5.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"

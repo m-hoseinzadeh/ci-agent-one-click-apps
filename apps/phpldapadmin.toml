@@ -1,0 +1,60 @@
+slug = "phpldapadmin"
+name = "OpenLDAP + phpLDAPadmin"
+category = "App"
+description = "OpenLDAP with administration interface"
+keywords = ["openldap", "phpldapadmin"]
+compose = '''
+services:
+  phpldapadmin:
+    image: osixia/openldap:{{OPENLDAP_VERSION}}
+    restart: always
+    volumes:
+    - phpldapadmin-db:/var/lib/ldap
+    - phpldapadmin-config:/etc/ldap/slapd.d
+    environment:
+      LDAP_ORGANISATION: '{{OPENLDAP_LDAP}}-organisation'
+      LDAP_DOMAIN: '{{ROOT_DOMAIN}}'
+      LDAP_ADMIN_PASSWORD: '{{OPENLDAP_LDAP}}-admin-password'
+  phpldapadmin-admin:
+    image: osixia/phpldapadmin:{{PHPLDAPADMIN_VERSION}}
+    restart: always
+    depends_on:
+    - phpldapadmin
+    environment:
+      PHPLDAPADMIN_TRUST_PROXY_SSL: true
+      PHPLDAPADMIN_LDAP_HOSTS: phpldapadmin
+      PHPLDAPADMIN_SERVER_ADMIN: '{{PHPLDAPADMIN_ADMIN}}-email'
+      PHPLDAPADMIN_SERVER_PATH: https://phpldapadmin-admin.{{ROOT_DOMAIN}}
+      PHPLDAPADMIN_HTTPS: false
+volumes:
+  phpldapadmin-db:
+  phpldapadmin-config:
+'''
+
+[[variables]]
+key = "OPENLDAP_LDAP"
+label = "Openldap Ldap"
+default = ""
+
+[[variables]]
+key = "OPENLDAP_VERSION"
+label = "Openldap Version"
+default = "1.4.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/osixia/openldap/tags"
+
+[[variables]]
+key = "PHPLDAPADMIN_ADMIN"
+label = "Phpldapadmin Admin"
+default = ""
+
+[[variables]]
+key = "PHPLDAPADMIN_VERSION"
+label = "PHPLadapAdmin Version"
+default = "0.9.0"
+description = "Check out their docker page for the valid tags https://hub.docker.com/r/osixia/phpldapadmin/tags"
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."

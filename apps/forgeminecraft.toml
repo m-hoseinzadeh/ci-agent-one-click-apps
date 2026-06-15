@@ -1,0 +1,120 @@
+slug = "forgeminecraft"
+name = "Dynamic Minecraft itzg server"
+category = "App"
+description = "Minecraft server with dynamic versions and types."
+keywords = ["dynamic", "forgeminecraft", "itzg", "minecraft", "server"]
+compose = '''
+services:
+  forgeminecraft:
+    image: itzg/minecraft-server:$$java_version
+    environment:
+      EULA: 'true'
+      TYPE: $$server_type
+      VERSION: '{{MINECRAFT_VERSION}}'
+      FORGE_VERSION: '{{FORGE_VERSION}}'
+      MAX_PLAYERS: '{{MAX_PLAYERS}}'
+      MODE: '{{GAME_MODE}}'
+      MAX_MEMORY: '{{MAX_RAMG}}'
+      SERVER_NAME: '{{DISPLAY_NAME}}'
+      MOTD: '{{DISPLAY_DESCRIPTION}}'
+      ONLINE_MODE: '{{ONLINE_MODE}}'
+      RCON_PASSWORD: '{{RCON_PASSWORD}}'
+      CF_API_KEY: '{{CF_API_KEY}}'
+      CF_PAGE_URL: '{{CF_PAGE_URL}}'
+      DISABLE_HEALTHCHECK: '{{DISABLE_HEALTHCHECK}}'
+    ports:
+    - '{{MC_PORT}}:25565'
+    volumes:
+    - forgeminecraft-data:/data
+    stdin_open: true
+    tty: true
+    restart: unless-stopped
+  forgeminecraft-web:
+    image: itzg/rcon:multiarch
+    environment:
+      RWA_USERNAME: '{{WEB_USERNAME}}'
+      RWA_PASSWORD: '{{WEB_PASSWORD}}'
+      RWA_ADMIN: 'TRUE'
+      RWA_RCON_HOST: forgeminecraft
+      RWA_RCON_PASSWORD: '{{RCON_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:4326'
+    - 4327:4327
+volumes:
+  forgeminecraft-data:
+'''
+
+[[variables]]
+key = "CF_API_KEY"
+label = "CurseForge API Key. Necessary only when you use AUTO_CURSEFORGE server type."
+
+[[variables]]
+key = "CF_PAGE_URL"
+label = "CurseForge page url. Necessary only when you use AUTO_CURSEFORGE server type."
+
+[[variables]]
+key = "DISABLE_HEALTHCHECK"
+label = "disable healthcheck (set TRUE if minecraft server stopping with rcon-cli)"
+default = "FALSE"
+
+[[variables]]
+key = "DISPLAY_DESCRIPTION"
+label = "server displayed description"
+default = "Minecraft server powered by docker"
+
+[[variables]]
+key = "DISPLAY_NAME"
+label = "server displayed name"
+default = "Minecraft server"
+
+[[variables]]
+key = "FORGE_VERSION"
+label = "forge server version"
+default = "47.0.46"
+description = "Choose the version that works with your mc version , see: https://files.minecraftforge.net/"
+
+[[variables]]
+key = "GAME_MODE"
+label = "game mode"
+default = "survival"
+
+[[variables]]
+key = "MAX_PLAYERS"
+label = "Max no of players"
+default = "20"
+
+[[variables]]
+key = "MAX_RAMG"
+label = "Max Ramg"
+default = ""
+
+[[variables]]
+key = "MC_PORT"
+label = "Service port"
+default = "25565"
+description = "Choose \"25565\" if you want to connect directly to the servers domain without any port specification."
+
+[[variables]]
+key = "MINECRAFT_VERSION"
+label = "Minecraft version"
+default = "1.20.1"
+
+[[variables]]
+key = "ONLINE_MODE"
+label = "online mode"
+default = "FALSE"
+
+[[variables]]
+key = "RCON_PASSWORD"
+label = "Rcon cli password"
+generate = true
+
+[[variables]]
+key = "WEB_PASSWORD"
+label = "admin portal password."
+generate = true
+
+[[variables]]
+key = "WEB_USERNAME"
+label = "admin portal username"
+default = "admin"

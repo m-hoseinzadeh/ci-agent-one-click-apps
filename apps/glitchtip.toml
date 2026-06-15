@@ -1,0 +1,96 @@
+slug = "glitchtip"
+name = "GlitchTip"
+category = "App"
+description = "Simple, open source error tracking."
+keywords = ["glitchtip"]
+compose = '''
+services:
+  glitchtip-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_USER: glitchtip
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+    volumes:
+    - glitchtip-postgres-data:/var/lib/postgresql/data
+  glitchtip-redis:
+    environment:
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+  glitchtip:
+    depends_on:
+    - glitchtip-postgres
+    - glitchtip-redis
+    environment:
+      DATABASE_URL: postgres://glitchtip:{{POSTGRES_PASSWORD}}@glitchtip-postgres:5432/glitchtip
+      REDIS_URL: redis://:{{REDIS_PASSWORD}}@glitchtip-redis:6379
+      SECRET_KEY: '{{SECRET}}'
+      PORT: 8000
+      EMAIL_URL: '{{SMTP}}'
+      GLITCHTIP_DOMAIN: http://glitchtip.{{ROOT_DOMAIN}}
+      DEFAULT_FROM_EMAIL: '{{FROM_EMAIL}}'
+      CELERY_WORKER_CONCURRENCY: '{{CELERY_WORKER_CONCURRENCY}}'
+    ports:
+    - '{{HTTP_PORT}}:8000'
+  glitchtip-worker:
+    depends_on:
+    - glitchtip-postgres
+    - glitchtip-redis
+    environment:
+      DATABASE_URL: postgres://glitchtip:{{POSTGRES_PASSWORD}}@glitchtip-postgres:5432/glitchtip
+      REDIS_URL: redis://:{{REDIS_PASSWORD}}@glitchtip-redis:6379
+      SECRET_KEY: '{{SECRET}}'
+      PORT: 8000
+      EMAIL_URL: '{{SMTP}}'
+      GLITCHTIP_DOMAIN: http://glitchtip.{{ROOT_DOMAIN}}
+      DEFAULT_FROM_EMAIL: '{{FROM_EMAIL}}'
+      CELERY_WORKER_CONCURRENCY: '{{CELERY_WORKER_CONCURRENCY}}'
+volumes:
+  glitchtip-postgres-data:
+'''
+
+[[variables]]
+key = "CELERY_WORKER_CONCURRENCY"
+label = "Celery Worker Concurrency"
+default = "2"
+description = "Number of concurrent celery workers. Defaults to number of CPU cores. Highly recommended to change. Our sample docker compose file defaults this to 2, to avoid unwanted and unnecessary scaling."
+
+[[variables]]
+key = "FROM_EMAIL"
+label = "Email Address"
+default = "info@example.com"
+description = "Default from email address."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "PostgreSQL Password"
+generate = true
+description = "This is the PostgreSQL password for user 'glitchtip'."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "15"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis Password"
+generate = true
+description = "This is the PostgreSQL password for user 'glitchtip'."
+
+[[variables]]
+key = "ROOT_DOMAIN"
+label = "Public domain"
+default = ""
+description = "Domain used to build public URLs (set your project domain)."
+
+[[variables]]
+key = "SECRET"
+label = "Secret Key"
+generate = true
+description = "Secret key used by glitchtip."
+
+[[variables]]
+key = "SMTP"
+label = "SMTP Configuration"
+default = "smtp://email:password@smtp_url:port"
+description = "See https://glitchtip.com/documentation/install#configuration."

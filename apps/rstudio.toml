@@ -1,0 +1,37 @@
+slug = "rstudio"
+name = "RStudio"
+category = "App"
+description = "RStudio Server enables you to provide a browser based interface to a version of R running on a Linux server, bringing the power & productivity of the RStudio IDE to server-based deployments of R."
+keywords = ["rstudio"]
+compose = '''
+services:
+  rstudio:
+    image: rocker/rstudio:{{RSTUDIO_VERSION}}
+    volumes:
+    - rstudio-code:/home/rstudio
+    restart: always
+    environment:
+      PASSWORD: '{{RSTUDIO_PASSWORD}}'
+      USER: '{{RSTUDIO_USERNAME}}'
+    ports:
+    - '{{HTTP_PORT}}:8787'
+volumes:
+  rstudio-code:
+'''
+
+[[variables]]
+key = "RSTUDIO_PASSWORD"
+label = "Password"
+description = "Your super secret Password for RStudio"
+
+[[variables]]
+key = "RSTUDIO_USERNAME"
+label = "Username"
+default = "rstudio"
+description = "Your username to log into RStudio"
+
+[[variables]]
+key = "RSTUDIO_VERSION"
+label = "RStudio Version Tag"
+default = "4.0.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/rocker/rstudio/tags"

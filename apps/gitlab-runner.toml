@@ -1,0 +1,21 @@
+slug = "gitlab-runner"
+name = "Gitlab (runner)"
+category = "Dev tools"
+description = "Runner version of GitLab for CI/CD pipeline"
+keywords = ["(runner)", "gitlab", "runner"]
+compose = '''
+services:
+  gitlab-runner:
+    image: gitlab/gitlab-runner:{{GITLAB}}-runner_version
+    volumes:
+    - gitlab-runner-data:/etc/gitlab-runner
+    - /var/run/docker.sock:/var/run/docker.sock
+    restart: always
+volumes:
+  gitlab-runner-data:
+'''
+
+[[variables]]
+key = "GITLAB"
+label = "Gitlab"
+default = ""

@@ -18,6 +18,21 @@ apps/<slug>.toml   # one template per app
 
 ci-agent clones this repo on **Sync** and reads every `apps/*.toml`.
 
+## Offline / air-gapped servers
+
+A box with no git access can't Sync. For those, every change here is packaged
+into a `catalog.zip` published as the rolling
+[**`catalog-latest`** release](https://github.com/m-hoseinzadeh/ci-agent-one-click-apps/releases/tag/catalog-latest)
+(see `.github/workflows/catalog-release.yml`). Stable URL:
+
+```
+https://github.com/m-hoseinzadeh/ci-agent-one-click-apps/releases/download/catalog-latest/catalog.zip
+```
+
+Download it (and `catalog.zip.sha256` to verify), carry it to the server, then
+in ci-agent: **Manage sources → Add an uploaded-bundle source → Upload bundle**.
+The zip holds `apps/` at its root — the same files Sync would clone.
+
 ## Template format
 
 ```toml

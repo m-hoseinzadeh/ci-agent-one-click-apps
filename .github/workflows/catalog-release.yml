@@ -1,0 +1,60 @@
+name: Catalog bundle
+
+# Package apps/ into catalog.zip and publish it as the rolling `catalog-latest`
+# release on every change. The asset has a stable download URL:
+#   https://github.com/m-hoseinzadeh/ci-agent-one-click-apps/releases/download/catalog-latest/catalog.zip
+# Online ci-agent boxes can fetch it; for an air-gapped box, download it, carry
+# it in, and load it via Manage sources → Upload bundle (an upload-kind source).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/**"
+      - ".github/workflows/catalog-release.yml"
+  workflow_dispatch:
+
+# Coalesce rapid pushes so the rolling release isn't rebuilt concurrently.
+concurrency:
+  group: catalog-release
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package catalog
+        run: |
+          set -euo pipefail
+          count=$(find apps -maxdepth 1 -name '*.toml' | wc -l | tr -d ' ')
+          if [ "$count" -eq 0 ]; then
+            echo "::error::no apps/*.toml templates found" >&2
+            exit 1
+          fi
+          # `apps/` at the archive root — exactly what ci-agent's apply_upload
+          # expects. -X drops extra file attributes for a stable archive.
+          zip -r -X catalog.zip apps -x '*/.*'
+          sha256sum catalog.zip > catalog.zip.sha256
+          echo "APP_COUNT=$count" >> "$GITHUB_ENV"
+
+      - name: Publish rolling release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          notes="Catalog bundle — ${APP_COUNT} apps, built from ${GITHUB_SHA::7} at $(date -u +%FT%TZ).
+
+          Download \`catalog.zip\` and load it in ci-agent via **Manage sources → Upload bundle**.
+          \`catalog.zip.sha256\` is the checksum."
+          # Move the rolling tag to this commit and refresh its assets. Delete +
+          # recreate so the tag target, notes and assets all reflect the latest.
+          gh release delete catalog-latest --yes --cleanup-tag 2>/dev/null || true
+          gh release create catalog-latest catalog.zip catalog.zip.sha256 \
+            --title "Latest catalog bundle" \
+            --notes "$notes" \
+            --target "$GITHUB_SHA"

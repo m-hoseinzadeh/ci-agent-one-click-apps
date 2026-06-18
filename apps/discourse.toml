@@ -2,13 +2,12 @@ slug = "discourse"
 name = "Discourse"
 category = "Communication"
 description = "Discourse is the 100% open source discussion platform built for the next decade of the Internet. Use it as a mailing list, discussion forum, long-form chat room, and more!"
-keywords = ["discourse"]
+keywords = ["discourse", "forum", "discussion", "community"]
+http_port = 3000
 compose = '''
 services:
   discourse-postgresql:
-    documentation: Taken from https://hub.docker.com/r/bitnamilegacy/postgresql
     image: docker.io/bitnamilegacy/postgresql:{{POSTGRESQL_VERSION}}
-    restart: always
     environment:
       POSTGRESQL_DATABASE: '{{DB_NAME}}'
       POSTGRESQL_USERNAME: '{{DB_USER}}'
@@ -17,15 +16,12 @@ services:
     volumes:
     - discourse-postgresql-data:/bitnami/postgresql
   discourse-redis:
-    documentation: Taken from https://hub.docker.com/r/bitnamilegacy/redis
     image: docker.io/bitnamilegacy/redis:{{REDIS_VERSION}}
-    restart: always
     environment:
       ALLOW_EMPTY_PASSWORD: 'yes'
     volumes:
     - discourse-redis-data:/bitnami
   discourse:
-    documentation: Taken from https://hub.docker.com/r/bitnamilegacy/discourse
     image: docker.io/bitnamilegacy/discourse:{{DISCOURSE_VERSION}}
     depends_on:
     - discourse-postgresql
@@ -46,7 +42,7 @@ services:
       DISCOURSE_POSTGRESQL_NAME: '{{DB_NAME}}'
       DISCOURSE_POSTGRESQL_USERNAME: '{{DB_USER}}'
       DISCOURSE_POSTGRESQL_PASSWORD: '{{DB_PASS}}'
-      DISCOURSE_HOSTNAME: discourse.{{ROOT_DOMAIN}}
+      DISCOURSE_HOSTNAME: '{{DISCOURSE_HOSTNAME}}'
       REDIS_HOST: discourse-redis
       SMTP_HOST: '{{SMTP_HOST}}'
       SMTP_PORT: '{{SMTP_PORT}}'
@@ -55,7 +51,8 @@ services:
     ports:
     - '{{HTTP_PORT}}:3000'
   discourse-sidekiq:
-    documentation: Taken from https://hub.docker.com/r/bitnamilegacy/discourse
+    image: docker.io/bitnamilegacy/discourse:{{DISCOURSE_VERSION}}
+    command: /opt/bitnami/scripts/discourse-sidekiq/run.sh
     depends_on:
     - discourse
     volumes:
@@ -66,7 +63,7 @@ services:
       DISCOURSE_POSTGRESQL_PASSWORD: '{{DB_PASS}}'
       DISCOURSE_HOST: discourse
       DISCOURSE_PORT: '3000'
-      DISCOURSE_HOSTNAME: discourse.{{ROOT_DOMAIN}}
+      DISCOURSE_HOSTNAME: '{{DISCOURSE_HOSTNAME}}'
       POSTGRESQL_HOST: discourse-postgresql
       REDIS_HOST: discourse-redis
       SMTP_HOST: '{{SMTP_HOST}}'
@@ -82,89 +79,89 @@ volumes:
 [[variables]]
 key = "ADMIN_EMAIL"
 label = "Admin email"
-default = "your_email@gmail.com"
-description = "Email of the admin account"
+default = ""
+description = "Email address for the initial Discourse admin account."
 
 [[variables]]
 key = "ADMIN_PASS"
 label = "Admin password"
-default = "sTr0nG_p@s$wo%d"
-description = "Password of the admin account"
+generate = true
+description = "Password for the initial Discourse admin account (auto-generated)."
 
 [[variables]]
 key = "ADMIN_USER"
 label = "Admin username"
 default = "admin"
-description = "Name of the admin account"
+description = "Username for the initial Discourse admin account."
 
 [[variables]]
 key = "DB_NAME"
 label = "Database name"
 default = "discourse_db"
-description = "Name for the database using postgresql"
+description = "Name of the PostgreSQL database."
 
 [[variables]]
 key = "DB_PASS"
 label = "Database password"
-default = "sTr0nG_p@s$wo%d"
-description = "Password for the database user and root using postgresql"
+generate = true
+description = "Password for the PostgreSQL database and postgres superuser (auto-generated)."
 
 [[variables]]
 key = "DB_USER"
 label = "Database user"
 default = "discourse_user"
-description = "Username for the database using postgresql"
+description = "Username for the PostgreSQL database."
 
 [[variables]]
 key = "DISCOURSE_VERSION"
-label = "Discourse Version"
+label = "Discourse version"
 default = "2.8.11"
-description = "Version of Discourse"
+description = "Tag of the Discourse image."
 
 [[variables]]
 key = "POSTGRESQL_VERSION"
-label = "Postgresql (database) version"
+label = "PostgreSQL version"
 default = "15.1.0"
-description = "Version of Postgresql"
+description = "Tag of the PostgreSQL image."
 
 [[variables]]
 key = "REDIS_VERSION"
 label = "Redis version"
 default = "5.0"
-description = "Version of Redis"
+description = "Tag of the Redis image."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "DISCOURSE_HOSTNAME"
+label = "Public hostname"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public hostname Discourse builds URLs from. Leave blank now and set it to your project's domain after ci-agent assigns one."
 
 [[variables]]
 key = "SITENAME"
-label = "Sitename"
+label = "Site name"
 default = "My site!"
-description = "The title of the site, the words on the tab"
+description = "Title of the site shown in the browser tab."
 
 [[variables]]
 key = "SMTP_HOST"
-label = "SMPT host"
-default = "smtp.gmail.com"
-description = "The host for your smtp server"
+label = "SMTP host"
+default = ""
+description = "Hostname of your outgoing mail server (external; required for email/signups)."
 
 [[variables]]
 key = "SMTP_PASS"
 label = "SMTP password"
-default = "sTr0nG_p@s$wo%d"
-description = "The password for your smtp server"
+default = ""
+description = "Password for your SMTP server (external credential; leave blank if unused)."
 
 [[variables]]
 key = "SMTP_PORT"
 label = "SMTP port"
 default = "587"
-description = "The port for your smtp server"
+description = "Port of your outgoing mail server."
 
 [[variables]]
 key = "SMTP_USER"
 label = "SMTP user"
-default = "your_email@gmail.com"
-description = "The user for your smtp server"
+default = ""
+description = "Username for your SMTP server (external; leave blank if unused)."

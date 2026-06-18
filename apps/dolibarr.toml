@@ -2,40 +2,38 @@ slug = "dolibarr"
 name = "Dolibarr"
 category = "App"
 description = "Open Source ERP & CRM for Business (SME or large companies, freelancers, foundations)"
-keywords = ["dolibarr"]
+keywords = ["dolibarr", "erp", "crm"]
+http_port = 80
 compose = '''
 services:
   dolibarr-db:
-    image: postgres:{{POSTGRES}}-version
+    image: mariadb:{{MARIADB_VERSION}}
     volumes:
-    - dolibarr-db:/var/lib/postgresql/data
-    restart: always
+    - dolibarr-db:/var/lib/mysql
     environment:
-      POSTGRES_USER: dolibarr
-      POSTGRES_PASSWORD: '{{PG}}-pass'
-      POSTGRES_DB: dolibarr
-    ports:
-    - '{{HTTP_PORT}}:5432'
+      MARIADB_ROOT_PASSWORD: '{{DB_ROOT_PASSWORD}}'
+      MARIADB_DATABASE: dolibarr
+      MARIADB_USER: dolibarr
+      MARIADB_PASSWORD: '{{DB_PASSWORD}}'
   dolibarr:
-    image: upshift/dolibarr:{{DOLIBARR}}-version
+    image: dolibarr/dolibarr:{{DOLIBARR_VERSION}}
     depends_on:
     - dolibarr-db
     volumes:
     - dolibarr-html:/var/www/html
     - dolibarr-docs:/var/www/documents
-    restart: always
     environment:
+      DOLI_DB_TYPE: mysqli
       DOLI_DB_HOST: dolibarr-db
+      DOLI_DB_HOST_PORT: 3306
       DOLI_DB_NAME: dolibarr
-      DOLI_DB_ROOT_LOGIN: dolibarr
-      DOLI_DB_ROOT_PASSWOORD: '{{PG}}-pass'
       DOLI_DB_USER: dolibarr
-      DOLI_DB_PORT: 5432
-      DOLI_DB_TYPE: pgsql
-      DOLI_DB_PASSWORD: '{{PG}}-pass'
-      DOLI_ADMIN_LOGIN: '{{ADMIN}}-login'
-      DOLI_ADMIN_PASSWORD: '{{ADMIN}}-pass'
-      DOLI_URL_ROOT: http://dolibarr.{{ROOT_DOMAIN}}
+      DOLI_DB_PASSWORD: '{{DB_PASSWORD}}'
+      DOLI_INSTALL_AUTO: 1
+      DOLI_ADMIN_LOGIN: '{{ADMIN_LOGIN}}'
+      DOLI_ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
+    ports:
+    - '{{HTTP_PORT}}:80'
 volumes:
   dolibarr-db:
   dolibarr-html:
@@ -43,27 +41,37 @@ volumes:
 '''
 
 [[variables]]
-key = "ADMIN"
-label = "Admin"
-default = ""
+key = "ADMIN_LOGIN"
+label = "Admin username"
+default = "admin"
+description = "Login for the initial Dolibarr administrator account."
 
 [[variables]]
-key = "DOLIBARR"
-label = "Dolibarr"
-default = ""
+key = "ADMIN_PASSWORD"
+label = "Admin password"
+generate = true
+description = "Password for the initial Dolibarr administrator account."
 
 [[variables]]
-key = "PG"
-label = "Pg"
-default = ""
+key = "DB_PASSWORD"
+label = "Database password"
+generate = true
+description = "Password for the dolibarr database user."
 
 [[variables]]
-key = "POSTGRES"
-label = "Postgres"
-default = ""
+key = "DB_ROOT_PASSWORD"
+label = "Database root password"
+generate = true
+description = "Root password for the MariaDB server."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "MARIADB_VERSION"
+label = "MariaDB version"
+default = "11"
+description = "MariaDB image tag."
+
+[[variables]]
+key = "DOLIBARR_VERSION"
+label = "Dolibarr version"
+default = "21"
+description = "Dolibarr image tag."

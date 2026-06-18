@@ -3,11 +3,11 @@ name = "n8n.io Queue Mode"
 category = "Automation"
 description = "Node based workflow automation tool - Queue mode"
 keywords = ["io", "mode", "n8n", "n8n.io", "queue"]
+http_port = 5678
 compose = '''
 services:
   n8n-io-queue-mode-editor:
     image: n8nio/n8n:{{N8N_VERSION}}
-    restart: always
     environment:
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: n8n-io-queue-mode-postgres
@@ -17,8 +17,6 @@ services:
       GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
       TZ: '{{N8N_TIMEZONE}}'
       NODE_ENV: '{{N8N_ENVIRONMENT}}'
-      N8N_PROTOCOL: https
-      N8N_HOST: n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
       N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
@@ -27,8 +25,8 @@ services:
       N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
       N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
       N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
-      WEBHOOK_URL: https://n8n-io-queue-mode-webhooks.{{ROOT_DOMAIN}}
-      N8N_EDITOR_BASE_URL: https://n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      WEBHOOK_URL: '{{N8N_APP_URL}}'
+      N8N_EDITOR_BASE_URL: '{{N8N_APP_URL}}'
       N8N_RUNNERS_ENABLED: true
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_DEFAULT_LOCALE: '{{N8N_DEFAULT_LOCALE}}'
@@ -48,7 +46,6 @@ services:
     - '{{HTTP_PORT}}:5678'
   n8n-io-queue-mode-workers:
     image: n8nio/n8n:{{N8N_VERSION}}
-    restart: always
     environment:
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: n8n-io-queue-mode-postgres
@@ -58,8 +55,6 @@ services:
       GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
       TZ: '{{N8N_TIMEZONE}}'
       NODE_ENV: '{{N8N_ENVIRONMENT}}'
-      N8N_PROTOCOL: https
-      N8N_HOST: n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
       N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
@@ -68,8 +63,8 @@ services:
       N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
       N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
       N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
-      WEBHOOK_URL: https://n8n-io-queue-mode-webhooks.{{ROOT_DOMAIN}}
-      N8N_EDITOR_BASE_URL: https://n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      WEBHOOK_URL: '{{N8N_APP_URL}}'
+      N8N_EDITOR_BASE_URL: '{{N8N_APP_URL}}'
       N8N_RUNNERS_ENABLED: true
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_DEFAULT_LOCALE: '{{N8N_DEFAULT_LOCALE}}'
@@ -90,7 +85,6 @@ services:
     - worker
   n8n-io-queue-mode-webhooks:
     image: n8nio/n8n:{{N8N_VERSION}}
-    restart: always
     environment:
       DB_TYPE: postgresdb
       DB_POSTGRESDB_HOST: n8n-io-queue-mode-postgres
@@ -100,8 +94,6 @@ services:
       GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
       TZ: '{{N8N_TIMEZONE}}'
       NODE_ENV: '{{N8N_ENVIRONMENT}}'
-      N8N_PROTOCOL: https
-      N8N_HOST: n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
       N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
@@ -110,8 +102,8 @@ services:
       N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
       N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
       N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
-      WEBHOOK_URL: https://n8n-io-queue-mode-webhooks.{{ROOT_DOMAIN}}
-      N8N_EDITOR_BASE_URL: https://n8n-io-queue-mode-editor.{{ROOT_DOMAIN}}
+      WEBHOOK_URL: '{{N8N_APP_URL}}'
+      N8N_EDITOR_BASE_URL: '{{N8N_APP_URL}}'
       N8N_RUNNERS_ENABLED: true
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       N8N_DEFAULT_LOCALE: '{{N8N_DEFAULT_LOCALE}}'
@@ -132,7 +124,6 @@ services:
     - webhook
   n8n-io-queue-mode-postgres:
     image: pgvector/pgvector:{{POSTGRES_VERSION}}
-    restart: always
     environment:
       POSTGRES_DB: '{{POSTGRES_DB}}'
       POSTGRES_USER: '{{POSTGRES_USER}}'
@@ -142,7 +133,6 @@ services:
     - n8n-io-queue-mode-postgres-data:/var/lib/postgresql/data
   n8n-io-queue-mode-redis:
     image: redis:{{REDIS_VERSION}}
-    restart: always
     volumes:
     - n8n-io-queue-mode-redis-data:/data
 volumes:
@@ -151,6 +141,12 @@ volumes:
   n8n-io-queue-mode-postgres-data:
   n8n-io-queue-mode-redis-data:
 '''
+
+[[variables]]
+key = "N8N_APP_URL"
+label = "Application | Public URL"
+default = ""
+description = "Full public URL n8n is reached at (e.g. https://n8n.example.com). Used for the editor base URL and webhook URL. Leave blank until you assign a domain to this project, then set it and redeploy."
 
 [[variables]]
 key = "N8N_CONCURRENCY_PRODUCTION_LIMIT"
@@ -185,22 +181,26 @@ description = "Application environment."
 [[variables]]
 key = "N8N_SMTP_HOST"
 label = "Application | SMTP Host"
-description = "SMTP host used for sending mails."
+default = ""
+description = "SMTP host used for sending mails. External credential — leave blank if you do not use email."
 
 [[variables]]
 key = "N8N_SMTP_PASS"
 label = "Application | SMTP Password"
-description = "SMTP user password used for sending mails."
+default = ""
+description = "SMTP user password used for sending mails. External credential — leave blank if you do not use email."
 
 [[variables]]
 key = "N8N_SMTP_PORT"
 label = "Application | SMTP Port"
-description = "SMTP port used for sending mails. Usually `465`."
+default = ""
+description = "SMTP port used for sending mails. Usually `465`. Leave blank if you do not use email."
 
 [[variables]]
 key = "N8N_SMTP_SENDER"
 label = "Application | SMTP Sender"
-description = "SMTP sender used for sending mails (e.g. `N8N <n8n@example.com>`)."
+default = ""
+description = "SMTP sender used for sending mails (e.g. `N8N <n8n@example.com>`). Leave blank if you do not use email."
 
 [[variables]]
 key = "N8N_SMTP_SSL"
@@ -211,7 +211,8 @@ description = "Whether to use SSL for sending mails through SMTP."
 [[variables]]
 key = "N8N_SMTP_USER"
 label = "Application | SMTP User"
-description = "SMTP user used for sending mails."
+default = ""
+description = "SMTP user used for sending mails. External credential — leave blank if you do not use email."
 
 [[variables]]
 key = "N8N_TIMEZONE"
@@ -254,9 +255,3 @@ key = "REDIS_VERSION"
 label = "Redis | Version"
 default = "8.2.0"
 description = "Check out their Docker page for the valid tags: https://hub.docker.com/_/redis?tab=tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

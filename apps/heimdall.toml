@@ -3,13 +3,15 @@ name = "Heimdall"
 category = "App"
 description = "Heimdall is a way to organise all those links to your most used web sites and web applications in a simple way."
 keywords = ["heimdall"]
+http_port = 80
 compose = '''
 services:
   heimdall:
     image: linuxserver/heimdall:{{HEIMDALL_VERSION}}
     environment:
       TZ: '{{TZ}}'
-    hostname: heimdall.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:80'
     volumes:
     - heimdall-config:/config
 volumes:
@@ -21,12 +23,6 @@ key = "HEIMDALL_VERSION"
 label = "Version Tag"
 default = "version-2.2.2"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/heimdall/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"

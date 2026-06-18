@@ -3,6 +3,7 @@ name = "Paperless-ngx"
 category = "App"
 description = "Paperless-ngx is a community-supported document management system that transforms your physical documents into a searchable online archive so you can keep, well, less paper."
 keywords = ["ngx", "paperless"]
+http_port = 8000
 compose = '''
 services:
   paperless-ngx:
@@ -12,9 +13,8 @@ services:
     - paperless-ngx-gotenberg
     - paperless-ngx-tika
     image: paperlessngx/paperless-ngx:{{APP_VERSION}}
-    restart: always
     environment:
-      PAPERLESS_URL: http://paperless-ngx.{{ROOT_DOMAIN}}
+      PAPERLESS_URL: '{{APP_URL}}'
       PAPERLESS_REDIS: redis://paperless-ngx-redis:6379/0
       PAPERLESS_REDIS_PREFIX: '{{REDIS_PREFIX}}'
       PAPERLESS_DBHOST: paperless-ngx-db
@@ -32,9 +32,6 @@ services:
       PAPERLESS_LOGROTATE_MAX_SIZE: '{{LOGROTATE_MAX_SIZE}}'
       PAPERLESS_LOGROTATE_MAX_BACKUPS: '{{LOGROTATE_MAX_BACKUP}}'
       PAPERLESS_SECRET_KEY: '{{SECRET_KEY}}'
-      PAPERLESS_ALLOWED_HOSTS: paperless-ngx.{{ROOT_DOMAIN}}
-      PAPERLESS_CSRF_TRUSTED_ORIGINS: http://paperless-ngx.{{ROOT_DOMAIN}},https://paperless-ngx.{{ROOT_DOMAIN}}
-      PAPERLESS_CORS_ALLOWED_HOSTS: http://paperless-ngx.{{ROOT_DOMAIN}},https://paperless-ngx.{{ROOT_DOMAIN}}
       PAPERLESS_ADMIN_USER: '{{ADMIN_USER}}'
       PAPERLESS_ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
       PAPERLESS_ADMIN_MAIL: '{{ADMIN_EMAIL}}'
@@ -87,26 +84,22 @@ services:
     image: redis:{{REDIS_VERSION}}
     volumes:
     - paperless-ngx-redis-data:/data
-    restart: always
   paperless-ngx-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - paperless-ngx-db:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_DB: '{{DBNAME}}'
       POSTGRES_USER: '{{DBUSER}}'
       POSTGRES_PASSWORD: '{{DBPASS}}'
   paperless-ngx-gotenberg:
     image: gotenberg/gotenberg:{{GOTENBERG_VERSION}}
-    restart: unless-stopped
     command:
     - gotenberg
     - --chromium-disable-javascript=true
     - --chromium-allow-list=file:///tmp/.*
   paperless-ngx-tika:
     image: apache/tika:{{TIKA_VERSION}}
-    restart: unless-stopped
 volumes:
   paperless-ngx-data:
   paperless-ngx-media:
@@ -352,10 +345,10 @@ label = "Redis version"
 default = "7"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Full base URL Paperless is served at, e.g. https://docs.example.com. Leave blank for now; set it after ci-agent assigns a domain. Paperless derives its allowed hosts and CSRF/CORS trusted origins from this value."
 
 [[variables]]
 key = "SECRET_KEY"

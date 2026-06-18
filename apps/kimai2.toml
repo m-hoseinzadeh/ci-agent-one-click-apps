@@ -3,78 +3,108 @@ name = "Kimai"
 category = "App"
 description = "With Kimai, the boring process of feeding spreadsheets with your working hours is not only simplified, it also offers dozens of other exciting features that you don't even know you're missing!"
 keywords = ["kimai", "kimai2"]
+http_port = 8001
 compose = '''
 services:
-  kimai2-fpm:
+  kimai2:
+    image: kimai/kimai2:{{KIMAI_VERSION}}
     depends_on:
     - kimai2-db
-    image: kimai/kimai2:{{KIMAI_VERSION}}
-    restart: always
     environment:
-      ADMINMAIL: '{{KIMAI}}-adminmail'
-      ADMINPASS: '{{KIMAI}}-adminpass'
-      MAILER_URL: '{{KIMAI}}-mailerurl'
-      MAILER_FROM: '{{KIMAI}}-mailerfrom'
-      DATABASE_URL: mysql://{{MARIADB}}-user:{{MARIADB}}-pass@kimai2-db/{{MARIADB}}-db
-      TRUSTED_HOSTS: kimai2.{{ROOT_DOMAIN}},nginx,localhost,127.0.0.1
+      APP_SECRET: '{{APP_SECRET}}'
+      ADMINMAIL: '{{ADMIN_EMAIL}}'
+      ADMINPASS: '{{ADMIN_PASSWORD}}'
+      TRUSTED_HOSTS: '{{TRUSTED_HOSTS}}'
+      MAILER_URL: '{{MAILER_URL}}'
+      MAILER_FROM: '{{MAILER_FROM}}'
+      DATABASE_URL: 'mysql://{{MARIADB_USER}}:{{MARIADB_PASSWORD}}@kimai2-db/{{MARIADB_DATABASE}}?charset=utf8mb4&serverVersion=10.11'
     volumes:
-    - kimai2-public:/opt/kimai/public
+    - kimai2-data:/opt/kimai/var/data
+    - kimai2-plugins:/opt/kimai/var/plugins
+    ports:
+    - '{{HTTP_PORT}}:8001'
   kimai2-db:
     image: mariadb:{{MARIADB_VERSION}}
+    command: --default-storage-engine innodb
     environment:
-      MYSQL_DATABASE: '{{MARIADB}}-db'
-      MYSQL_USER: '{{MARIADB}}-user'
-      MYSQL_PASSWORD: '{{MARIADB}}-pass'
-      MYSQL_ROOT_PASSWORD: '{{MARIADB}}-rootpass'
+      MYSQL_DATABASE: '{{MARIADB_DATABASE}}'
+      MYSQL_USER: '{{MARIADB_USER}}'
+      MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PASSWORD}}'
     volumes:
     - kimai2-db-data:/var/lib/mysql
-    restart: unless-stopped
-    ports:
-    - '{{HTTP_PORT}}:3306'
-  kimai2:
-    image: lcxat/nginx-fpm-reverse-proxy:{{NGINX_VERSION}}
-    environment:
-      FPM_NGINX_HOST: kimai2-fpm
-    volumes:
-    - kimai2-public:/opt/kimai/public:ro
-    depends_on:
-    - kimai2-fpm
-    restart: unless-stopped
 volumes:
-  kimai2-public:
+  kimai2-data:
+  kimai2-plugins:
   kimai2-db-data:
 '''
 
 [[variables]]
-key = "KIMAI"
-label = "Kimai"
-default = ""
-
-[[variables]]
 key = "KIMAI_VERSION"
 label = "Version Tag"
-default = "fpm-1.15.2-prod"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/kimai/kimai2/tags"
+default = "apache-2.31.0-prod"
+description = "Use an 'apache-*-prod' tag (the Apache variant serves HTTP directly on port 8001). Valid tags: https://hub.docker.com/r/kimai/kimai2/tags"
 
 [[variables]]
-key = "MARIADB"
-label = "Mariadb"
+key = "APP_SECRET"
+label = "App Secret"
+generate = true
+description = "Random secret used by Kimai to sign cookies/CSRF tokens. Leave generated."
+
+[[variables]]
+key = "ADMIN_EMAIL"
+label = "Admin Email"
+default = "admin@kimai.local"
+description = "Email of the initial super-admin account created on first boot."
+
+[[variables]]
+key = "ADMIN_PASSWORD"
+label = "Admin Password"
+generate = true
+description = "Password for the initial super-admin account."
+
+[[variables]]
+key = "TRUSTED_HOSTS"
+label = "Trusted Hosts"
+default = "localhost,127.0.0.1"
+description = "Comma-separated hostnames allowed to serve Kimai. After ci-agent assigns a domain, add it here (e.g. localhost,127.0.0.1,kimai.example.com)."
+
+[[variables]]
+key = "MAILER_URL"
+label = "Mailer URL (optional)"
 default = ""
+description = "Outbound SMTP DSN for sending email, e.g. smtp://user:pass@host:port. Leave blank to disable email."
+
+[[variables]]
+key = "MAILER_FROM"
+label = "Mailer From (optional)"
+default = ""
+description = "From address used for outgoing email. Leave blank if email is disabled."
 
 [[variables]]
 key = "MARIADB_VERSION"
-label = "mariaDB Version"
-default = "10"
-description = "Check out their docker page for the valid tags https://hub.docker.com/_/mariadb"
+label = "MariaDB Version"
+default = "10.11"
+description = "MariaDB image tag. Valid tags: https://hub.docker.com/_/mariadb"
 
 [[variables]]
-key = "NGINX_VERSION"
-label = "nginx fpm Version"
-default = "1.21.3"
-description = "Check out their docker page for the valid tags https://hub.docker.com/r/lcxat/nginx-fpm-reverse-proxy/tags"
+key = "MARIADB_DATABASE"
+label = "Database Name"
+default = "kimai"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "MARIADB_USER"
+label = "Database User"
+default = "kimai"
+
+[[variables]]
+key = "MARIADB_PASSWORD"
+label = "Database Password"
+generate = true
+description = "Password for the Kimai database user."
+
+[[variables]]
+key = "MARIADB_ROOT_PASSWORD"
+label = "Database Root Password"
+generate = true
+description = "MariaDB root password."

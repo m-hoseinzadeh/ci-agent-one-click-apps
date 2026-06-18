@@ -1,30 +1,40 @@
 slug = "litestream"
 name = "Litestream"
 category = "Database"
-description = "Streaming replication for SQLite"
-keywords = ["litestream"]
+description = "Streaming replication for SQLite databases to S3-compatible storage"
+keywords = ["litestream", "sqlite", "backup", "replication"]
 compose = '''
 services:
   litestream:
-    volumes:
-    - litestream-data:/data
-    - litestream-config:/config
+    image: litestream/litestream:{{VERSION}}
+    command: replicate /data/db {{REPLICA_URL}}
     environment:
       LITESTREAM_ACCESS_KEY_ID: '{{ACCESS_KEY_ID}}'
       LITESTREAM_SECRET_ACCESS_KEY: '{{SECRET_ACCESS_KEY}}'
+    volumes:
+    - litestream-data:/data
 volumes:
   litestream-data:
-  litestream-config:
 '''
+
+[[variables]]
+key = "VERSION"
+label = "Litestream Version"
+default = "0.3"
+description = "Litestream image tag. See https://hub.docker.com/r/litestream/litestream/tags"
+
+[[variables]]
+key = "REPLICA_URL"
+label = "Replica URL"
+default = "s3://BUCKET/db"
+description = "Destination for replication, e.g. s3://your-bucket/db. The SQLite database is read from /data/db inside the litestream-data volume."
 
 [[variables]]
 key = "ACCESS_KEY_ID"
 label = "Access key ID"
-generate = true
-description = "Enter your replica-specific authentication key"
+description = "S3 access key ID for the replica bucket. Obtain it from your storage provider; leave blank only if your URL uses another auth method."
 
 [[variables]]
 key = "SECRET_ACCESS_KEY"
 label = "Secret access key"
-generate = true
-description = "Enter your replica-specific secret key"
+description = "S3 secret access key for the replica bucket. Obtain it from your storage provider."

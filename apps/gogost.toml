@@ -1,17 +1,17 @@
 slug = "gogost"
 name = "GOST - GO Simple Tunnel"
 category = "App"
-description = "A simple security tunnel written in Go lang"
+description = "A simple security tunnel written in Go. Configure tunnels and the Web API via the mounted config in /etc/gost; the published port maps to the GOST API/Web UI port (18080)."
 keywords = ["go", "gogost", "gost", "simple", "tunnel"]
+http_port = 18080
 compose = '''
 services:
   gogost:
     image: gogost/gost:{{GOST_VERSION}}
-    restart: always
     volumes:
     - gogost-data:/etc/gost
     ports:
-    - '{{HTTP_PORT}}:$$cap_gost_api_port'
+    - '{{HTTP_PORT}}:18080'
 volumes:
   gogost-data:
 '''

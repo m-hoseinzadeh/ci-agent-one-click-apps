@@ -1,75 +1,100 @@
 slug = "firefly-iii"
 name = "Firefly III"
 category = "App"
-description = "Firefly III - A free and open source personal finance manager"
-keywords = ["firefly", "iii"]
+description = "Firefly III - A free and open source personal finance manager. APP_KEY and the cron token are generated automatically; set SITE_OWNER and TZ to taste."
+keywords = ["firefly", "finance", "budget", "money"]
+http_port = 8080
 compose = '''
 services:
   firefly-iii:
     image: fireflyiii/core:{{FIREFLY_VERSION}}
     volumes:
-    - firefly-iii-export:/var/www/firefly-iii/storage/export
-    - firefly-iii-upload:/var/www/firefly-iii/storage/upload
-    restart: always
+    - firefly-iii-upload:/var/www/html/storage/upload
     depends_on:
     - firefly-iii-db
     environment:
-      SITE_OWNER: '{{FIREFLY_SITE}}-owner'
-      TZ: '{{FIREFLY_TIME}}-zone'
+      APP_KEY: '{{APP_KEY}}'
+      SITE_OWNER: '{{SITE_OWNER}}'
+      TZ: '{{TZ}}'
       TRUSTED_PROXIES: '**'
       DB_CONNECTION: mysql
+      DB_HOST: firefly-iii-db
       DB_PORT: 3306
       DB_DATABASE: firefly
       DB_USERNAME: firefly
-      DB_HOST: firefly-iii-db
       DB_PASSWORD: '{{MARIADB_PASSWORD}}'
-      APP_KEY: '{{FIREFLY_APP}}-key'
     ports:
     - '{{HTTP_PORT}}:8080'
   firefly-iii-db:
     image: mariadb:{{MARIADB_VERSION}}
     volumes:
     - firefly-iii-db-data:/var/lib/mysql
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: '{{MARIADB_PASSWORD}}'
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: firefly
       MYSQL_USER: firefly
       MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
+  firefly-iii-cron:
+    image: alpine:{{ALPINE_VERSION}}
+    environment:
+      TZ: '{{TZ}}'
+      STATIC_CRON_TOKEN: '{{STATIC_CRON_TOKEN}}'
+    depends_on:
+    - firefly-iii
+    command: >
+      sh -c "apk add --no-cache tzdata &&
+      ln -fs /usr/share/zoneinfo/$$TZ /etc/localtime &&
+      echo \"0 3 * * * wget -qO- http://firefly-iii:8080/api/v1/cron/$$STATIC_CRON_TOKEN;echo\" | crontab - &&
+      crond -f -L /dev/stdout"
 volumes:
-  firefly-iii-export:
   firefly-iii-upload:
   firefly-iii-db-data:
 '''
 
 [[variables]]
-key = "FIREFLY_APP"
-label = "Firefly App"
-default = ""
+key = "APP_KEY"
+label = "Application Key"
+description = "Internal Laravel encryption key. Must be exactly 32 characters; generated automatically."
+generate = true
 
 [[variables]]
-key = "FIREFLY_SITE"
-label = "Firefly Site"
-default = ""
-
-[[variables]]
-key = "FIREFLY_TIME"
-label = "Firefly Time"
-default = ""
-
-[[variables]]
-key = "FIREFLY_VERSION"
-label = "Firefly Version Tag"
-default = "version-5.5.13"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/fireflyiii/core/tags"
+key = "STATIC_CRON_TOKEN"
+label = "Cron Token"
+description = "Internal token used by the cron sidecar to trigger scheduled jobs. Must be exactly 32 characters; generated automatically."
+generate = true
 
 [[variables]]
 key = "MARIADB_PASSWORD"
-label = "Mariadb Password"
-description = "The password of the Mariadb Database\""
+label = "Database Password"
+description = "Password for the Firefly III MariaDB database; generated automatically."
+generate = true
+
+[[variables]]
+key = "SITE_OWNER"
+label = "Site Owner Email"
+default = "mail@example.com"
+description = "Email address of the site owner, used for error reports and notifications."
+
+[[variables]]
+key = "TZ"
+label = "Timezone"
+default = "UTC"
+description = "Timezone, e.g. Europe/Amsterdam or America/New_York."
+
+[[variables]]
+key = "FIREFLY_VERSION"
+label = "Firefly III Version Tag"
+default = "version-6"
+description = "Image tag for fireflyiii/core. See https://hub.docker.com/r/fireflyiii/core/tags"
 
 [[variables]]
 key = "MARIADB_VERSION"
-label = "Mariadb Version Tag"
-default = "10.5.4"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"
+label = "MariaDB Version Tag"
+default = "lts"
+description = "Image tag for mariadb. See https://hub.docker.com/_/mariadb?tab=tags"
+
+[[variables]]
+key = "ALPINE_VERSION"
+label = "Alpine Version Tag"
+default = "3.20"
+description = "Image tag for the alpine cron sidecar."

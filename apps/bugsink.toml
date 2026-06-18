@@ -1,13 +1,13 @@
 slug = "bugsink"
 name = "Bugsink"
 category = "Monitoring"
-description = "Bugsink is a self-hosted error tracker. Full control over your data. Compatible with Sentry SDKs, easy to set up, scalable & reliable"
-keywords = ["bugsink"]
+description = "Bugsink is a self-hosted error tracker. Full control over your data. Compatible with Sentry SDKs, easy to set up, scalable & reliable."
+keywords = ["bugsink", "error-tracking", "sentry", "monitoring"]
+http_port = 8000
 compose = '''
 services:
   bugsink-mysql:
     image: mysql:{{MYSQL_VERSION}}
-    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: '{{MYSQL_PASSWORD}}'
       MYSQL_DATABASE: bugsink
@@ -23,18 +23,16 @@ services:
   bugsink:
     image: bugsink/bugsink:{{BUGSINK_VERSION}}
     depends_on:
-      mysql:
+      bugsink-mysql:
         condition: service_healthy
-    restart: unless-stopped
     ports:
     - '{{HTTP_PORT}}:8000'
-    - 8000:8000
     environment:
-      SECRET_KEY: '{{GEN_RANDOM_HEX}}(50)'
-      CREATE_SUPERUSER: admin:{{SUPERUSER_PASSWORD}}
+      SECRET_KEY: '{{SECRET_KEY}}'
+      CREATE_SUPERUSER: '{{SUPERUSER_EMAIL}}:{{SUPERUSER_PASSWORD}}'
       PORT: 8000
       DATABASE_URL: mysql://root:{{MYSQL_PASSWORD}}@bugsink-mysql:3306/bugsink
-      BASE_URL: https://bugsink.{{ROOT_DOMAIN}}/
+      BASE_URL: '{{BASE_URL}}'
       BEHIND_HTTPS_PROXY: 'true'
     healthcheck:
       test:
@@ -50,34 +48,41 @@ volumes:
 [[variables]]
 key = "BUGSINK_VERSION"
 label = "Bugsink Version"
-default = "1.7.4"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/bugsink/bugsink/tags"
-
-[[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
-default = ""
-
-[[variables]]
-key = "MYSQL_PASSWORD"
-label = "MySQL Password"
-generate = true
-description = "The password for the MySQL root user."
+default = "2"
+description = "Bugsink image tag. See https://hub.docker.com/r/bugsink/bugsink/tags"
 
 [[variables]]
 key = "MYSQL_VERSION"
-label = "Database | Version"
-default = "8.4.4"
-description = "MySQL version. Check out their valid tags at https://hub.docker.com/_/mysql/tags"
+label = "MySQL Version"
+default = "8.4"
+description = "MySQL version. See https://hub.docker.com/_/mysql/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "MYSQL_PASSWORD"
+label = "MySQL Root Password"
+generate = true
+description = "Password for the internal MySQL root user (used by Bugsink to connect)."
+
+[[variables]]
+key = "SECRET_KEY"
+label = "Secret Key"
+generate = true
+description = "Django secret key used by Bugsink to sign sessions and tokens."
+
+[[variables]]
+key = "SUPERUSER_EMAIL"
+label = "Bugsink Admin Email"
+default = "admin@example.com"
+description = "Email/login for the initial Bugsink admin account."
 
 [[variables]]
 key = "SUPERUSER_PASSWORD"
 label = "Bugsink Admin Password"
 generate = true
-description = "The password for the Bugsink admin user."
+description = "Password for the initial Bugsink admin account."
+
+[[variables]]
+key = "BASE_URL"
+label = "Base URL"
+default = ""
+description = "Public base URL Bugsink uses to build links (e.g. https://bugsink.example.com). Leave blank to set after the project domain is assigned."

@@ -3,13 +3,13 @@ name = "ETESync"
 category = "App"
 description = "ETESync is a self hosted syncing solution, it is secure, end-to-end encrypted, and privacy respecting sync for your contacts, calendars and tasks."
 keywords = ["etesync"]
+http_port = 3735
 compose = '''
 services:
   etesync:
     image: grburst/etesync:{{VERSION}}
     volumes:
     - etesync-data:/data
-    restart: always
     environment:
       SUPER_USER: '{{SUPER_USER}}'
       SUPER_EMAIL: '{{SUPER_EMAIL}}'
@@ -29,7 +29,8 @@ description = "etesync super user email"
 [[variables]]
 key = "SUPER_PASS"
 label = "password"
-description = "etesync super user password"
+description = "etesync super user (admin) password"
+generate = true
 
 [[variables]]
 key = "SUPER_USER"

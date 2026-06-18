@@ -6,7 +6,6 @@ keywords = ["davos"]
 compose = '''
 services:
   davos-davos:
-    container_name: davos
     environment:
       PGID: '{{DAVOS_PGID}}'
       PUID: '{{DAVOS_PUID}}'

@@ -3,6 +3,7 @@ name = "Bazarr"
 category = "App"
 description = "Bazarr is a companion application to Sonarr and Radarr. It can manage and download subtitles based on your requirements."
 keywords = ["bazarr"]
+http_port = 6767
 compose = '''
 services:
   bazarr:
@@ -11,7 +12,6 @@ services:
       TZ: '{{TZ}}'
       PUID: '{{PUID}}'
       PGID: '{{GUID}}'
-    hostname: bazarr.{{ROOT_DOMAIN}}
     volumes:
     - bazarr-config:/config
     - '{{PATH_TO_MOVIES}}:/movies'
@@ -49,12 +49,6 @@ key = "PUID"
 label = "User ID"
 default = "1000"
 description = "User ID that the process uses, run (id $user) in your instance to see the id"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"

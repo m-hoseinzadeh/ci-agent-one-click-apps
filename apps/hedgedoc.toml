@@ -3,6 +3,7 @@ name = "HedgeDoc"
 category = "App"
 description = "HedgeDoc lets you create real-time collaborative markdown notes"
 keywords = ["hedgedoc"]
+http_port = 3000
 compose = '''
 services:
   hedgedoc:
@@ -11,8 +12,8 @@ services:
     image: quay.io/hedgedoc/hedgedoc:{{VERSION}}
     environment:
       CMD_DB_URL: postgres://{{DBUSER}}:{{DBPASS}}@hedgedoc-db:5432/{{DBNAME}}
-      CMD_DOMAIN: hedgedoc.{{ROOT_DOMAIN}}
-      CMD_URL_ADDPORT: false
+      CMD_DOMAIN: '{{APP_DOMAIN}}'
+      CMD_URL_ADDPORT: 'false'
       PLUGIN_INSTALLER: '{{PLUGIN_INSTALLER}}'
     volumes:
     - hedgedoc-uploads:/hedgedoc/public/uploads
@@ -22,7 +23,6 @@ services:
     image: postgres:{{PGVERSION}}
     volumes:
     - hedgedoc-db:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_DB: '{{DBNAME}}'
       POSTGRES_USER: '{{DBUSER}}'
@@ -35,7 +35,7 @@ volumes:
 [[variables]]
 key = "DBNAME"
 label = "Database Name"
-default = "joplin"
+default = "hedgedoc"
 
 [[variables]]
 key = "DBPASS"
@@ -45,27 +45,28 @@ generate = true
 [[variables]]
 key = "DBUSER"
 label = "Database User"
-default = "joplin"
+default = "hedgedoc"
 
 [[variables]]
 key = "PGVERSION"
 label = "Postgresql Version"
-default = "9.6-alpine"
+default = "17.7-alpine"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/postgres/tags/"
 
 [[variables]]
 key = "PLUGIN_INSTALLER"
 label = "Plugin Installer"
 default = ""
+description = "Optional comma-separated list of HedgeDoc plugins to install at boot; leave blank for none."
 
 [[variables]]
-key = "ROOT_DOMAIN"
+key = "APP_DOMAIN"
 label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+default = "localhost"
+description = "Domain HedgeDoc uses to build public URLs; set this to your project domain after deployment, otherwise links may break."
 
 [[variables]]
 key = "VERSION"
 label = "HedgeDoc Version"
-default = "1.7.2"
+default = "1.10.8"
 description = "Make sure to use the latest release from https://hedgedoc.org/latest-release"

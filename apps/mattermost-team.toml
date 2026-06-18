@@ -3,13 +3,13 @@ name = "Mattermost Team Edition"
 category = "Communication"
 description = "Mattermost Team Edition open source collaboration/chat software"
 keywords = ["edition", "mattermost", "team"]
+http_port = 8065
 compose = '''
 services:
   mattermost-team-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - mattermost-team-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: mmuser
       POSTGRES_PASSWORD: '{{PG_PASS}}'
@@ -24,13 +24,12 @@ services:
     - mattermost-team-config:/mattermost/config
     - mattermost-team-plugins:/mattermost/plugins
     - mattermost-team-clientplugins:/mattermost/client/plugins
-    restart: always
     environment:
       MM_USERNAME: mmuser
       MM_PASSWORD: '{{PG_PASS}}'
       MM_DBNAME: mattermost
       DB_HOST: mattermost-team-db
-      MM_SERVICESETTINGS_SITEURL: https://mattermost-team.{{ROOT_DOMAIN}}
+      MM_SERVICESETTINGS_SITEURL: '{{APP_URL}}'
       MM_SQLSETTINGS_DATASOURCE: postgres://mmuser:{{PG_PASS}}@mattermost-team-db:5432/mattermost?sslmode=disable&connect_timeout=10
     ports:
     - '{{HTTP_PORT}}:8065'
@@ -62,7 +61,7 @@ default = "14.3"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Site URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL of this Mattermost site (e.g. https://chat.example.com). Set after assigning a domain; leave blank initially."

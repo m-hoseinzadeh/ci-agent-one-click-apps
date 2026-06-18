@@ -1,8 +1,9 @@
 slug = "humhub"
 name = "HumHub"
 category = "App"
-description = "A open source social media network"
-keywords = ["humhub"]
+description = "An open source social network kit for building your own community."
+keywords = ["humhub", "social", "network", "community"]
+http_port = 80
 compose = '''
 services:
   humhub-db:
@@ -14,24 +15,22 @@ services:
       MYSQL_ROOT_PASSWORD: '{{MYSQL_ROOT_PASSWD}}'
       MYSQL_USER: '{{MYSQL_USER}}'
       MYSQL_PASSWORD: '{{MYSQL_PASSWD}}'
-    restart: always
-    ports:
-    - '{{HTTP_PORT}}:3306'
   humhub:
+    image: mriedmann/humhub:{{HUMHUB_VERSION}}
     environment:
       HUMHUB_AUTO_INSTALL: '{{HUMHUB_AUTO_INSTALL}}'
       HUMHUB_DB_HOST: humhub-db
       HUMHUB_DB_NAME: '{{MYSQL_DATABASE_NAME}}'
       HUMHUB_DB_USER: '{{MYSQL_USER}}'
       HUMHUB_DB_PASSWORD: '{{MYSQL_PASSWD}}'
-      HUMHUB_HOST: humhub.{{ROOT_DOMAIN}}
-      HUMHUB_PROTO: https
-    image: mriedmann/humhub:{{HUMHUB_VERSION}}
-    restart: always
+      HUMHUB_HOST: '{{HUMHUB_HOST}}'
+      HUMHUB_PROTO: '{{HUMHUB_PROTO}}'
     volumes:
     - humhub-config:/var/www/localhost/htdocs/protected/config
     - humhub-uploads:/var/www/localhost/htdocs/uploads
     - humhub-modules:/var/www/localhost/htdocs/protected/modules
+    ports:
+    - '{{HTTP_PORT}}:80'
 volumes:
   humhub-db-data:
   humhub-config:
@@ -43,40 +42,46 @@ volumes:
 key = "HUMHUB_AUTO_INSTALL"
 label = "AutoSetup"
 default = "false"
-description = "If this is set to false (advised) you will have to provide the DB creds on first run."
+description = "If false (advised) you provide the DB creds and admin account in the web installer on first run. If true, HumHub auto-installs using the values below."
 
 [[variables]]
 key = "HUMHUB_VERSION"
 label = "Version Tag"
 default = "1.6.2"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mriedmann/humhub/tags"
+description = "Image tag for mriedmann/humhub. Check valid tags at https://hub.docker.com/r/mriedmann/humhub/tags"
+
+[[variables]]
+key = "HUMHUB_HOST"
+label = "Public host"
+default = "localhost"
+description = "Hostname used to build public URLs during auto-install. Set this to your project domain after it is assigned (only used when AutoSetup is true)."
+
+[[variables]]
+key = "HUMHUB_PROTO"
+label = "Public protocol"
+default = "https"
+description = "Protocol (http or https) used to build public URLs during auto-install."
 
 [[variables]]
 key = "MYSQL_DATABASE_NAME"
 label = "Database Name"
 default = "humhub"
-description = "The name of humhub db"
-
-[[variables]]
-key = "MYSQL_PASSWD"
-label = "Database Password"
-generate = true
-description = "Password to connect to the database"
-
-[[variables]]
-key = "MYSQL_ROOT_PASSWD"
-label = "Database Root Password"
-generate = true
-description = "Password to manage to the database"
+description = "The name of the HumHub database."
 
 [[variables]]
 key = "MYSQL_USER"
 label = "Database User"
 default = "humhub"
-description = "The username to for humhub to connect to database"
+description = "The username HumHub uses to connect to the database."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "MYSQL_PASSWD"
+label = "Database Password"
+generate = true
+description = "Password for the HumHub database user (auto-generated)."
+
+[[variables]]
+key = "MYSQL_ROOT_PASSWD"
+label = "Database Root Password"
+generate = true
+description = "Root password for the MySQL server (auto-generated)."

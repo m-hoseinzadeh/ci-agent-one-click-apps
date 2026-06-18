@@ -3,6 +3,7 @@ name = "Directus + MySQL + Redis"
 category = "Database"
 description = "Directus is an open-source headless CMS and an Open Data Platform built to democratize the database. It provides a dynamic API and intuitive Admin Panel App."
 keywords = ["directus", "mysql", "redis"]
+http_port = 8055
 compose = '''
 services:
   directus-mysql-redis-mysql:
@@ -24,11 +25,10 @@ services:
     volumes:
     - directus-mysql-redis-uploads:/directus/uploads
     - directus-mysql-redis-extensions:/directus/extensions
-    restart: always
     environment:
       KEY: '{{DIRECTUS_AUTH_PUBLIC_KEY}}'
       SECRET: '{{DIRECTUS_AUTH_SECRET_KEY}}'
-      PUBLIC_URL: https://directus-mysql-redis.{{ROOT_DOMAIN}}
+      PUBLIC_URL: '{{APP_URL}}'
       DB_CLIENT: mysql
       DB_HOST: directus-mysql-redis-mysql
       DB_PORT: '3306'
@@ -131,7 +131,7 @@ default = "1d"
 description = "How long the data cache is persisted. (https://docs.directus.io/self-hosted/config-options.html#cache)"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL Directus uses to build absolute links (e.g. https://directus.example.com). Leave blank until ci-agent assigns a domain, then set it."

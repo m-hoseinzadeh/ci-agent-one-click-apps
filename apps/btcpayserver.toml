@@ -3,13 +3,13 @@ name = "BTCPay Server"
 category = "App"
 description = "Free, open-source & self-hosted, Bitcoin payment processor."
 keywords = ["btcpay", "btcpayserver", "server"]
+http_port = 49392
 compose = '''
 services:
   btcpayserver:
     image: btcpayserver/btcpayserver:{{BTCPAYSERVER_VERSION}}
-    hostname: btcpayserver.{{ROOT_DOMAIN}}
     environment:
-      BTCPAY_HOST: btcpayserver.{{ROOT_DOMAIN}}
+      BTCPAY_HOST: '{{BTCPAY_HOST}}'
       BTCPAY_POSTGRES: User ID={{POSTGRES_USER}};Host=btcpayserver-postgres;Port={{POSTGRES_PORT}};Application Name=btcpayserver;Database=btcpayserver{{NBITCOIN_NETWORK}}
       BTCPAY_EXPLORERPOSTGRES: User ID={{POSTGRES_USER}};Host=btcpayserver-postgres;Port={{POSTGRES_PORT}};Application Name=btcpayserver;MaxPoolSize=80;Database=nbxplorer{{NBITCOIN_NETWORK}}
       BTCPAY_NETWORK: '{{NBITCOIN_NETWORK}}'
@@ -37,8 +37,14 @@ services:
     - btcpayserver-lightning-rtl-data:/etc/clightning_bitcoin_rtl
     - btcpayserver-lightning-rest-certificates:/etc/clightning_bitcoin_rest_certs
     ports:
-    - '{{HTTP_PORT}}:$$cap_BTCPAY_PORT'
+    - '{{HTTP_PORT}}:{{BTCPAY_PORT}}'
   btcpayserver-postgres:
+    image: btcpayserver/postgres:{{POSTGRES_VERSION}}
+    command:
+    - -c
+    - random_page_cost=1.0
+    - -c
+    - shared_preload_libraries=pg_stat_statements
     environment:
       POSTGRES_HOST_AUTH_METHOD: '{{POSTGRES_HOST_AUTH_METHOD}}'
     volumes:
@@ -379,10 +385,16 @@ default = "postgres"
 description = "User of the PostgreSQL database."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "BTCPAY_HOST"
+label = "Application | Host"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public hostname used to build BTCPay Server URLs (set after the project domain is assigned, e.g. `btcpay.example.com`). Leave blank to configure later."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "General | PostgreSQL Version"
+default = "18.1-1"
+description = "Check out their valid tags at https://hub.docker.com/r/btcpayserver/postgres/tags"
 
 [[variables]]
 key = "RTL_BITCOIND_CONFIG_PATH"

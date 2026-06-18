@@ -1,27 +1,26 @@
 slug = "formio"
 name = "Formio"
 category = "App"
-description = "<form.io> is a combined Form and Data Management platform for form-based Progressive web applications."
+description = "form.io is a combined Form and Data Management platform for form-based Progressive web applications."
 keywords = ["formio"]
+http_port = 3001
 compose = '''
 services:
   formio-mongodb:
-    documentation: Taken from https://hub.docker.com/_/mongo
+    # Taken from https://hub.docker.com/_/mongo
     image: mongo:{{MONGO_VERSION}}
     volumes:
     - formio-db-data:/data/db
-    restart: always
   formio:
-    documentation: Taken from https://hub.docker.com/r/calipseo/formio
+    # Taken from https://hub.docker.com/r/calipseo/formio
     depends_on:
     - formio-mongodb
     image: calipseo/formio:{{FORMIO_VERSION}}
     volumes:
     - formio-data:/app
-    restart: always
     environment:
-      APP_URL: https://formio.{{ROOT_DOMAIN}}
-      API_URL: https://formio.{{ROOT_DOMAIN}}
+      APP_URL: '{{APP_URL}}'
+      API_URL: '{{APP_URL}}'
       MONGO: mongodb://formio-mongodb:27017/formio
       ROOT_EMAIL: '{{ADMIN_EMAIL}}'
       ROOT_PASSWORD: '{{ADMIN_PASS}}'
@@ -37,15 +36,22 @@ volumes:
 '''
 
 [[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Public base URL used by Formio to build API and app URLs (e.g. https://formio.example.com). Leave blank to set after the project gets its domain."
+
+[[variables]]
 key = "ADMIN_EMAIL"
 label = "Formio default admin email"
 default = "admin@example.com"
-description = "Admin email for Formio."
+description = "Admin email for Formio (set on first startup only)."
 
 [[variables]]
 key = "ADMIN_PASS"
-label = "admin password"
-description = "Password for the admin user."
+label = "Admin password"
+generate = true
+description = "Password for the default admin user (set on first startup only)."
 
 [[variables]]
 key = "FORMIO_VERSION"
@@ -60,27 +66,25 @@ default = "4.1"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mongo?tab=tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
 key = "SMTP_HOST"
-label = "SMPT host"
-description = "The host for your smtp server"
-
-[[variables]]
-key = "SMTP_PASS"
-label = "SMTP password"
-description = "The password for your smtp server"
+label = "SMTP host"
+default = ""
+description = "The host for your SMTP server. Leave blank to disable outbound email."
 
 [[variables]]
 key = "SMTP_PORT"
 label = "SMTP port"
-description = "The port for your smtp server"
+default = ""
+description = "The port for your SMTP server. Leave blank to disable outbound email."
 
 [[variables]]
 key = "SMTP_USER"
 label = "SMTP user"
-description = "The user for your smtp server"
+default = ""
+description = "The username for your SMTP server. Leave blank if not using SMTP."
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+default = ""
+description = "The password for your SMTP server. Leave blank if not using SMTP."

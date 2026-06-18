@@ -1,18 +1,17 @@
 slug = "fider"
-name = "Fider - No Database"
-category = "Database"
+name = "Fider"
+category = "Productivity"
 description = "Fider is a platform to collect and organize customer feedback."
-keywords = ["database", "fider", "no"]
+keywords = ["fider", "feedback", "productivity"]
+http_port = 3000
 compose = '''
 services:
   fider:
-    documentation: Taken from https://hub.docker.com/r/getfider/fider/
     image: getfider/fider:{{FIDER_VERSION}}
-    restart: always
     environment:
-      BASE_URL: fider.{{ROOT_DOMAIN}}
-      DATABASE_URL: '{{DB_URL}}'
-      JWT_SECRET: '{{GEN_RANDOM_HEX}}(16)'
+      DATABASE_URL: postgres://fider:{{POSTGRES_PASSWORD}}@fider-postgres:5432/fider?sslmode=disable
+      JWT_SECRET: '{{JWT_SECRET}}'
+      BASE_URL: '{{APP_URL}}'
       EMAIL_NOREPLY: '{{EMAIL_NOREPLY}}'
       EMAIL_SMTP_HOST: '{{SMTP_HOST}}'
       EMAIL_SMTP_PORT: '{{SMTP_PORT}}'
@@ -20,51 +19,76 @@ services:
       EMAIL_SMTP_PASSWORD: '{{SMTP_PASS}}'
     ports:
     - '{{HTTP_PORT}}:3000'
+    depends_on:
+    - fider-postgres
+  fider-postgres:
+    image: postgres:{{POSTGRES_VERSION}}
+    volumes:
+    - fider-postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: fider
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: fider
+volumes:
+  fider-postgres-data:
 '''
-
-[[variables]]
-key = "DB_URL"
-label = "Fider database URL"
-description = "Postgres database connection URL for Fider, for example \"postgres://username:password@srv-captain--mypostgres:5432/fider?sslmode=disable\""
-
-[[variables]]
-key = "EMAIL_NOREPLY"
-label = "SMTP sender email"
-description = "The sender email address for your outgoing mail"
 
 [[variables]]
 key = "FIDER_VERSION"
 label = "Fider Version"
-default = "0.21.1"
+default = "stable"
 description = "https://hub.docker.com/r/getfider/fider/tags"
 
 [[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
-default = ""
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "17"
+description = "PostgreSQL image tag for the bundled database."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "POSTGRES_PASSWORD"
+label = "Postgres Password"
+generate = true
+description = "Internal Postgres password Fider mints for itself. Auto-generated; leave as-is."
+
+[[variables]]
+key = "JWT_SECRET"
+label = "JWT Secret"
+generate = true
+description = "Internal secret Fider uses to sign authentication tokens. Auto-generated; leave as-is."
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Full public URL where Fider will be served (e.g. https://feedback.example.com). Set after the project domain is assigned."
+
+[[variables]]
+key = "EMAIL_NOREPLY"
+label = "SMTP sender email"
+default = ""
+description = "The sender (no-reply) email address for outgoing mail. Required for invitations and email sign-in."
 
 [[variables]]
 key = "SMTP_HOST"
-label = "SMPT host"
-description = "The host for your smtp server"
-
-[[variables]]
-key = "SMTP_PASS"
-label = "SMTP password"
-description = "The password for your smtp server"
+label = "SMTP host"
+default = ""
+description = "Host for your SMTP server. Leave blank if not using email."
 
 [[variables]]
 key = "SMTP_PORT"
 label = "SMTP port"
-description = "The port for your smtp server"
+default = ""
+description = "Port for your SMTP server (e.g. 587). Leave blank if not using email."
 
 [[variables]]
 key = "SMTP_USER"
 label = "SMTP user"
-description = "The user for your smtp server"
+default = ""
+description = "Username for your SMTP server. Leave blank if not using email."
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+default = ""
+description = "Password for your SMTP server. Leave blank if not using email."

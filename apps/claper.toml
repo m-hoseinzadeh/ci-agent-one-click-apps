@@ -3,6 +3,7 @@ name = "Claper"
 category = "App"
 description = "Claper turns your presentations into an interactive, engaging and exciting experience."
 keywords = ["claper"]
+http_port = 4000
 compose = '''
 services:
   claper-postgres:
@@ -10,19 +11,21 @@ services:
     environment:
       POSTGRES_USER: claper
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWD}}'
+      POSTGRES_DB: claper
     volumes:
     - claper-postgres-data:/var/lib/postgresql/data
   claper:
     image: ghcr.io/claperco/claper:{{CLAPER_VER}}
-    container_name: claper
+    depends_on:
+    - claper-postgres
     volumes:
     - claper-uploads:/app/priv/static/uploads
     environment:
       DATABASE_URL: postgres://claper:{{POSTGRES_PASSWD}}@claper-postgres:5432/claper
       MAIL_TRANSPORT: local
-      ENDPOINT_HOST: claper.{{ROOT_DOMAIN}}
-      ENDPOINT_PORT: 443
-      SECRET_KEY_BASE: '{{GEN_RANDOM_HEX}}(64)'
+      ENDPOINT_HOST: '{{ENDPOINT_HOST}}'
+      ENDPOINT_PORT: '{{ENDPOINT_PORT}}'
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
     ports:
     - '{{HTTP_PORT}}:4000'
 volumes:
@@ -37,9 +40,22 @@ default = "1.4.0"
 description = "Check out their page for the valid tags https://github.com/ClaperCo/Claper/pkgs/container/claper"
 
 [[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
+key = "ENDPOINT_HOST"
+label = "Public Hostname"
 default = ""
+description = "Public hostname Claper builds URLs from (e.g. claper.example.com). Leave blank until you assign a domain to this project, then set it."
+
+[[variables]]
+key = "ENDPOINT_PORT"
+label = "Public Port"
+default = "443"
+description = "Public port reflected in generated URLs. Use 443 behind HTTPS."
+
+[[variables]]
+key = "SECRET_KEY_BASE"
+label = "Secret Key Base"
+generate = true
+description = "Strong secret with at least 64 characters used to sign sessions and tokens."
 
 [[variables]]
 key = "POSTGRES_PASSWD"
@@ -52,9 +68,3 @@ key = "POSTGRES_VERSION"
 label = "Postgres Version"
 default = "15-alpine"
 description = "Version of PostgreSQL. Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

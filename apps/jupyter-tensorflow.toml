@@ -3,10 +3,11 @@ name = "Jupyter Tensorflow"
 category = "App"
 description = "Jupyter Notebook with built in Tensorflow and Keras for your data analysis and machine learning work"
 keywords = ["jupyter", "tensorflow"]
+http_port = 8888
 compose = '''
 services:
   jupyter-tensorflow:
-    restart: always
+    image: quay.io/jupyter/tensorflow-notebook:2024-11-25
     environment:
       JUPYTER_ENABLE_LAB: '{{JUPYTERLAB}}'
       RESTARTABLE: 'yes'

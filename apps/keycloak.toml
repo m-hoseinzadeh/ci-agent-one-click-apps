@@ -3,25 +3,32 @@ name = "Keycloak"
 category = "App"
 description = "Keycloak is an open source identity and access management solution"
 keywords = ["keycloak"]
+http_port = 8080
 compose = '''
 services:
   keycloak-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - keycloak-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: keycloak
       POSTGRES_PASSWORD: '{{PG_PASS}}'
       POSTGRES_DB: keycloak
   keycloak:
+    image: quay.io/keycloak/keycloak:{{KEYCLOAK_VERSION}}
+    command: start-dev
     depends_on:
     - keycloak-db
-    restart: always
     environment:
       KC_BOOTSTRAP_ADMIN_USERNAME: '{{KEYCLOAK_ADMIN}}'
       KC_BOOTSTRAP_ADMIN_PASSWORD: '{{KEYCLOAK_PASSWORD}}'
+      KC_DB: postgres
+      KC_DB_URL_HOST: keycloak-db
+      KC_DB_URL_DATABASE: keycloak
+      KC_DB_USERNAME: keycloak
       KC_DB_PASSWORD: '{{PG_PASS}}'
+      KC_HTTP_ENABLED: 'true'
+      KC_PROXY_HEADERS: xforwarded
     ports:
     - '{{HTTP_PORT}}:8080'
 volumes:
@@ -51,3 +58,9 @@ key = "POSTGRES_VERSION"
 label = "Postgres Version"
 default = "16"
 description = "Check out Keycloak DB page for any valid major tested https://www.keycloak.org/server/db"
+
+[[variables]]
+key = "KEYCLOAK_VERSION"
+label = "Keycloak Version"
+default = "26.6.3"
+description = "Keycloak container image tag from quay.io/keycloak/keycloak."

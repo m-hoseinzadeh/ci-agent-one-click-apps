@@ -1,20 +1,22 @@
 slug = "iredmail"
 name = "iRedMail"
 category = "Communication"
-description = "iRedMail - Open Source Mail Server, built in one container"
-keywords = ["iredmail"]
+description = "iRedMail - Open Source Mail Server, built in one container. Set the mail domain and hostname to your own domain before deploying."
+keywords = ["iredmail", "mail", "email", "smtp", "imap"]
+http_port = 80
 compose = '''
 services:
   iredmail:
+    image: iredmail/mariadb:{{IREDMAIL_VERSION}}
     ports:
     - '{{HTTP_PORT}}:80'
     - '25:25'
-    - 110:110
-    - 143:143
-    - 465:465
-    - 587:587
-    - 993:993
-    - 995:995
+    - '110:110'
+    - '143:143'
+    - '465:465'
+    - '587:587'
+    - '993:993'
+    - '995:995'
     volumes:
     - /etc/localtime:/etc/localtime
     - iredmail-data-backup-mysql:/var/vmail/backup/mysql
@@ -28,14 +30,11 @@ services:
     - iredmail-data-clamav:/var/lib/clamav
     - iredmail-data-sa-rules:/var/lib/spamassassin
     - iredmail-data-postfix-queue:/var/spool/postfix
-    restart: always
     environment:
-      VERSION: '{{IREDMAIL_VERSION}}'
-      MLMMJADMIN_API_TOKEN: '{{GEN_RANDOM_HEX}}(32)'
-      ROUNDCUBE_DES_KEY: '{{GEN_RANDOM_HEX}}(24)'
-      FIRST_MAIL_DOMAIN: '{{ROOT_DOMAIN}}'
-      HOSTNAME: iredmail.{{ROOT_DOMAIN}}
-      ADMIN_VERSION: '{{IREDMAIL_ADMIN_VERSION}}'
+      MLMMJADMIN_API_TOKEN: '{{MLMMJADMIN_API_TOKEN}}'
+      ROUNDCUBE_DES_KEY: '{{ROUNDCUBE_DES_KEY}}'
+      FIRST_MAIL_DOMAIN: '{{FIRST_MAIL_DOMAIN}}'
+      HOSTNAME: '{{MAIL_HOSTNAME}}'
       FIRST_MAIL_DOMAIN_ADMIN_PASSWORD: '{{IREDMAIL_DEFAULT_PASSWORD}}'
 volumes:
   iredmail-data-backup-mysql:
@@ -52,30 +51,37 @@ volumes:
 '''
 
 [[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
-default = ""
+key = "IREDMAIL_VERSION"
+label = "iRedMail image tag"
+default = "stable"
+description = "Tag of the iredmail/mariadb image. Check the valid tags at https://hub.docker.com/r/iredmail/mariadb/tags"
 
 [[variables]]
-key = "IREDMAIL_ADMIN_VERSION"
-label = "iRedMail Admin version tag"
-default = "NoChange"
-description = "Set 'NoChange' to stay by the docker image version OR Check out their GitHub page for the newest version https://github.com/iredmail/iRedAdmin/tags"
+key = "FIRST_MAIL_DOMAIN"
+label = "Mail domain"
+default = ""
+description = "Primary email domain to serve (e.g. example.com). You must set this to your own domain."
+
+[[variables]]
+key = "MAIL_HOSTNAME"
+label = "Mail hostname (FQDN)"
+default = ""
+description = "Fully-qualified hostname for the mail server (e.g. mail.example.com). Must resolve to this server's public IP."
 
 [[variables]]
 key = "IREDMAIL_DEFAULT_PASSWORD"
-label = "First Password"
+label = "Postmaster password"
 generate = true
-description = "Password for the admin login (you can change that later from the admin panel)"
+description = "Password for the postmaster admin login (you can change it later from the admin panel)."
 
 [[variables]]
-key = "IREDMAIL_VERSION"
-label = "iRedMail version tag"
-default = "stable"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/iredmail/mariadb/tags"
+key = "MLMMJADMIN_API_TOKEN"
+label = "mlmmjadmin API token"
+generate = true
+description = "Internal API token for the mailing-list backend. Generated automatically."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "ROUNDCUBE_DES_KEY"
+label = "Roundcube DES key"
+generate = true
+description = "Internal Roundcube webmail session encryption key. Generated automatically."

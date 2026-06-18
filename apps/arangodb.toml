@@ -10,7 +10,6 @@ services:
     volumes:
     - arangodb-db-data:/var/lib/arangodb3
     - arangodb-db-apps-data:/var/lib/arangodb3-apps
-    restart: always
     environment:
       ARANGO_ROOT_PASSWORD: '{{DB_PASS}}'
     ports:
@@ -23,9 +22,10 @@ volumes:
 [[variables]]
 key = "ARANGO_VERSION"
 label = "ArangoDB Version"
-default = "3.4"
+default = "3.12"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/arangodb/tags/"
 
 [[variables]]
 key = "DB_PASS"
 label = "ArangoDB Root password"
+generate = true

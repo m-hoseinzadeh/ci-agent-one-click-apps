@@ -7,7 +7,6 @@ compose = '''
 services:
   mumble:
     image: mumblevoip/mumble-server:{{VERSION}}
-    container_name: mumble-server
     hostname: mumble-server
     restart: on-failure
     volumes:

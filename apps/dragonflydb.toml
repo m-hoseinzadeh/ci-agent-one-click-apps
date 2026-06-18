@@ -1,6 +1,6 @@
 slug = "dragonflydb"
 name = "Dragonfly"
-category = "App"
+category = "Database"
 description = "Dragonfly is a simple, performant, and cost-efficient in-memory data store."
 keywords = ["dragonfly", "dragonflydb"]
 compose = '''
@@ -9,10 +9,11 @@ services:
     image: docker.dragonflydb.io/dragonflydb/dragonfly:{{DRAGONFLYDB_VERSION}}
     volumes:
     - dragonflydb-dragonflydb-data:/data
-    restart: always
     environment:
       DFLY_requirepass: '{{DRAGONFLYDB_PASSWORD}}'
       DFLY_maxmemory: '{{DRAGONFLYDB_MAXMEM}}'
+    ports:
+    - '{{HTTP_PORT}}:6379'
 volumes:
   dragonflydb-dragonflydb-data:
 '''
@@ -26,6 +27,7 @@ description = "Dragonfly recommends at least 4GB to take advantage of its full p
 [[variables]]
 key = "DRAGONFLYDB_PASSWORD"
 label = "Dragonfly Password"
+generate = true
 
 [[variables]]
 key = "DRAGONFLYDB_VERSION"

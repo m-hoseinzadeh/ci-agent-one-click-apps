@@ -3,12 +3,14 @@ name = "JupyterLab"
 category = "App"
 description = "JupyterLab is the next-generation user interface for Project Jupyter. It offers all the familiar building blocks of the classic Jupyter Notebook in a flexible and powerful user interface."
 keywords = ["jupyter", "jupyterlab", "lab"]
+http_port = 8888
 compose = '''
 services:
   jupyter-lab:
-    restart: always
+    image: quay.io/jupyter/base-notebook:{{JUPYTER_VERSION}}
     environment:
       JUPYTER_ENABLE_LAB: 'yes'
+      JUPYTER_TOKEN: '{{JUPYTER_TOKEN}}'
     volumes:
     - jupyter-lab:/home/jovyan/
     ports:
@@ -16,3 +18,15 @@ services:
 volumes:
   jupyter-lab:
 '''
+
+[[variables]]
+key = "JUPYTER_TOKEN"
+label = "Access Token"
+generate = true
+description = "Token required to log in to JupyterLab. A random one is generated for you; copy it to sign in."
+
+[[variables]]
+key = "JUPYTER_VERSION"
+label = "JupyterLab Image Version"
+default = "python-3.11"
+description = "Tag of the quay.io/jupyter/base-notebook image. See https://quay.io/repository/jupyter/base-notebook?tab=tags for valid tags."

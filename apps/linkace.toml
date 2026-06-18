@@ -1,18 +1,19 @@
 slug = "linkace"
-name = "LinkAce (v2)"
+name = "LinkAce"
 category = "App"
 description = "LinkAce is a self-hosted tool for effortlessly archiving, organizing, and sharing your favorite web links."
-keywords = ["(v2)", "linkace"]
+keywords = ["bookmarks", "links", "self-hosted", "linkace"]
+http_port = 80
 compose = '''
 services:
   linkace:
-    restart: always
+    image: linkace/linkace:{{LINKACE_VERSION}}
     depends_on:
     - linkace-db
+    - linkace-redis
     environment:
-      COMPOSE_PROJECT_NAME: linkace
-      APP_URL: http://linkace.{{ROOT_DOMAIN}}
-      APP_KEY: '{{GEN_RANDOM_HEX}}(32)'
+      APP_URL: '{{APP_URL}}'
+      APP_KEY: '{{APP_KEY}}'
       DB_CONNECTION: mysql
       DB_HOST: linkace-db
       DB_PORT: 3306
@@ -37,31 +38,48 @@ services:
     ports:
     - '{{HTTP_PORT}}:80'
   linkace-db:
-    image: mariadb:11.4.4
-    restart: always
-    depends_on:
-    - linkace-redis
+    image: mariadb:{{MARIADB_VERSION}}
     environment:
-      MYSQL_ROOT_PASSWORD: '{{GEN_RANDOM_HEX}}(32)'
+      MYSQL_ROOT_PASSWORD: '{{LINKACE_DB_ROOT_PASS}}'
       MYSQL_DATABASE: '{{LINKACE_DB_NAME}}'
       MYSQL_USER: '{{LINKACE_DB_USER}}'
       MYSQL_PASSWORD: '{{LINKACE_DB_PASS}}'
     volumes:
     - linkace-db:/var/lib/mysql
   linkace-redis:
-    image: bitnamilegacy/redis:{{LINKACE_REDIS_VERSION}}
-    restart: unless-stopped
-    environment:
-      REDIS_PASSWORD: '{{LINKACE_REDIS_PASS}}'
+    image: redis:{{LINKACE_REDIS_VERSION}}
+    command: redis-server --requirepass "{{LINKACE_REDIS_PASS}}"
+    volumes:
+    - linkace-redis:/data
 volumes:
   linkace-data:
   linkace-db:
+  linkace-redis:
 '''
 
 [[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
+key = "LINKACE_VERSION"
+label = "LinkAce Version"
+default = "simple"
+description = "LinkAce image tag. The 'simple' tag is the all-in-one container that serves the app on port 80. See https://hub.docker.com/r/linkace/linkace/tags"
+
+[[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB Version"
+default = "11.2"
+description = "MariaDB image tag for the LinkAce database."
+
+[[variables]]
+key = "APP_URL"
+label = "App URL"
 default = ""
+description = "Public base URL LinkAce uses to build links (e.g. https://links.example.com). Leave empty and set it after assigning a domain."
+
+[[variables]]
+key = "APP_KEY"
+label = "App Key"
+generate = true
+description = "Laravel application encryption key. Generated automatically."
 
 [[variables]]
 key = "LINKACE_DB_NAME"
@@ -70,16 +88,34 @@ default = "linkace"
 description = "Database name for LinkAce"
 
 [[variables]]
+key = "LINKACE_DB_USER"
+label = "Database User"
+default = "linkace"
+description = "Database user for LinkAce"
+
+[[variables]]
 key = "LINKACE_DB_PASS"
 label = "Database Password"
 generate = true
 description = "Database password for LinkAce"
 
 [[variables]]
-key = "LINKACE_DB_USER"
-label = "Database User"
-default = "linkace"
-description = "Database user for LinkAce"
+key = "LINKACE_DB_ROOT_PASS"
+label = "Database Root Password"
+generate = true
+description = "MariaDB root password. Generated automatically."
+
+[[variables]]
+key = "LINKACE_REDIS_VERSION"
+label = "Redis Version"
+default = "7.2-alpine"
+description = "Redis image tag. See https://hub.docker.com/_/redis/tags"
+
+[[variables]]
+key = "LINKACE_REDIS_PASS"
+label = "Redis Password"
+generate = true
+description = "Redis password for LinkAce"
 
 [[variables]]
 key = "LINKACE_MAIL_ENCRYPTION"
@@ -90,11 +126,13 @@ description = "SMTP server encryption"
 [[variables]]
 key = "LINKACE_MAIL_FROM_ADDRESS"
 label = "Mail From Address"
+default = ""
 description = "Email address to send emails from"
 
 [[variables]]
 key = "LINKACE_MAIL_FROM_NAME"
 label = "Mail From Name"
+default = "LinkAce"
 description = "Name to send emails from"
 
 [[variables]]
@@ -106,7 +144,8 @@ description = "SMTP server hostname"
 [[variables]]
 key = "LINKACE_MAIL_PASSWORD"
 label = "Mail Password"
-description = "SMTP server password"
+default = ""
+description = "SMTP server password. Obtain from your mail provider; leave blank if email is unused."
 
 [[variables]]
 key = "LINKACE_MAIL_PORT"
@@ -117,22 +156,5 @@ description = "SMTP server port"
 [[variables]]
 key = "LINKACE_MAIL_USERNAME"
 label = "Mail Username"
-description = "SMTP server username"
-
-[[variables]]
-key = "LINKACE_REDIS_PASS"
-label = "Redis Password"
-generate = true
-description = "Redis password for LinkAce"
-
-[[variables]]
-key = "LINKACE_REDIS_VERSION"
-label = "Redis Version"
-default = "7.2"
-description = "Check out their Docker Hub page for the valid tags https://hub.docker.com/_/redis/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "SMTP server username. Obtain from your mail provider; leave blank if email is unused."

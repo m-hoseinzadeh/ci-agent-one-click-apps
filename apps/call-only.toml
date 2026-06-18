@@ -1,94 +1,119 @@
 slug = "call-only"
-name = "Cal.com - No Database"
-category = "Database"
-description = "The open-source Calendly alternative."
-keywords = ["cal.com", "call", "database", "no", "only"]
+name = "Cal.com"
+category = "Productivity"
+description = "The open-source Calendly alternative for scheduling, bundled with its own PostgreSQL database."
+keywords = ["cal.com", "calendar", "scheduling", "calendly", "booking"]
+http_port = 3000
 compose = '''
 services:
   call-only:
     image: calcom/cal.com:{{VERSION}}
-    restart: always
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_WEBAPP_URL: http://call-only.{{ROOT_DOMAIN}}
-      NEXTAUTH_SECRET: '{{SECRET_KEY_BASE}}'
+      NEXT_PUBLIC_WEBAPP_URL: '{{APP_URL}}'
+      NEXTAUTH_URL: '{{APP_URL}}'
+      NEXTAUTH_SECRET: '{{NEXTAUTH_SECRET}}'
       CALENDSO_ENCRYPTION_KEY: '{{CALENDSO_ENCRYPTION_KEY}}'
       POSTGRES_USER: '{{POSTGRES_USER}}'
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
       POSTGRES_DB: '{{POSTGRES_DB}}'
-      DATABASE_HOST: '{{POSTGRES_HOST}}'
-      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}/{{POSTGRES_DB}}
-      DATABASE_DIRECT_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@{{POSTGRES_HOST}}/{{POSTGRES_DB}}
+      DATABASE_HOST: database:5432
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@database:5432/{{POSTGRES_DB}}
+      DATABASE_DIRECT_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@database:5432/{{POSTGRES_DB}}
       GOOGLE_API_CREDENTIALS: '{}'
       EMAIL_FROM: '{{EMAIL_FROM}}'
       EMAIL_SERVER_HOST: '{{EMAIL_HOST}}'
-      EMAIL_SERVER_PORT: '{{EMAIL_SERVER_PASSWORD}}'
+      EMAIL_SERVER_PORT: '{{EMAIL_PORT}}'
       EMAIL_SERVER_USER: '{{EMAIL_SERVER_USER}}'
       EMAIL_SERVER_PASSWORD: '{{EMAIL_SERVER_PASSWORD}}'
     ports:
     - '{{HTTP_PORT}}:3000'
+    depends_on:
+    - database
+  database:
+    image: postgres:{{POSTGRES_VERSION}}
+    environment:
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+    volumes:
+    - database-data:/var/lib/postgresql/data
+volumes:
+  database-data:
 '''
-
-[[variables]]
-key = "CALENDSO_ENCRYPTION_KEY"
-label = "Secret Key Base"
-default = "secret"
-description = "Encryption key that will be used to encrypt CalDAV credentials, choose a random string, for example with `dd if=/dev/urandom bs=1K count=1 | md5sum`"
-
-[[variables]]
-key = "EMAIL_FROM"
-label = "Emails from"
-default = "notifications@example.com"
-
-[[variables]]
-key = "EMAIL_HOST"
-label = "Emails server host"
-default = "smtp.example.com"
-
-[[variables]]
-key = "EMAIL_SERVER_PASSWORD"
-label = "Emails server password"
-default = "email_password"
-
-[[variables]]
-key = "EMAIL_SERVER_USER"
-label = "Emails server user"
-default = "email_user"
-
-[[variables]]
-key = "POSTGRES_DB"
-label = "Postgres db"
-default = "calendso"
-
-[[variables]]
-key = "POSTGRES_HOST"
-label = "Postgres host"
-default = "database:5432"
-
-[[variables]]
-key = "POSTGRES_PASSWORD"
-label = "Postgres password"
-default = "password"
-
-[[variables]]
-key = "POSTGRES_USER"
-label = "Postgres user"
-default = "user"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
-key = "SECRET_KEY_BASE"
-label = "Secret Key Base"
-default = "secret"
-description = "The randomized string which is used to verify the integrity of signed cookies. Use `openssl rand -base64 32` to generate a key"
 
 [[variables]]
 key = "VERSION"
 label = "Cal.com Version"
-default = "v2.5.4"
-description = "Check out their docker page for the valid tags https://hub.docker.com/r/calcom/cal.com/tags"
+default = "v5.7.5"
+description = "Cal.com image tag. See valid tags at https://hub.docker.com/r/calcom/cal.com/tags"
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Full public URL where Cal.com will be reachable (e.g. https://cal.example.com). Set this after assigning a domain; leave blank to fill in later."
+
+[[variables]]
+key = "NEXTAUTH_SECRET"
+label = "NextAuth Secret"
+generate = true
+description = "Random secret used to sign authentication sessions. Generated automatically."
+
+[[variables]]
+key = "CALENDSO_ENCRYPTION_KEY"
+label = "Encryption Key"
+generate = true
+description = "Key used to encrypt CalDAV credentials. Generated automatically."
+
+[[variables]]
+key = "POSTGRES_VERSION"
+label = "PostgreSQL Version"
+default = "16"
+description = "PostgreSQL image tag."
+
+[[variables]]
+key = "POSTGRES_USER"
+label = "Postgres user"
+default = "calcom"
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Postgres password"
+generate = true
+description = "Password for the bundled PostgreSQL database. Generated automatically."
+
+[[variables]]
+key = "POSTGRES_DB"
+label = "Postgres database"
+default = "calcom"
+
+[[variables]]
+key = "EMAIL_FROM"
+label = "Email from address"
+default = ""
+description = "From address for outgoing email (e.g. notifications@example.com). Required only if you configure SMTP."
+
+[[variables]]
+key = "EMAIL_HOST"
+label = "SMTP host"
+default = ""
+description = "SMTP server hostname. Leave blank to disable email."
+
+[[variables]]
+key = "EMAIL_PORT"
+label = "SMTP port"
+default = "587"
+description = "SMTP server port."
+
+[[variables]]
+key = "EMAIL_SERVER_USER"
+label = "SMTP username"
+default = ""
+description = "SMTP username. Leave blank to disable email."
+
+[[variables]]
+key = "EMAIL_SERVER_PASSWORD"
+label = "SMTP password"
+default = ""
+description = "SMTP password (external credential). Leave blank to disable email."

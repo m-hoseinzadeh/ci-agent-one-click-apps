@@ -3,32 +3,41 @@ name = "Listmonk"
 category = "Communication"
 description = "High performance, self-hosted newsletter and mailing list manager with a modern dashboard"
 keywords = ["listmonk"]
+http_port = 9000
 compose = '''
 services:
   listmonk-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - listmonk-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: '{{POSTGRES_USERNAME}}'
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
       POSTGRES_DB: '{{POSTGRES_DB_NAME}}'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U {{POSTGRES_USERNAME}}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
   listmonk:
+    image: listmonk/listmonk:latest
+    command: [sh, -c, "./listmonk --install --idempotent --yes --config '' && ./listmonk --upgrade --yes --config '' && ./listmonk --config ''"]
     environment:
       TZ: Etc/UTC
       LISTMONK_db__host: listmonk-db
+      LISTMONK_db__port: 5432
       LISTMONK_db__database: '{{POSTGRES_DB_NAME}}'
       LISTMONK_db__user: '{{POSTGRES_USERNAME}}'
       LISTMONK_db__password: '{{POSTGRES_PASSWORD}}'
       LISTMONK_db__ssl_mode: '{{POSTGRES_SSL_MODE}}'
-      LISTMONK_app__admin_username: '{{LISTMONK_ADMIN_USERNAME}}'
-      LISTMONK_app__admin_password: '{{LISTMONK_ADMIN_PASSWORD}}'
+      LISTMONK_ADMIN_USER: '{{LISTMONK_ADMIN_USERNAME}}'
+      LISTMONK_ADMIN_PASSWORD: '{{LISTMONK_ADMIN_PASSWORD}}'
       LISTMONK_app__address: 0.0.0.0:9000
     volumes:
-    - listmonk-data:/listmonk
+    - listmonk-data:/listmonk/uploads
     depends_on:
-    - listmonk-db
+      listmonk-db:
+        condition: service_healthy
     ports:
     - '{{HTTP_PORT}}:9000'
 volumes:
@@ -69,5 +78,5 @@ default = "listmonk"
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Postgresql Version"
-default = "14.1"
+default = "17-alpine"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"

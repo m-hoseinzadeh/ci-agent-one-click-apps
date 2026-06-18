@@ -1,18 +1,16 @@
 slug = "influxdb"
-name = "InfluxDb"
+name = "InfluxDB"
 category = "Database"
-description = "InfluxDB is a time series database. It stores large amounts of timestamped data, including DevOps monitoring, application metrics, IoT sensor data, and real-time analytics."
-keywords = ["influxdb"]
+description = "InfluxDB is a time series database. It stores large amounts of timestamped data, including DevOps monitoring, application metrics, IoT sensor data, and real-time analytics. Standalone database: leave the port blank to keep it internal-only, or set one to expose 8086."
+keywords = ["influxdb", "timeseries", "database", "metrics"]
 compose = '''
 services:
-  influxdb-db:
+  influxdb:
     image: influxdb:{{INFLUX_VERSION}}
     volumes:
-    - influxdb-db-data:/var/lib/influxdb
-    restart: always
+    - influxdb-data:/var/lib/influxdb
     ports:
-    - '{{INFLUXDB_PORT}}:8086'
-    - '{{GRAPHITE_PORT}}:2003'
+    - '{{HTTP_PORT}}:8086'
     environment:
       INFLUXDB_DB: '{{INFLUX_DB}}'
       INFLUXDB_HTTP_AUTH_ENABLED: '{{INFLUX_AUTH_ENABLED}}'
@@ -23,85 +21,73 @@ services:
       INFLUXDB_READ_USER: '{{INFLUX_READ_USER}}'
       INFLUXDB_READ_USER_PASSWORD: '{{INFLUX_READ_USER_PASSWORD}}'
       INFLUXDB_WRITE_USER: '{{INFLUX_WRITE_USER}}'
-      INFLUXDB_WRITE_USER_PASSWORD: '{{INFLUX_WRITE_PASSWORD}}'
+      INFLUXDB_WRITE_USER_PASSWORD: '{{INFLUX_WRITE_USER_PASSWORD}}'
 volumes:
-  influxdb-db-data:
+  influxdb-data:
 '''
 
 [[variables]]
-key = "GRAPHITE_PORT"
-label = "Graphite port"
-default = "2003"
-description = "The port for graphite protocol"
+key = "INFLUX_VERSION"
+label = "InfluxDB version"
+default = "1.8"
+description = "InfluxDB 1.x image tag. See https://hub.docker.com/_/influxdb/tags for valid tags. These init variables apply to the 1.x line."
 
 [[variables]]
-key = "INFLUXDB_PORT"
-label = "Influxdb port"
-default = "8086"
-description = "The port to make queries to influxdb."
-
-[[variables]]
-key = "INFLUX_ADMIN_PASSWORD"
-label = "Admin password"
-default = ""
-description = "The password for the admin user configured with INFLUXDB_ADMIN_USER. If this is unset, a random password is generated and printed to standard out."
-
-[[variables]]
-key = "INFLUX_ADMIN_USER"
-label = "Admin User"
-default = ""
-description = "The name of the admin user to be created. If this is unset, no admin user is created."
+key = "INFLUX_DB"
+label = "Initial database name"
+default = "mydb"
+description = "Automatically creates a database with this name on first boot."
 
 [[variables]]
 key = "INFLUX_AUTH_ENABLED"
 label = "Auth enabled (true/false)"
-default = ""
-description = "Enables authentication. Either this must be set or auth-enabled = true must be set within the configuration file for any authentication related options below to work."
+default = "true"
+description = "Enables HTTP authentication. Required for the user/password options below to take effect."
 
 [[variables]]
-key = "INFLUX_DB"
-label = "Influx DB"
-default = ""
-description = "Automatically initializes a database with the name of this environment variable."
+key = "INFLUX_ADMIN_USER"
+label = "Admin user"
+default = "admin"
+description = "Name of the admin user created on first boot."
 
 [[variables]]
-key = "INFLUX_READ_USER"
-label = "Influx read user"
-default = ""
-description = "The name of a user to be created with read privileges on INFLUXDB_DB. If INFLUXDB_DB is not set, this user will have no granted permissions."
-
-[[variables]]
-key = "INFLUX_READ_USER_PASSWORD"
-label = "Influx read user password"
-default = ""
-description = "The password for the user configured with INFLUXDB_READ_USER. If this is unset, a random password is generated and printed to standard out"
+key = "INFLUX_ADMIN_PASSWORD"
+label = "Admin password"
+generate = true
+description = "Password for the admin user. Auto-generated; the app mints this internally."
 
 [[variables]]
 key = "INFLUX_USER"
-label = "Inlfux user"
-default = ""
-description = "The name of a user to be created with no privileges. If INFLUXDB_DB is set, this user will be granted read and write permissions for that database."
+label = "Application user"
+default = "influx"
+description = "A user with read+write on the initial database (no privileges if no database is set)."
 
 [[variables]]
 key = "INFLUX_USER_PASSWORD"
-label = "Influx password"
-default = ""
-description = "The password for the user configured with INFLUXDB_USER. If this is unset, a random password is generated and printed to standard out."
+label = "Application user password"
+generate = true
+description = "Password for the application user. Auto-generated."
 
 [[variables]]
-key = "INFLUX_VERSION"
-label = "InfluxDb Version"
-default = "1.8"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/influxdb/tags/"
+key = "INFLUX_READ_USER"
+label = "Read-only user"
+default = "influx-read"
+description = "A user with read privileges on the initial database."
 
 [[variables]]
-key = "INFLUX_WRITE_PASSWORD"
-label = "Influx write user password"
-default = ""
-description = "The password for the user configured with INFLUXDB_WRITE_USER. If this is unset, a random password is generated and printed to standard out."
+key = "INFLUX_READ_USER_PASSWORD"
+label = "Read-only user password"
+generate = true
+description = "Password for the read-only user. Auto-generated."
 
 [[variables]]
 key = "INFLUX_WRITE_USER"
-label = "Influx write user"
-default = ""
-description = "The name of a user to be created with write privileges on INFLUXDB_DB. If INFLUXDB_DB is not set, this user will have no granted permissions."
+label = "Write-only user"
+default = "influx-write"
+description = "A user with write privileges on the initial database."
+
+[[variables]]
+key = "INFLUX_WRITE_USER_PASSWORD"
+label = "Write-only user password"
+generate = true
+description = "Password for the write-only user. Auto-generated."

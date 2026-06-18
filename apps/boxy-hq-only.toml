@@ -3,11 +3,11 @@ name = "BoxyHQ Jackson (SAML to OAuht) - No Database"
 category = "Database"
 description = "This will create a BoxyHQ Jackson only. You will need to create and configure the database information manually. Intended for advanced users."
 keywords = ["(saml", "boxy", "boxyhq", "database", "hq", "jackson", "no", "oauht)", "only", "to"]
+http_port = 5225
 compose = '''
 services:
   boxy-hq-only:
     image: boxyhq/jackson:{{BOXYHQ_JACKSON_VERSION}}
-    restart: always
     environment:
       EXTERNAL_URL: '{{EXTERNAL_URL}}'
       SAML_AUDIENCE: '{{SAML_AUDIENCE}}'
@@ -126,8 +126,8 @@ description = "The database URL to connect to. If you are using self-signed cert
 [[variables]]
 key = "EXTERNAL_URL"
 label = "External URL"
-default = "$$cap_appname.$$cap_root_domain"
-description = "The public URL to reach this service. This is used internally to construct the callback url at which the SAML/OIDC IdP sends back the authorization response. (https://boxyhq.com/docs/jackson/deploy/env-variables#external_url)"
+default = ""
+description = "The public URL to reach this service. ci-agent assigns the domain after the project is created, so leave this blank initially and set it to the assigned URL once known. This is used internally to construct the callback url at which the SAML/OIDC IdP sends back the authorization response. (https://boxyhq.com/docs/jackson/deploy/env-variables#external_url)"
 
 [[variables]]
 key = "IDP_ENABLED"
@@ -161,8 +161,8 @@ description = "Set this to a random string. You can use openssl rand -base64 32 
 [[variables]]
 key = "NEXTAUTH_URL"
 label = "NextAuth URL"
-default = "$$cap_appname.$$cap_root_domain"
-description = "When running locally this will point to the local server https://boxyhq.my-domain.com. When deploying to production, set this to the canonical URL of the site. (https://boxyhq.com/docs/jackson/deploy/env-variables#nextauth_url)"
+default = ""
+description = "The canonical URL of the site. ci-agent assigns the domain after the project is created, so leave this blank initially and set it to the assigned URL once known. (https://boxyhq.com/docs/jackson/deploy/env-variables#nextauth_url)"
 
 [[variables]]
 key = "NEXT_TELEMETRY_DISABLED"
@@ -233,7 +233,7 @@ description = "If you'd like to use the Admin Portal to manage our Audit Logs se
 [[variables]]
 key = "SAML_AUDIENCE"
 label = "SAML Audience"
-default = "$$cap_appname.$$cap_root_domain"
+default = "https://saml.boxyhq.com"
 description = "The value of this setting (same as SP EntityID of Jackson) allows the Jackson instance to verify that it is the intended recipient of a SAML response. The same value is also set in the SAML App created on the IdP end by your customers. Once set do not change this value unless you get your customers to reconfigure their SAML App again. It is case-sensitive. This does not have to be a real URL. (https://boxyhq.com/docs/jackson/deploy/env-variables#saml_audience)"
 
 [[variables]]

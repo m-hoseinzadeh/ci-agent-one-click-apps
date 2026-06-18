@@ -3,6 +3,7 @@ name = "Deluge"
 category = "App"
 description = "A lightweight, Free Software, cross-platform BitTorrent client with Full Encryption, WebUI, Plugin System, etc."
 keywords = ["deluge"]
+http_port = 8112
 compose = '''
 services:
   deluge:
@@ -11,7 +12,6 @@ services:
       TZ: '{{TZ}}'
       PUID: '{{PUID}}'
       PGID: '{{PGID}}'
-    hostname: deluge.{{ROOT_DOMAIN}}
     volumes:
     - deluge-config:/config
     - deluge-downloads:/downloads
@@ -35,12 +35,6 @@ key = "PUID"
 label = "PUID"
 default = "1000"
 description = "User ID"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"

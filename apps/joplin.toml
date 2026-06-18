@@ -2,16 +2,15 @@ slug = "joplin"
 name = "Joplin"
 category = "App"
 description = "Joplin - an open source note taking and to-do application with synchronization capabilities for Windows, macOS, Linux, Android and iOS."
-keywords = ["joplin"]
+keywords = ["joplin", "notes", "todo"]
+http_port = 22300
 compose = '''
 services:
   joplin-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - joplin-db-data:/var/lib/postgresql/data
-    restart: unless-stopped
     environment:
-      APP_PORT: 22300
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
       POSTGRES_USER: '{{POSTGRES_USER}}'
       POSTGRES_DB: '{{POSTGRES_DB}}'
@@ -19,14 +18,15 @@ services:
     image: joplin/server:{{JOPLIN_TAG}}
     depends_on:
     - joplin-db
-    restart: unless-stopped
     environment:
-      APP_BASE_URL: http://joplin.{{ROOT_DOMAIN}}
+      APP_PORT: 22300
+      APP_BASE_URL: '{{APP_URL}}'
       DB_CLIENT: pg
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
       POSTGRES_DATABASE: '{{POSTGRES_DB}}'
       POSTGRES_USER: '{{POSTGRES_USER}}'
       POSTGRES_HOST: joplin-db
+      POSTGRES_PORT: 5432
     ports:
     - '{{HTTP_PORT}}:22300'
 volumes:
@@ -36,8 +36,14 @@ volumes:
 [[variables]]
 key = "JOPLIN_TAG"
 label = "Joplin Version"
-default = "1.7.2"
+default = "3.7.1"
 description = "Check out their docker page for the valid tags https://hub.docker.com/r/joplin/server/tags"
+
+[[variables]]
+key = "APP_URL"
+label = "Public base URL"
+default = ""
+description = "Public URL Joplin will be reached at (e.g. https://joplin.example.com). Required for sync/login to work; set it after assigning a domain to this project."
 
 [[variables]]
 key = "POSTGRES_DB"
@@ -47,7 +53,8 @@ default = "joplin"
 [[variables]]
 key = "POSTGRES_PASSWORD"
 label = "Postgres Password"
-default = "cA3rS2oK"
+generate = true
+description = "Internal database password, generated automatically."
 
 [[variables]]
 key = "POSTGRES_USER"
@@ -57,10 +64,4 @@ default = "joplin"
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Postgres Version"
-default = "13.1"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+default = "16"

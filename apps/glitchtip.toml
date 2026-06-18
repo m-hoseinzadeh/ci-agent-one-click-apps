@@ -1,96 +1,122 @@
 slug = "glitchtip"
 name = "GlitchTip"
 category = "App"
-description = "Simple, open source error tracking."
-keywords = ["glitchtip"]
+description = "Simple, open source error tracking (Sentry-compatible)."
+keywords = ["glitchtip", "error-tracking", "sentry", "monitoring"]
+http_port = 8000
 compose = '''
 services:
   glitchtip-postgres:
     image: postgres:{{POSTGRES_VERSION}}
     environment:
+      POSTGRES_DB: glitchtip
       POSTGRES_USER: glitchtip
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
     volumes:
     - glitchtip-postgres-data:/var/lib/postgresql/data
   glitchtip-redis:
+    image: valkey/valkey:{{VALKEY_VERSION}}
+    volumes:
+    - glitchtip-redis-data:/data
+  glitchtip-migrate:
+    image: glitchtip/glitchtip:{{GLITCHTIP_VERSION}}
+    restart: "no"
+    depends_on:
+    - glitchtip-postgres
+    - glitchtip-redis
+    command: ./manage.py migrate
     environment:
-      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      DATABASE_URL: postgres://glitchtip:{{POSTGRES_PASSWORD}}@glitchtip-postgres:5432/glitchtip
+      VALKEY_URL: redis://glitchtip-redis:6379
+      SECRET_KEY: '{{SECRET}}'
+      EMAIL_URL: '{{SMTP}}'
+      GLITCHTIP_DOMAIN: '{{APP_URL}}'
+      DEFAULT_FROM_EMAIL: '{{FROM_EMAIL}}'
   glitchtip:
+    image: glitchtip/glitchtip:{{GLITCHTIP_VERSION}}
     depends_on:
     - glitchtip-postgres
     - glitchtip-redis
     environment:
       DATABASE_URL: postgres://glitchtip:{{POSTGRES_PASSWORD}}@glitchtip-postgres:5432/glitchtip
-      REDIS_URL: redis://:{{REDIS_PASSWORD}}@glitchtip-redis:6379
+      VALKEY_URL: redis://glitchtip-redis:6379
       SECRET_KEY: '{{SECRET}}'
       PORT: 8000
       EMAIL_URL: '{{SMTP}}'
-      GLITCHTIP_DOMAIN: http://glitchtip.{{ROOT_DOMAIN}}
+      GLITCHTIP_DOMAIN: '{{APP_URL}}'
       DEFAULT_FROM_EMAIL: '{{FROM_EMAIL}}'
       CELERY_WORKER_CONCURRENCY: '{{CELERY_WORKER_CONCURRENCY}}'
     ports:
     - '{{HTTP_PORT}}:8000'
   glitchtip-worker:
+    image: glitchtip/glitchtip:{{GLITCHTIP_VERSION}}
     depends_on:
     - glitchtip-postgres
     - glitchtip-redis
+    command: ./bin/run-celery-with-beat.sh
     environment:
       DATABASE_URL: postgres://glitchtip:{{POSTGRES_PASSWORD}}@glitchtip-postgres:5432/glitchtip
-      REDIS_URL: redis://:{{REDIS_PASSWORD}}@glitchtip-redis:6379
+      VALKEY_URL: redis://glitchtip-redis:6379
       SECRET_KEY: '{{SECRET}}'
-      PORT: 8000
       EMAIL_URL: '{{SMTP}}'
-      GLITCHTIP_DOMAIN: http://glitchtip.{{ROOT_DOMAIN}}
+      GLITCHTIP_DOMAIN: '{{APP_URL}}'
       DEFAULT_FROM_EMAIL: '{{FROM_EMAIL}}'
       CELERY_WORKER_CONCURRENCY: '{{CELERY_WORKER_CONCURRENCY}}'
 volumes:
   glitchtip-postgres-data:
+  glitchtip-redis-data:
 '''
 
 [[variables]]
-key = "CELERY_WORKER_CONCURRENCY"
-label = "Celery Worker Concurrency"
-default = "2"
-description = "Number of concurrent celery workers. Defaults to number of CPU cores. Highly recommended to change. Our sample docker compose file defaults this to 2, to avoid unwanted and unnecessary scaling."
+key = "GLITCHTIP_VERSION"
+label = "GlitchTip Version"
+default = "6"
+description = "GlitchTip image tag. See https://hub.docker.com/r/glitchtip/glitchtip/tags."
 
 [[variables]]
-key = "FROM_EMAIL"
-label = "Email Address"
-default = "info@example.com"
-description = "Default from email address."
+key = "POSTGRES_VERSION"
+label = "Postgres Version"
+default = "18"
+description = "Postgres image tag. See https://hub.docker.com/_/postgres/tags."
+
+[[variables]]
+key = "VALKEY_VERSION"
+label = "Valkey Version"
+default = "9"
+description = "Valkey (Redis-compatible) image tag. See https://hub.docker.com/r/valkey/valkey/tags."
 
 [[variables]]
 key = "POSTGRES_PASSWORD"
 label = "PostgreSQL Password"
 generate = true
-description = "This is the PostgreSQL password for user 'glitchtip'."
-
-[[variables]]
-key = "POSTGRES_VERSION"
-label = "Postgres Version"
-default = "15"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
-
-[[variables]]
-key = "REDIS_PASSWORD"
-label = "Redis Password"
-generate = true
-description = "This is the PostgreSQL password for user 'glitchtip'."
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "PostgreSQL password for the 'glitchtip' database user. Generated automatically."
 
 [[variables]]
 key = "SECRET"
 label = "Secret Key"
 generate = true
-description = "Secret key used by glitchtip."
+description = "Django secret key used by GlitchTip. Generated automatically."
+
+[[variables]]
+key = "CELERY_WORKER_CONCURRENCY"
+label = "Celery Worker Concurrency"
+default = "2"
+description = "Number of concurrent Celery workers. Defaults to 2 to avoid unnecessary scaling on small servers."
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Public base URL used to build links, including scheme (e.g. https://glitchtip.example.com). Set after assigning a domain. Leave blank to set later."
+
+[[variables]]
+key = "FROM_EMAIL"
+label = "Default From Email"
+default = "info@example.com"
+description = "Default from email address for outgoing mail."
 
 [[variables]]
 key = "SMTP"
 label = "SMTP Configuration"
-default = "smtp://email:password@smtp_url:port"
-description = "See https://glitchtip.com/documentation/install#configuration."
+default = "consolemail://"
+description = "Email backend URL. Set your SMTP credentials, e.g. smtp://user:password@host:port. See https://glitchtip.com/documentation/install#configuration."

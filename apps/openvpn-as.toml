@@ -3,11 +3,11 @@ name = "OpenVPN Access Server"
 category = "App"
 description = "Full featured secure network tunneling VPN software."
 keywords = ["access", "as", "openvpn", "server"]
+http_port = 943
 compose = '''
 services:
   openvpn-as:
     image: linuxserver/openvpn-as:{{OPENVPN_VERSION}}
-    hostname: openvpn-as.{{ROOT_DOMAIN}}
     environment:
       PUID: '{{OPENVPN_PUID}}'
       PGID: '{{OPENVPN_GUID}}'
@@ -16,7 +16,7 @@ services:
     volumes:
     - openvpn-as:/config
     ports:
-    - '{{HTTP_PORT}}:$$cap_OPENVPN_PORT_ADMIN'
+    - '{{HTTP_PORT}}:943'
     - '{{OPENVPN_PORT_TCP}}:{{OPENVPN_PORT_TCP}}'
     - '{{OPENVPN_PORT_UDP}}:{{OPENVPN_PORT_UDP}}'
     cap_add:
@@ -65,9 +65,3 @@ key = "OPENVPN_VERSION"
 label = "General | Version Tag"
 default = "2.9.0-5c5bd120-Ubuntu18-ls124"
 description = "Check out their valid tags at https://hub.docker.com/r/linuxserver/openvpn-as/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

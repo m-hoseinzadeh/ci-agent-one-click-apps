@@ -1,20 +1,28 @@
 slug = "keydb"
 name = "KeyDB"
 category = "Database"
-description = "KeyDB is a high-performance fork of Redis, fully compatible with Redis and includes additional features such as multithreading"
-keywords = ["keydb"]
+description = "KeyDB is a high-performance fork of Redis, fully compatible with Redis and includes additional features such as multithreading."
+keywords = ["keydb", "redis", "cache", "database"]
 compose = '''
 services:
   keydb:
+    image: eqalpha/keydb:{{KEYDB_VERSION}}
+    command: keydb-server /etc/keydb/keydb.conf --requirepass "{{KEYDB_PASSWORD}}"
+    ports:
+    - '{{HTTP_PORT}}:6379'
     volumes:
-    - keydb-keydb-data:/data
-    restart: always
-    environment:
-      KEYDB_PASSWORD: '{{KEYDB_PASSWORD}}'
+    - keydb-data:/data
 volumes:
-  keydb-keydb-data:
+  keydb-data:
 '''
+
+[[variables]]
+key = "KEYDB_VERSION"
+label = "KeyDB Version"
+default = "latest"
 
 [[variables]]
 key = "KEYDB_PASSWORD"
 label = "KeyDB Password"
+description = "Password required to connect to KeyDB (requirepass)."
+generate = true

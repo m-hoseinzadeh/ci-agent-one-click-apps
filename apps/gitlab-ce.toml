@@ -3,16 +3,17 @@ name = "Gitlab (CE)"
 category = "Dev tools"
 description = "CE version of GitLab for CI/CD pipeline"
 keywords = ["(ce)", "ce", "gitlab"]
+http_port = 80
 compose = '''
 services:
   gitlab-ce:
     image: gitlab/gitlab-ce:{{GITLAB_VERSION}}
-    hostname: gitlab-ce.{{ROOT_DOMAIN}}
+    ports:
+    - '{{HTTP_PORT}}:80'
     volumes:
-    - 'gitlab-ce-config: /etc/gitlab'
-    - 'gitlab-ce-logs: /var/log/gitlab'
-    - 'gitlab-ce-data: /var/opt/gitlab'
-    restart: always
+    - 'gitlab-ce-config:/etc/gitlab'
+    - 'gitlab-ce-logs:/var/log/gitlab'
+    - 'gitlab-ce-data:/var/opt/gitlab'
     environment:
       GITLAB_OMNIBUS_CONFIG: '{{GITLAB_OMNIBUS_CONFIG}}'
 volumes:
@@ -24,16 +25,11 @@ volumes:
 [[variables]]
 key = "GITLAB_OMNIBUS_CONFIG"
 label = "Omnibus Config (Optional)"
-description = "More information here: https://docs.gitlab.com/omnibus/docker/#pre-configure-docker-container"
+default = ""
+description = "Optional Ruby config string for the GitLab omnibus package (e.g. external_url, SMTP). Leave blank to use defaults. More information here: https://docs.gitlab.com/omnibus/docker/#pre-configure-docker-container"
 
 [[variables]]
 key = "GITLAB_VERSION"
 label = "Gitlab-CE Version Tag"
-default = "11.9.8-ce.0"
+default = "17.0.1-ce.0"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/gitlab/gitlab-ce/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

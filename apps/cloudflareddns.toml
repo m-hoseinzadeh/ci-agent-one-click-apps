@@ -21,7 +21,7 @@ services:
 key = "API_KEY"
 label = "Cloudflare API token"
 default = ""
-description = "Your CloudFlare scoped API token. See the Creating a Cloudflare API token upward."
+description = "Your Cloudflare scoped API token with Zone:DNS:Edit permission. Create one in your Cloudflare dashboard under My Profile > API Tokens. Required."
 
 [[variables]]
 key = "CRON"
@@ -51,10 +51,10 @@ description = "Set to AAAA to use set IPv6 records instead of IPv4 records. Defa
 key = "SUBDOMAIN"
 label = "Zone's subdomain"
 default = "*"
-description = "A subdomain of the ZONE to write DNS changes to. If this is not supplied the root zone will be used. Defaults to your CapRover apps subdomains."
+description = "A subdomain of the ZONE to write DNS changes to. If this is not supplied the root zone will be used."
 
 [[variables]]
 key = "ZONE"
 label = "DNS zone"
-default = "$$cap_root_domain"
-description = "The DNS zone that DDNS updates should be applied to. Defaults to your CapRover root domain."
+default = ""
+description = "The DNS zone (your root domain registered in Cloudflare, e.g. example.com) that DDNS updates should be applied to."

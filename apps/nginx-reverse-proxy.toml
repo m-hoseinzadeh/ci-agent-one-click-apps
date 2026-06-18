@@ -1,13 +1,15 @@
 slug = "nginx-reverse-proxy"
 name = "Nginx Reverse Proxy"
 category = "App"
-description = "A simple Nginx image preloaded with reverse proxy config that allows you to proxy a URL to another URL"
+description = "A simple Nginx image preloaded with reverse proxy config that lets you proxy incoming requests to another URL."
 keywords = ["nginx", "proxy", "reverse"]
+http_port = 80
 compose = '''
 services:
   nginx-reverse-proxy:
-    image: caprover/nginx-reverse-proxy:{{_VERSION}}
-    restart: always
+    image: caprover/nginx-reverse-proxy:{{IMAGE_VERSION}}
+    ports:
+      - '{{HTTP_PORT}}:80'
     environment:
       UPSTREAM_HTTP_ADDRESS: '{{UPSTREAM_HTTP_ADDRESS}}'
       CLIENT_MAX_BODY_SIZE: '{{MAX_BODY_SIZE}}'
@@ -17,16 +19,16 @@ services:
 key = "MAX_BODY_SIZE"
 label = "Client max body size"
 default = "256M"
-description = "Sets the maximum allowed size of the client request body, specified in the “Content-Length” request header field. If the size in a request exceeds the configured value, the 413 (Request Entity Too Large) error is returned to the client. Please be aware that browsers cannot correctly display this error. Setting size to 0 disables checking of client request body size."
+description = "Sets the maximum allowed size of the client request body, specified in the Content-Length request header field. If a request exceeds the configured value, a 413 (Request Entity Too Large) error is returned to the client. Setting size to 0 disables checking of client request body size."
 
 [[variables]]
 key = "UPSTREAM_HTTP_ADDRESS"
 label = "Upstream address"
 default = ""
-description = "For example use https://caprover.com to forward all request to CapRover. Do not include a trailing slash.  If you're forwarding http requests to a CapRover internal app use http://srv-captain--yourappnamehere or if you want a particular port, use http://srv-captain--yourappnamehere:8080"
+description = "The destination all requests are forwarded to, e.g. https://example.com (do not include a trailing slash). To forward to another app on the same server use http://<other-app-service-name>:<port>."
 
 [[variables]]
-key = "_VERSION"
-label = "Version"
+key = "IMAGE_VERSION"
+label = "Image version"
 default = "1-ef5ffcb"
-description = "Additional tags can be found here: https://hub.docker.com/r/caprover/nginx-reverse-proxy/tags"
+description = "Image tag for caprover/nginx-reverse-proxy. Additional tags are listed at https://hub.docker.com/r/caprover/nginx-reverse-proxy/tags"

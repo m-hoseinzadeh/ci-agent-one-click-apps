@@ -1,13 +1,15 @@
 slug = "nginx-redirect"
 name = "Nginx Redirect"
 category = "App"
-description = "A simple nginx image preloaded with redirect config that allows you to redirect to another URL. Useful for domain alias creation."
+description = "A simple nginx image preloaded with redirect config that lets you redirect all incoming requests to another URL. Useful for creating domain aliases."
 keywords = ["nginx", "redirect"]
+http_port = 80
 compose = '''
 services:
   nginx-redirect:
-    image: caprover/nginx-redirect:latest
-    restart: always
+    image: caprover/nginx-redirect:1-14d89df
+    ports:
+      - '{{HTTP_PORT}}:80'
     environment:
       RETURN_LOCATION: return 301 {{REDIRECT_URL}}$$request_uri;
 '''
@@ -15,5 +17,5 @@ services:
 [[variables]]
 key = "REDIRECT_URL"
 label = "Redirect address"
-default = "https://caprover.com"
-description = "For example use https://caprover.com to redirect all request to CapRover."
+default = "https://example.com"
+description = "The destination URL that all requests are redirected to (e.g. https://example.com)."

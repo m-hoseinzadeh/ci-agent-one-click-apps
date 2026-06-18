@@ -1,15 +1,17 @@
 slug = "joomla"
 name = "Joomla - No Database"
 category = "Database"
-description = "This will create a Joomla only. You will need to create and configure the database information manually. Intended for advanced users."
+description = "This will create a Joomla only. You will need to create and configure the database information manually (an existing, externally managed MySQL/MariaDB). Intended for advanced users."
 keywords = ["database", "joomla", "no"]
+http_port = 80
 compose = '''
 services:
   joomla-joomla:
     image: joomla:{{JOOMLA_VERSION}}
+    ports:
+    - '{{HTTP_PORT}}:80'
     volumes:
     - joomla-joomla-data:/var/www/html
-    restart: always
     environment:
       JOOMLA_DB_HOST: '{{DB_HOST}}:3306'
       JOOMLA_DB_NAME: '{{DB_NAME}}'
@@ -22,26 +24,29 @@ volumes:
 [[variables]]
 key = "DB_HOST"
 label = "Database Host"
-default = "srv-captain--xxx"
-description = "Database Host"
+default = ""
+description = "Hostname of your existing external MySQL/MariaDB server. Leave port off — 3306 is appended automatically."
 
 [[variables]]
 key = "DB_NAME"
 label = "DB Name"
 default = "joomla"
-description = "Database Name"
-
-[[variables]]
-key = "DB_PASS"
-label = "Database Password"
+description = "Name of the existing database for Joomla."
 
 [[variables]]
 key = "DB_USER"
 label = "Database User"
 default = "joomla"
+description = "Database username with access to the Joomla database."
+
+[[variables]]
+key = "DB_PASS"
+label = "Database Password"
+default = ""
+description = "Password for the external database user. This is an external credential you provide; it is not generated."
 
 [[variables]]
 key = "JOOMLA_VERSION"
 label = "Joomla Version"
-default = "php7.3-apache"
+default = "6.1.1-php8.3-apache"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/joomla?tab=tags"

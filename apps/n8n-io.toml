@@ -3,6 +3,7 @@ name = "n8n.io"
 category = "Automation"
 description = "Node based workflow automation tool"
 keywords = ["io", "n8n", "n8n.io"]
+http_port = 5678
 compose = '''
 services:
   n8n-io-db:
@@ -24,8 +25,6 @@ services:
       GENERIC_TIMEZONE: '{{N8N_TIMEZONE}}'
       TZ: '{{N8N_TIMEZONE}}'
       NODE_ENV: '{{N8N_ENVIRONMENT}}'
-      N8N_PROTOCOL: https
-      N8N_HOST: n8n-io.{{ROOT_DOMAIN}}
       N8N_DIAGNOSTICS_ENABLED: '{{N8N_DIAGNOSTICS_ENABLED}}'
       N8N_EMAIL_MODE: smtp
       N8N_SMTP_HOST: '{{N8N_SMTP_HOST}}'
@@ -34,8 +33,8 @@ services:
       N8N_SMTP_PASS: '{{N8N_SMTP_PASS}}'
       N8N_SMTP_SENDER: '{{N8N_SMTP_SENDER}}'
       N8N_SMTP_SSL: '{{N8N_SMTP_SSL}}'
-      WEBHOOK_URL: https://n8n-io.{{ROOT_DOMAIN}}
-      N8N_EDITOR_BASE_URL: https://n8n-io.{{ROOT_DOMAIN}}
+      WEBHOOK_URL: '{{APP_URL}}'
+      N8N_EDITOR_BASE_URL: '{{APP_URL}}'
       N8N_ENCRYPTION_KEY: '{{N8N_ENCRYPTION_KEY}}'
       N8N_RUNNERS_ENABLED: true
     volumes:
@@ -61,7 +60,7 @@ description = "Whether to send telemetry data to n8n.io."
 key = "N8N_ENCRYPTION_KEY"
 label = "Application | Encryption key for credentials"
 generate = true
-description = "Password of the PostgreSQL database user."
+description = "Encryption key used to secure stored credentials. Keep it stable across restarts."
 
 [[variables]]
 key = "N8N_ENVIRONMENT"
@@ -137,7 +136,7 @@ default = "15.0-alpine"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Application | Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL where n8n is reached (e.g. https://n8n.example.com). Used for WEBHOOK_URL and the editor base URL. Set after a domain is assigned; leave blank initially."

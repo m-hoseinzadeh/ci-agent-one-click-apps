@@ -3,13 +3,13 @@ name = "jsreport"
 category = "App"
 description = "jsreport is an open source reporting platform where reports are designed using popular JavaScript templating engines"
 keywords = ["jsreport"]
+http_port = 5488
 compose = '''
 services:
   jsreport:
     image: jsreport/jsreport:{{JSREPORT_VERSION}}
     volumes:
     - jsreport-data:/jsreport
-    restart: always
     environment:
       extensions_authentication_admin_username: '{{JSREPORT_ADMINUSERNAME}}'
       extensions_authentication_admin_password: '{{JSREPORT_PASSWORD}}'
@@ -29,11 +29,12 @@ description = "Only use alphanumeric chars."
 [[variables]]
 key = "JSREPORT_PASSWORD"
 label = "Admin password"
+generate = true
 
 [[variables]]
 key = "JSREPORT_SECRET"
 label = "Session secret"
-default = "long-secret"
+generate = true
 
 [[variables]]
 key = "JSREPORT_VERSION"

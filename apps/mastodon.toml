@@ -1,13 +1,32 @@
 slug = "mastodon"
 name = "Mastodon"
 category = "App"
-description = "Social networking, back in your hands."
-keywords = ["mastodon"]
+description = "Self-hosted, federated social networking server (ActivityPub). After deploy, set LOCAL_DOMAIN to your assigned project domain and provide a VAPID key pair and SMTP credentials for full functionality."
+keywords = ["mastodon", "social", "fediverse", "activitypub"]
+http_port = 3000
 compose = '''
 services:
-  mastodon:
+  mastodon-db-migrate:
+    image: ghcr.io/mastodon/mastodon:{{MASTODON_VERSION}}
+    command: bundle exec rails db:migrate
+    restart: "no"
     environment:
-      LOCAL_DOMAIN: mastodon.{{ROOT_DOMAIN}}
+      RAILS_ENV: production
+      DB_HOST: mastodon-postgres
+      DB_USER: mastodon
+      DB_NAME: mastodon_production
+      DB_PASS: '{{POSTGRES_PASSWORD}}'
+      DB_PORT: 5432
+      REDIS_HOST: mastodon-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
+      SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
+      OTP_SECRET: '{{OTP_SECRET}}'
+  mastodon:
+    image: ghcr.io/mastodon/mastodon:{{MASTODON_VERSION}}
+    command: bundle exec puma -C config/puma.rb
+    environment:
+      LOCAL_DOMAIN: '{{LOCAL_DOMAIN}}'
       ALTERNATE_DOMAINS: '{{ALT_DOMAIN}}'
       REDIS_HOST: mastodon-redis
       REDIS_PORT: 6379
@@ -18,10 +37,10 @@ services:
       DB_PASS: '{{POSTGRES_PASSWORD}}'
       DB_PORT: 5432
       ES_ENABLED: 'false'
-      OTP_SECRET: '{{OPT_SECRET_BASE}}'
+      OTP_SECRET: '{{OTP_SECRET}}'
       SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
-      VAPID_PRIVATE_KEY: '{{GEN_RANDOM_HEX}}(16)'
-      VAPID_PUBLIC_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      VAPID_PRIVATE_KEY: '{{VAPID_PRIVATE_KEY}}'
+      VAPID_PUBLIC_KEY: '{{VAPID_PUBLIC_KEY}}'
       SINGLE_USER_MODE: '{{SU_MODE}}'
       SMTP_SERVER: '{{SMTP_SERVER}}'
       SMTP_PORT: '{{SMTP_PORT}}'
@@ -36,8 +55,10 @@ services:
     ports:
     - '{{HTTP_PORT}}:3000'
   mastodon-streaming:
+    image: ghcr.io/mastodon/mastodon-streaming:{{MASTODON_VERSION}}
+    command: node ./streaming/index.js
     environment:
-      LOCAL_DOMAIN: mastodon.{{ROOT_DOMAIN}}
+      LOCAL_DOMAIN: '{{LOCAL_DOMAIN}}'
       ALTERNATE_DOMAINS: '{{ALT_DOMAIN}}'
       REDIS_HOST: mastodon-redis
       REDIS_PORT: 6379
@@ -47,25 +68,13 @@ services:
       DB_NAME: mastodon_production
       DB_PASS: '{{POSTGRES_PASSWORD}}'
       DB_PORT: 5432
-      ES_ENABLED: 'false'
-      OTP_SECRET: '{{OPT_SECRET_BASE}}'
       SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
-      VAPID_PRIVATE_KEY: '{{GEN_RANDOM_HEX}}(16)'
-      VAPID_PUBLIC_KEY: '{{GEN_RANDOM_HEX}}(16)'
-      SINGLE_USER_MODE: '{{SU_MODE}}'
-      SMTP_SERVER: '{{SMTP_SERVER}}'
-      SMTP_PORT: '{{SMTP_PORT}}'
-      SMTP_LOGIN: '{{SMTP_USER}}'
-      SMTP_PASSWORD: '{{SMTP_PASS}}'
-      SMTP_FROM_ADDRESS: '{{SMTP_FROM}}'
-      SMTP_TLS: '{{SMTP_TLS}}'
-      S3_ENABLED: 'false'
       RAILS_ENV: production
-    volumes:
-    - mastodon-system:/mastodon/public/system
   mastodon-sidekiq:
+    image: ghcr.io/mastodon/mastodon:{{MASTODON_VERSION}}
+    command: bundle exec sidekiq
     environment:
-      LOCAL_DOMAIN: mastodon.{{ROOT_DOMAIN}}
+      LOCAL_DOMAIN: '{{LOCAL_DOMAIN}}'
       ALTERNATE_DOMAINS: '{{ALT_DOMAIN}}'
       REDIS_HOST: mastodon-redis
       REDIS_PORT: 6379
@@ -76,10 +85,10 @@ services:
       DB_PASS: '{{POSTGRES_PASSWORD}}'
       DB_PORT: 5432
       ES_ENABLED: 'false'
-      OTP_SECRET: '{{OPT_SECRET_BASE}}'
+      OTP_SECRET: '{{OTP_SECRET}}'
       SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
-      VAPID_PRIVATE_KEY: '{{GEN_RANDOM_HEX}}(16)'
-      VAPID_PUBLIC_KEY: '{{GEN_RANDOM_HEX}}(16)'
+      VAPID_PRIVATE_KEY: '{{VAPID_PRIVATE_KEY}}'
+      VAPID_PUBLIC_KEY: '{{VAPID_PUBLIC_KEY}}'
       SINGLE_USER_MODE: '{{SU_MODE}}'
       SMTP_SERVER: '{{SMTP_SERVER}}'
       SMTP_PORT: '{{SMTP_PORT}}'
@@ -100,10 +109,10 @@ services:
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
       POSTGRES_DB: mastodon_production
   mastodon-redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass '{{REDIS_PASSWORD}}'
     volumes:
     - mastodon-redis-data:/data
-    environment:
-      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
 volumes:
   mastodon-system:
   mastodon-postgres-data:
@@ -111,71 +120,97 @@ volumes:
 '''
 
 [[variables]]
+key = "MASTODON_VERSION"
+label = "Mastodon version"
+default = "v4.6.0"
+description = "Mastodon image tag to deploy."
+
+[[variables]]
+key = "LOCAL_DOMAIN"
+label = "Local domain"
+default = ""
+description = "The bare hostname Mastodon serves (e.g. social.example.com). Set this to your assigned project domain. This cannot be changed after the first account is created."
+
+[[variables]]
 key = "ALT_DOMAIN"
 label = "Alternate domains (optional)"
-description = "If you have multiple domains pointed at your Mastodon server, this setting will allow Mastodon to recognize itself when users are addressed using those other domains. Separate the domains by commas, e.g. foo.com,bar.com"
-
-[[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
 default = ""
+description = "If you have multiple domains pointed at your Mastodon server, this lets Mastodon recognize itself when users are addressed via those domains. Separate domains with commas, e.g. foo.com,bar.com"
 
 [[variables]]
-key = "OPT_SECRET_BASE"
+key = "VAPID_PRIVATE_KEY"
+label = "VAPID private key"
+default = ""
+description = "Web Push VAPID private key. Generate a key pair with 'rails mastodon:webpush:generate_vapid_key'. Required for push notifications."
+
+[[variables]]
+key = "VAPID_PUBLIC_KEY"
+label = "VAPID public key"
+default = ""
+description = "Web Push VAPID public key, paired with the private key above."
+
+[[variables]]
+key = "OTP_SECRET"
 label = "One-time password secret"
 generate = true
-description = "Two-Factor Authentication (2FA) Key"
+description = "Secret used for two-factor authentication (2FA). A long random string."
 
 [[variables]]
 key = "POSTGRES_PASSWORD"
 label = "Postgres Password"
 generate = true
-description = "Password must be at least 12 characters.  Please use a random string."
+description = "Database password. Use a long random string (at least 12 characters)."
 
 [[variables]]
 key = "REDIS_PASSWORD"
 label = "Redis Password"
 generate = true
-description = "Password must be at least 12 characters. Please use a random string."
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Redis password. Use a long random string (at least 12 characters)."
 
 [[variables]]
 key = "SECRET_KEY_BASE"
 label = "Secret Key Base"
 generate = true
-description = "The randomized string which is used to verify the integrity of signed cookies. Please use a string with more than 26 characters"
-
-[[variables]]
-key = "SMTP_FROM"
-label = "SMTP from"
-
-[[variables]]
-key = "SMTP_PASS"
-label = "SMTP password"
-
-[[variables]]
-key = "SMTP_PORT"
-label = "SMTP port"
+description = "Used to verify the integrity of signed cookies. A random string of more than 26 characters."
 
 [[variables]]
 key = "SMTP_SERVER"
 label = "SMTP hostname"
+default = ""
+description = "Outbound mail server hostname (external credential — leave blank if you have no SMTP server yet)."
 
 [[variables]]
-key = "SMTP_TLS"
-label = "SMTP TLS"
+key = "SMTP_PORT"
+label = "SMTP port"
+default = "587"
+description = "Outbound mail server port."
 
 [[variables]]
 key = "SMTP_USER"
 label = "SMTP username"
+default = ""
+description = "SMTP login username (external credential)."
+
+[[variables]]
+key = "SMTP_PASS"
+label = "SMTP password"
+default = ""
+description = "SMTP password (external credential — leave blank if unused)."
+
+[[variables]]
+key = "SMTP_FROM"
+label = "SMTP from address"
+default = ""
+description = "From address for outbound email, e.g. Mastodon <notifications@example.com>."
+
+[[variables]]
+key = "SMTP_TLS"
+label = "SMTP TLS"
+default = "true"
+description = "Whether to use TLS for SMTP (true/false)."
 
 [[variables]]
 key = "SU_MODE"
 label = "Single user mode"
 default = "false"
-description = "If set to true, the frontpage of your Mastodon server will always redirect to the first profile in the database and registrations will be disabled."
+description = "If true, the frontpage always redirects to the first profile in the database and registrations are disabled."

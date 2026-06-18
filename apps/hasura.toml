@@ -3,23 +3,21 @@ name = "Hasura"
 category = "Database"
 description = "Instant realtime GraphQL APIs on any Postgres application, existing or new"
 keywords = ["hasura"]
+http_port = 8080
 compose = '''
 services:
   hasura-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - hasura-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: '{{PG_USER}}'
       POSTGRES_PASSWORD: '{{PG_PASS}}'
       POSTGRES_DB: '{{PG_DB}}'
-      POSTGRES_INITDB_ARGS: '{{PG_INITDB_ARGS}}'
   hasura:
     image: hasura/graphql-engine:{{HASURA_VERSION}}
     depends_on:
     - hasura-db
-    restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: postgres://{{PG_USER}}:{{PG_PASS}}@hasura-db:5432/{{PG_DB}}
       HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
@@ -33,33 +31,32 @@ volumes:
 
 [[variables]]
 key = "ADMIN_SECRET"
-label = "Hasura admin secret(password)"
-description = "The admin secret gives you access to the console."
+label = "Hasura admin secret (password)"
+generate = true
+description = "The admin secret gives you access to the console and the GraphQL API."
 
 [[variables]]
 key = "HASURA_VERSION"
 label = "Hasura Version"
-default = "v1.2.2"
+default = "v2.45.5"
 description = "Check out their GitHub page for their latest version https://github.com/hasura/graphql-engine"
 
 [[variables]]
 key = "PG_DB"
 label = "Postgres Default Database"
-
-[[variables]]
-key = "PG_INITDB_ARGS"
-label = "OPTIONAL: Arguments for 'postgres initdb'"
-description = "For example, --data-checksums"
+default = "hasura"
 
 [[variables]]
 key = "PG_PASS"
 label = "Postgres Password"
+generate = true
 
 [[variables]]
 key = "PG_USER"
 label = "Postgres Username"
+default = "hasura"
 
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Postgres Version"
-default = "12"
+default = "16"

@@ -3,17 +3,19 @@ name = "Papercups"
 category = "Communication"
 description = "Papercups is an open source live customer chat web app written in Elixir."
 keywords = ["papercups"]
+http_port = 4000
 compose = '''
 services:
   papercups:
+    image: papercups/papercups:latest
     depends_on:
     - papercups-db
     environment:
       DATABASE_URL: ecto://postgres:{{POSTGRES_PASSWORD}}@papercups-db/postgres
       SECRET_KEY_BASE: '{{SECRET_KEY}}'
-      BACKEND_URL: papercups.{{ROOT_DOMAIN}}
+      BACKEND_URL: '{{BACKEND_URL}}'
       MIX_ENV: '{{MIX_ENV}}'
-      REACT_APP_URL: papercups.{{ROOT_DOMAIN}}
+      REACT_APP_URL: '{{REACT_APP_URL}}'
       FROM_ADDRESS: '{{EMAIL_FROM_ADDRESS}}'
       MAILGUN_API_KEY: '{{MAILGUN_API_KEY}}'
       DOMAIN: '{{EMAIL_FROM_DOMAIN}}'
@@ -39,41 +41,57 @@ services:
     - '{{HTTP_PORT}}:4000'
   papercups-db:
     image: postgres:{{POSTGRES_TAG}}
-    volume:
+    volumes:
     - papercups-db-data:/var/lib/postgresql/data
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
+volumes:
+  papercups-db-data:
 '''
 
 [[variables]]
 key = "AWS_ACCESS_KEY_ID"
 label = "AWS Access Key ID"
 default = ""
+description = "Optional. S3 access key for file uploads; leave blank if unused."
 
 [[variables]]
 key = "AWS_BUCKET"
 label = "AWS Bucket"
 default = ""
+description = "Optional. S3 bucket name for file uploads; leave blank if unused."
 
 [[variables]]
 key = "AWS_REGION"
 label = "AWS Region"
 default = ""
+description = "Optional. S3 region for file uploads; leave blank if unused."
 
 [[variables]]
 key = "AWS_SECRET_KEY"
-label = "AWS Secret Key ID"
+label = "AWS Secret Access Key"
 default = ""
+description = "Optional. S3 secret key for file uploads; leave blank if unused."
+
+[[variables]]
+key = "BACKEND_URL"
+label = "Backend URL"
+default = "localhost"
+description = "Public hostname used to build backend URLs. Set to your project's domain after creation."
 
 [[variables]]
 key = "CUSTOMER_IO_API_KEY"
 label = "Customer.io API Key"
 default = ""
+description = "Optional third-party Customer.io API key; leave blank if unused."
 
 [[variables]]
 key = "CUSTOMER_IO_SITE_ID"
 label = "Customer.io Site ID"
 default = ""
+description = "Optional third-party Customer.io site ID; leave blank if unused."
 
 [[variables]]
 key = "DB_REQUIRE_SSL"
@@ -88,12 +106,14 @@ default = "noreply@mail.papercups.io"
 [[variables]]
 key = "EMAIL_FROM_DOMAIN"
 label = "Email From Domain"
-default = "$$cap_appname.$$cap_root_domain"
+default = ""
+description = "Optional sending domain for transactional email (e.g. your Mailgun domain); leave blank if unused."
 
 [[variables]]
 key = "MAILGUN_API_KEY"
 label = "Mailgun API Key"
 default = ""
+description = "Optional third-party Mailgun API key for outbound email; leave blank if unused."
 
 [[variables]]
 key = "MIX_ENV"
@@ -109,39 +129,44 @@ generate = true
 [[variables]]
 key = "POSTGRES_TAG"
 label = "Postgres Tag"
-default = "9.6-alpine"
+default = "14-alpine"
 description = "Check out their docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"
+
+[[variables]]
+key = "REACT_APP_URL"
+label = "React App URL"
+default = "localhost"
+description = "Public hostname used by the frontend to reach the API. Set to your project's domain after creation."
 
 [[variables]]
 key = "REACT_GOOGLE_ANALYTICS_ID"
 label = "Google Analytics ID"
 default = ""
+description = "Optional Google Analytics measurement ID; leave blank if unused."
 
 [[variables]]
 key = "REACT_LOGROCKET_ID"
 label = "Papercups's React LogRocket ID"
 default = ""
+description = "Optional LogRocket app ID; leave blank if unused."
 
 [[variables]]
 key = "REACT_SENTRY_DSN"
 label = "Papercups's React Sentry DSN"
 default = ""
+description = "Optional frontend Sentry DSN; leave blank if unused."
 
 [[variables]]
 key = "REACT_SLACK_CLIENT_ID"
 label = "Papercups's React Slack Client ID"
 default = ""
+description = "Optional Slack OAuth client ID used by the frontend; leave blank if unused."
 
 [[variables]]
 key = "REACT_STRIPE_PUBLIC_ID"
 label = "Papercups's React Stripe Public ID"
 default = ""
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional Stripe publishable key used by the frontend; leave blank if unused."
 
 [[variables]]
 key = "SECRET_KEY"
@@ -153,26 +178,31 @@ description = "Must be at least 64 bytes"
 key = "SENTRY_DSN"
 label = "Sentry DSN"
 default = ""
+description = "Optional backend Sentry DSN; leave blank if unused."
 
 [[variables]]
 key = "SLACK_BOT_ACCESS_TOKEN"
 label = "Slack Bot Access Token"
 default = ""
+description = "Optional third-party Slack bot token; leave blank if unused."
 
 [[variables]]
 key = "SLACK_CLIENT_ID"
 label = "Slack Bot Client ID"
 default = ""
+description = "Optional Slack OAuth client ID; leave blank if unused."
 
 [[variables]]
 key = "SLACK_CLIENT_SECRET"
 label = "Slack Bot Client Secret"
 default = ""
+description = "Optional Slack OAuth client secret; leave blank if unused."
 
 [[variables]]
 key = "STRIPE_SECRET"
 label = "Stripe Secret"
 default = ""
+description = "Optional third-party Stripe secret key; leave blank if unused."
 
 [[variables]]
 key = "UPLOAD_ENABLED"

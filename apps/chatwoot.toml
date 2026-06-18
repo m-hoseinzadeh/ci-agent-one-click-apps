@@ -2,29 +2,35 @@ slug = "chatwoot"
 name = "Chatwoot"
 category = "Communication"
 description = "Open-source customer support SaaS alternative to Intercom, Drift, Crisp"
-keywords = ["chatwoot"]
+keywords = ["chatwoot", "support", "chat", "helpdesk"]
+http_port = 3000
 compose = '''
 services:
   chatwoot-postgres:
-    image: postgres:15
+    image: pgvector/pgvector:pg16
     volumes:
     - chatwoot-postgres-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: chatwoot
       POSTGRES_PASSWORD: '{{CHATWOOT_POSTGRES_PASSWORD}}'
       POSTGRES_DB: chatwoot
   chatwoot-redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass "{{CHATWOOT_REDIS_PASSWORD}}"
     volumes:
     - chatwoot-redis-data:/data
-    restart: always
-    environment:
-      REDIS_PASSWORD: '{{CHATWOOT_REDIS_PASSWORD}}'
-  chatwoot-web:
-    restart: always
+  chatwoot-migrate:
+    image: chatwoot/chatwoot:{{CHATWOOT_VERSION}}
+    command: bundle exec rails db:chatwoot_prepare
+    restart: "no"
+    depends_on:
+    - chatwoot-postgres
+    - chatwoot-redis
     environment:
       RAILS_ENV: production
       RAILS_LOG_TO_STDOUT: 'true'
+      INSTALLATION_ENV: docker
+      NODE_ENV: production
       SECRET_KEY_BASE: '{{CHATWOOT_SECRET_KEY_BASE}}'
       POSTGRES_HOST: chatwoot-postgres
       POSTGRES_DATABASE: chatwoot
@@ -32,15 +38,39 @@ services:
       POSTGRES_PASSWORD: '{{CHATWOOT_POSTGRES_PASSWORD}}'
       REDIS_URL: redis://chatwoot-redis:6379
       REDIS_PASSWORD: '{{CHATWOOT_REDIS_PASSWORD}}'
-      INSTALLATION_ENV: caprover
+  chatwoot-web:
+    image: chatwoot/chatwoot:{{CHATWOOT_VERSION}}
+    command: bundle exec rails s -p 3000 -b 0.0.0.0
+    depends_on:
+    - chatwoot-postgres
+    - chatwoot-redis
+    environment:
+      RAILS_ENV: production
+      RAILS_LOG_TO_STDOUT: 'true'
+      INSTALLATION_ENV: docker
+      NODE_ENV: production
+      FRONTEND_URL: '{{FRONTEND_URL}}'
+      SECRET_KEY_BASE: '{{CHATWOOT_SECRET_KEY_BASE}}'
+      POSTGRES_HOST: chatwoot-postgres
+      POSTGRES_DATABASE: chatwoot
+      POSTGRES_USERNAME: chatwoot
+      POSTGRES_PASSWORD: '{{CHATWOOT_POSTGRES_PASSWORD}}'
+      REDIS_URL: redis://chatwoot-redis:6379
+      REDIS_PASSWORD: '{{CHATWOOT_REDIS_PASSWORD}}'
     ports:
     - '{{HTTP_PORT}}:3000'
   chatwoot-worker:
-    restart: always
+    image: chatwoot/chatwoot:{{CHATWOOT_VERSION}}
+    command: bundle exec sidekiq -C config/sidekiq.yml
+    depends_on:
+    - chatwoot-postgres
+    - chatwoot-redis
     environment:
       RAILS_ENV: production
       RAILS_LOG_TO_STDOUT: 'true'
-      FRONTEND_URL: http://chatwoot.{{ROOT_DOMAIN}}
+      INSTALLATION_ENV: docker
+      NODE_ENV: production
+      FRONTEND_URL: '{{FRONTEND_URL}}'
       SECRET_KEY_BASE: '{{CHATWOOT_SECRET_KEY_BASE}}'
       POSTGRES_HOST: chatwoot-postgres
       POSTGRES_DATABASE: chatwoot
@@ -48,29 +78,37 @@ services:
       POSTGRES_PASSWORD: '{{CHATWOOT_POSTGRES_PASSWORD}}'
       REDIS_URL: redis://chatwoot-redis:6379
       REDIS_PASSWORD: '{{CHATWOOT_REDIS_PASSWORD}}'
-      INSTALLATION_ENV: caprover
 volumes:
   chatwoot-postgres-data:
   chatwoot-redis-data:
 '''
 
 [[variables]]
+key = "CHATWOOT_VERSION"
+label = "Chatwoot Version"
+default = "v4.7.0"
+description = "Chatwoot image tag to deploy."
+
+[[variables]]
 key = "CHATWOOT_POSTGRES_PASSWORD"
 label = "Postgres Password"
-description = "Password must be at least 12 characters.  Please use a random string."
+generate = true
+description = "Internal database password. Auto-generated; use at least 12 characters."
 
 [[variables]]
 key = "CHATWOOT_REDIS_PASSWORD"
 label = "Redis Password"
-description = "Password must be at least 12 characters. Please use a random string."
+generate = true
+description = "Internal Redis password. Auto-generated; use at least 12 characters."
 
 [[variables]]
 key = "CHATWOOT_SECRET_KEY_BASE"
 label = "Chatwoot Secret Key Base"
-description = "The randomized string which is used to verify the integrity of signed cookies. Please use a string with more than 26 characters"
+generate = true
+description = "Randomized string used to verify signed cookies. Auto-generated; use 64+ characters."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "FRONTEND_URL"
+label = "Frontend URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL of this Chatwoot instance (e.g. https://chat.example.com). Leave blank until a domain is assigned, then set it so links and webhooks resolve correctly."

@@ -3,11 +3,11 @@ name = "Matrix Synapse"
 category = "Communication"
 description = "Server for the matrix protocol"
 keywords = ["matrix", "synapse"]
+http_port = 8008
 compose = '''
 services:
   matrix-synapse-db:
     image: postgres:{{POSTGRES_VERSION}}
-    restart: unless-stopped
     environment:
       POSTGRES_DB: synapse_db
       POSTGRES_PASSWORD: '{{DB_PASSWORD}}'
@@ -16,8 +16,15 @@ services:
     volumes:
     - matrix-synapse-db:/var/lib/postgresql/data
   matrix-synapse:
-    restart: unless-stopped
+    image: matrixdotorg/synapse:{{SYNAPSE_VERSION}}
     environment:
+      SYNAPSE_SERVER_NAME: '{{SERVER_NAME}}'
+      SYNAPSE_REPORT_STATS: '{{REPORT_STATS}}'
+      SYNAPSE_CONFIG_PATH: /data/homeserver.yaml
+      POSTGRES_HOST: matrix-synapse-db
+      POSTGRES_DB: synapse_db
+      POSTGRES_USER: synapse_user
+      POSTGRES_PASSWORD: '{{DB_PASSWORD}}'
       TZ: '{{TIME_ZONE}}'
     volumes:
     - matrix-synapse-data:/data
@@ -33,6 +40,24 @@ key = "DB_PASSWORD"
 label = "Database password"
 generate = true
 description = "The password for the Synapse database."
+
+[[variables]]
+key = "SYNAPSE_VERSION"
+label = "Synapse version"
+default = "latest"
+description = "The matrixdotorg/synapse image tag to deploy. See https://hub.docker.com/r/matrixdotorg/synapse/tags"
+
+[[variables]]
+key = "SERVER_NAME"
+label = "Server name"
+default = ""
+description = "The public domain of your Matrix homeserver (e.g. matrix.example.com). Used as your user-id suffix and cannot be changed later. Leave blank only if you will generate the config manually."
+
+[[variables]]
+key = "REPORT_STATS"
+label = "Report anonymous statistics"
+default = "no"
+description = "Whether to report anonymous usage statistics to matrix.org (yes/no)."
 
 [[variables]]
 key = "POSTGRES_VERSION"

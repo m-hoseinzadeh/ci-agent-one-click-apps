@@ -3,28 +3,28 @@ name = "Chaskiq"
 category = "Communication"
 description = "A full-featured Live Chat, Support & Marketing platform"
 keywords = ["chaskiq"]
+http_port = 3000
 compose = '''
 services:
   chaskiq-postgres:
     image: postgres:12
     volumes:
     - chaskiq-postgres-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: chaskiq
       POSTGRES_PASSWORD: '{{CHASKIQ_POSTGRES_PASSWORD}}'
       POSTGRES_DB: chaskiq
   chaskiq-redis:
+    image: redis:alpine
+    command: redis-server --requirepass "{{CHASKIQ_REDIS_PASSWORD}}"
     volumes:
     - chaskiq-redis-data:/data
-    restart: always
-    environment:
-      REDIS_PASSWORD: '{{CHASKIQ_REDIS_PASSWORD}}'
   chaskiq-web:
-    restart: always
+    image: chaskiq/chaskiq:{{CHASKIQ_VERSION}}
+    command: sh -c "bundle exec rails db:setup; bundle exec rails admin_generator; bundle exec rails s -b 0.0.0.0 -p 3000"
     environment:
-      HOST: https://chaskiq-web.{{ROOT_DOMAIN}}
-      WS: wss://chaskiq-web.{{ROOT_DOMAIN}}/cable
+      HOST: '{{APP_URL}}'
+      WS: '{{APP_URL}}/cable'
       RAILS_ENV: production
       RAILS_LOG_TO_STDOUT: 'true'
       RAILS_SERVE_STATIC_FILES: 'true'
@@ -45,10 +45,11 @@ services:
     ports:
     - '{{HTTP_PORT}}:3000'
   chaskiq-worker:
-    restart: always
+    image: chaskiq/chaskiq:{{CHASKIQ_VERSION}}
+    command: bundle exec sidekiq -C config/sidekiq.yml
     environment:
-      HOST: https://chaskiq.{{ROOT_DOMAIN}}
-      WS: wss://chaskiq.{{ROOT_DOMAIN}}/cable
+      HOST: '{{APP_URL}}'
+      WS: '{{APP_URL}}/cable'
       RAILS_ENV: production
       RAILS_LOG_TO_STDOUT: 'true'
       SECRET_KEY_BASE: '{{CHASKIQ_SECRET_KEY_BASE}}'
@@ -71,6 +72,18 @@ volumes:
 '''
 
 [[variables]]
+key = "CHASKIQ_VERSION"
+label = "Chaskiq image version"
+default = "9009088"
+description = "The chaskiq/chaskiq image tag to deploy."
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Public base URL used to build links (e.g. https://chat.yourdomain.com). Set after assigning a domain; leave blank to fill in later."
+
+[[variables]]
 key = "ADMIN_PASSWORD"
 label = "Admin Password"
 generate = true
@@ -85,37 +98,44 @@ description = "This is the admin email. Please change it."
 [[variables]]
 key = "CHASKIQ_AWS_ACCESS_KEY"
 label = "AWS access key"
-description = "Amazon access key (for file storage and email dispatching S3 / SES / SNS)"
+default = ""
+description = "Amazon secret access key (for file storage and email dispatching S3 / SES / SNS). Obtain from AWS; leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_AWS_KEY_ID"
 label = "AWS access key id"
-description = "Amazon access key id (for file storage and email dispatching S3 / SES / SNS)"
+default = ""
+description = "Amazon access key id (for file storage and email dispatching S3 / SES / SNS). Obtain from AWS; leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_AWS_S3_BUCKET"
 label = "AWS S3 bucket"
-description = "Amazon S3 bucket name"
+default = ""
+description = "Amazon S3 bucket name. Leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_AWS_S3_REGION"
 label = "AWS bucket region"
-description = "AWS S3 bucket region like: us-east-1"
+default = ""
+description = "AWS S3 bucket region like: us-east-1. Leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_DEFAULT_ONGOING_DOMAIN"
 label = "Default deliver domain"
-description = "For multiple email deliver tasks, like mail.yourdomain.com"
+default = ""
+description = "For multiple email deliver tasks, like mail.yourdomain.com. Leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_DEFAULT_SENDER_EMAIL"
 label = "Default sender email"
-description = "Default email sender, like: notifications@mail.yourapp.com"
+default = ""
+description = "Default email sender, like: notifications@mail.yourapp.com. Leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_GEOCODER_API_KEY"
 label = "Geocoder API key"
-description = "leave this empty if maxmind_local service is set"
+default = ""
+description = "Third-party geocoder API key. Leave empty if maxmind_local service is set."
 
 [[variables]]
 key = "CHASKIQ_GEOCODER_SERVICE"
@@ -138,16 +158,11 @@ description = "Password must be at least 12 characters. Please use a random stri
 [[variables]]
 key = "CHASKIQ_SCOUTAPP_KEY"
 label = "Scout app key"
-description = "Scout AMP key, for performance & error monitoring (optional)"
+default = ""
+description = "Scout APM key, for performance & error monitoring (optional, third-party). Leave blank if unused."
 
 [[variables]]
 key = "CHASKIQ_SECRET_KEY_BASE"
 label = "Chaskiq Secret Key Base"
 generate = true
 description = "The randomized string which is used to verify the integrity of signed cookies. Please use a string with more than 26 characters"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

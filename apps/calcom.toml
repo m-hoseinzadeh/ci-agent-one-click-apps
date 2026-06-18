@@ -3,12 +3,13 @@ name = "Cal.com"
 category = "App"
 description = "Scheduling Infrastructure For Everyone"
 keywords = ["cal.com", "calcom"]
+http_port = 3000
 compose = '''
 services:
   calcom:
     image: calcom/cal.com:{{CALCOM_VERSION}}
     environment:
-      NEXT_PUBLIC_WEBAPP_URL: http://calcom.{{ROOT_DOMAIN}}
+      NEXT_PUBLIC_WEBAPP_URL: '{{CALCOM_APP_URL}}'
       NEXTAUTH_SECRET: '{{CALCOM_NEXTAUTH_SECRET}}'
       CALENDSO_ENCRYPTION_KEY: '{{CALCOM_CALENDSO_ENCRYPTION_KEY}}'
       CALCOM_TELEMETRY_DISABLED: '{{CALCOM_TELEMETRY_DISABLED}}'
@@ -114,7 +115,7 @@ default = "15.0-alpine"
 description = "PostgreSQL version. Check out their valid tags at https://hub.docker.com/_/postgres/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "CALCOM_APP_URL"
+label = "Application | Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL of this Cal.com instance (e.g. https://cal.example.com). Set after the project domain is assigned; needed for correct links and OAuth callbacks."

@@ -1,8 +1,9 @@
 slug = "formance-ledger"
 name = "Formance Ledger"
 category = "App"
-description = "Programmable Financial Ledger To Build Money-Moving Applications"
+description = "Programmable financial ledger to build money-moving applications, backed by PostgreSQL."
 keywords = ["formance", "ledger"]
+http_port = 3068
 compose = '''
 services:
   formance-ledger:
@@ -28,11 +29,6 @@ services:
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
     volumes:
     - formance-ledger-db:/var/lib/postgresql/data
-  formance-ledger-ui:
-    environment:
-      NUMARY_UI_HTTP_BIND_ADDRESS: 0.0.0.0:3078
-    depends_on:
-    - formance-ledger
 volumes:
   formance-ledger:
   formance-ledger-db:
@@ -41,8 +37,8 @@ volumes:
 [[variables]]
 key = "FORMANCE_LEDGER_AUTH_BASIC_CREDENTIALS"
 label = "Application | Basic Authentication Credentials"
-generate = true
-description = "Basic authentication credentials, when enabled. Format is `username:password`."
+default = ""
+description = "Basic authentication credentials, when enabled. Format is `username:password`. Leave blank to disable basic auth (set Enable Basic Authentication to false)."
 
 [[variables]]
 key = "FORMANCE_LEDGER_AUTH_BASIC_ENABLED"
@@ -60,7 +56,7 @@ description = "Whether to send usage statistics to Segment."
 key = "FORMANCE_LEDGER_VERSION"
 label = "Application | Version"
 default = "v1.8.0"
-description = "Version of Formance. Check out their valid tags at https://github.com/formancehq/ledger/pkgs/container/ledger"
+description = "Version of Formance Ledger. Check out their valid tags at https://github.com/formancehq/ledger/pkgs/container/ledger"
 
 [[variables]]
 key = "POSTGRES_DB"

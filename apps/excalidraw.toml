@@ -1,40 +1,39 @@
 slug = "excalidraw"
 name = "Excalidraw"
 category = "App"
-description = "Virtual whiteboard for sketching hand-drawn like diagrams or normal ones. Collaborative and end-to-end encrypted."
-keywords = ["excalidraw"]
+description = "Virtual whiteboard for sketching hand-drawn like diagrams or normal ones. Collaborative and end-to-end encrypted. The collaboration room and storage backend are browser-reachable services: after the project gets a domain, expose them and set the *_URL variables so live collaboration and scene saving work."
+keywords = ["excalidraw", "whiteboard", "diagrams", "collaboration"]
+http_port = 80
 compose = '''
 services:
   excalidraw:
-    image: kiliandeca/excalidraw@{{EXCALIDRAW_VERSION}}
-    restart: always
+    image: kiliandeca/excalidraw:{{EXCALIDRAW_VERSION}}
+    healthcheck:
+      disable: true
     environment:
-      BACKEND_V2_GET_URL: https://excalidraw-storage.{{ROOT_DOMAIN}}/api/v2/scenes/
-      BACKEND_V2_POST_URL: https://excalidraw-storage.{{ROOT_DOMAIN}}/api/v2/scenes/
+      BACKEND_V2_GET_URL: "{{STORAGE_BACKEND_URL}}/api/v2/scenes/"
+      BACKEND_V2_POST_URL: "{{STORAGE_BACKEND_URL}}/api/v2/scenes/"
       LIBRARY_URL: https://libraries.excalidraw.com
       LIBRARY_BACKEND: https://us-central1-excalidraw-room-persistence.cloudfunctions.net/libraries
-      SOCKET_SERVER_URL: https://excalidraw-room.{{ROOT_DOMAIN}}/
-      STORAGE_BACKEND: https
-      HTTP_STORAGE_BACKEND_URL: https://excalidraw-storage.{{ROOT_DOMAIN}}/api/v2
+      SOCKET_SERVER_URL: "{{ROOM_URL}}"
+      STORAGE_BACKEND: "http"
+      HTTP_STORAGE_BACKEND_URL: "{{STORAGE_BACKEND_URL}}/api/v2"
     depends_on:
     - excalidraw-room
     - excalidraw-storage-backend
+    ports:
+    - '{{HTTP_PORT}}:80'
   excalidraw-room:
-    image: excalidraw/excalidraw-room
-    restart: always
+    image: excalidraw/excalidraw-room:{{ROOM_VERSION}}
   excalidraw-storage-backend:
-    image: kiliandeca/excalidraw-storage-backend@{{STORAGE_BACKEND_VERSION}}
-    restart: always
+    image: kiliandeca/excalidraw-storage-backend:{{STORAGE_BACKEND_VERSION}}
     environment:
       STORAGE_URI: redis://excalidraw-redis:6379
-      STORAGE_TTL: 2592000000
+      STORAGE_TTL: "2592000000"
     depends_on:
     - excalidraw-redis
-    ports:
-    - '{{HTTP_PORT}}:8080'
   excalidraw-redis:
     image: redis:{{REDIS_VERSION}}
-    restart: always
     volumes:
     - excalidraw-redis-data:/data
 volumes:
@@ -44,23 +43,35 @@ volumes:
 [[variables]]
 key = "EXCALIDRAW_VERSION"
 label = "Excalidraw version"
-default = "sha256:2fe5a14cc0aab940dcf6144a6a5e73b9d044bdf0148762f9c7bc0ceea424c872"
-description = "Check out this Docker page for any valid tags https://hub.docker.com/r/kiliandeca/excalidraw/tags"
+default = "latest"
+description = "Frontend image tag. See https://hub.docker.com/r/kiliandeca/excalidraw/tags"
 
 [[variables]]
-key = "REDIS_VERSION"
-label = "Redis Version"
-default = "7.0.3"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redis?tab=tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "ROOM_VERSION"
+label = "Excalidraw room version"
+default = "latest"
+description = "Collaboration room image tag. See https://hub.docker.com/r/excalidraw/excalidraw-room/tags"
 
 [[variables]]
 key = "STORAGE_BACKEND_VERSION"
-label = "Excalidraw storage backend adapter version"
-default = "sha256:dd01b5214ad2e24970bdc255e28b2921ab59b1db14dbb826979d1fdea1c5c20b"
-description = "Check out this Docker page for any valid tags https://hub.docker.com/r/kiliandeca/excalidraw-storage-backend/tags"
+label = "Excalidraw storage backend version"
+default = "latest"
+description = "Storage backend image tag. See https://hub.docker.com/r/kiliandeca/excalidraw-storage-backend/tags"
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis version"
+default = "7"
+description = "Redis image tag used by the storage backend. See https://hub.docker.com/_/redis?tab=tags"
+
+[[variables]]
+key = "STORAGE_BACKEND_URL"
+label = "Storage backend public URL"
+default = ""
+description = "Browser-reachable base URL of the storage backend (port 8080), e.g. https://excalidraw-storage.example.com. The frontend calls this from the user's browser to save/load scenes, so it must be publicly reachable. Leave blank to disable scene saving. Do not add a trailing slash."
+
+[[variables]]
+key = "ROOM_URL"
+label = "Collaboration room public URL"
+default = ""
+description = "Browser-reachable URL of the excalidraw-room websocket server (port 80), e.g. https://excalidraw-room.example.com/. The frontend connects here from the user's browser for live collaboration, so it must be publicly reachable. Leave blank to disable real-time collaboration."

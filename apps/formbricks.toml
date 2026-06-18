@@ -3,13 +3,13 @@ name = "Formbricks"
 category = "App"
 description = "Formbricks - The Open Source Survey & Experience Management solution for fast growing companies"
 keywords = ["formbricks"]
+http_port = 3000
 compose = '''
 services:
   formbricks-db:
-    image: postgres:{{POSTGRES_VERSION}}
+    image: pgvector/pgvector:{{POSTGRES_VERSION}}
     volumes:
     - formbricks-db-data:/var/lib/postgresql/data
-    restart: unless-stopped
     environment:
       POSTGRES_USER: formbricks
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
@@ -18,13 +18,13 @@ services:
     image: formbricks/formbricks:{{FORMBRICKS_TAG}}
     depends_on:
     - formbricks-db
-    restart: unless-stopped
     environment:
-      DATABASE_URL: postgres://formbricks:{{POSTGRES_PASSWORD}}@formbricks-db/{{POSTGRES_DB}}?sslmode=disable
-      WEBAPP_URL: https://formbricks.{{ROOT_DOMAIN}}/
-      NEXTAUTH_SECRET: '{{GEN_RANDOM_HEX}}(32)'
-      NEXTAUTH_URL: https://formbricks.{{ROOT_DOMAIN}}/
-      ENCRYPTION_KEY: '{{GEN_RANDOM_HEX}}(64)'
+      DATABASE_URL: postgresql://formbricks:{{POSTGRES_PASSWORD}}@formbricks-db:5432/{{POSTGRES_DB}}?schema=public
+      WEBAPP_URL: '{{APP_URL}}'
+      NEXTAUTH_URL: '{{APP_URL}}'
+      NEXTAUTH_SECRET: '{{NEXTAUTH_SECRET}}'
+      ENCRYPTION_KEY: '{{ENCRYPTION_KEY}}'
+      CRON_SECRET: '{{CRON_SECRET}}'
       EMAIL_VERIFICATION_DISABLED: '{{EMAIL_VERIFICATION_DISABLED}}'
       MAIL_FROM: '{{MAIL_FROM}}'
       SMTP_HOST: '{{SMTP_HOST}}'
@@ -42,21 +42,34 @@ volumes:
 '''
 
 [[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Public base URL where Formbricks will be reachable (e.g. https://surveys.example.com). Used for WEBAPP_URL and NEXTAUTH_URL. Set this after assigning a domain to the project."
+
+[[variables]]
+key = "CRON_SECRET"
+label = "Cron Secret"
+generate = true
+description = "API secret used to authenticate internal cron jobs. Auto-generated."
+
+[[variables]]
 key = "EMAIL_VERIFICATION_DISABLED"
 label = "Email Verification Disabled"
-default = "0"
+default = "1"
 description = "Disable email verification for new accounts. Set to 1 to disable, 0 to enable. Requires SMTP settings to be configured if enabled."
+
+[[variables]]
+key = "ENCRYPTION_KEY"
+label = "Encryption Key"
+generate = true
+description = "32-byte hex key used to encrypt sensitive data at rest. Auto-generated."
 
 [[variables]]
 key = "FORMBRICKS_TAG"
 label = "Formbricks Version"
 default = "2.1.1"
-description = "Check out our docker page for the valid tags https://hub.docker.com/r/formbricks/formbricks/tags"
-
-[[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
-default = ""
+description = "Check out the docker page for the valid tags https://hub.docker.com/r/formbricks/formbricks/tags"
 
 [[variables]]
 key = "INVITE_DISABLED"
@@ -67,8 +80,14 @@ description = "Disable the ability for invited users to create an account. Set t
 [[variables]]
 key = "MAIL_FROM"
 label = "Mail From"
-default = "example_from_address@example.com"
-description = "The email address to use as the sender for outgoing emails. Delete variable to disable email functionality."
+default = ""
+description = "The email address to use as the sender for outgoing emails. Leave blank to disable email functionality."
+
+[[variables]]
+key = "NEXTAUTH_SECRET"
+label = "NextAuth Secret"
+generate = true
+description = "Secret used to sign authentication sessions. Auto-generated."
 
 [[variables]]
 key = "PASSWORD_RESET_DISABLED"
@@ -88,14 +107,9 @@ generate = true
 
 [[variables]]
 key = "POSTGRES_VERSION"
-label = "Postgres Version"
-default = "13.1"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+label = "Postgres (pgvector) Version"
+default = "pg16"
+description = "Tag of the pgvector/pgvector image. Formbricks requires the pgvector extension, so a pgvector-enabled Postgres image is used."
 
 [[variables]]
 key = "SIGNUP_DISABLED"
@@ -106,14 +120,14 @@ description = "Disable the ability for new users to create an account. Set to 1 
 [[variables]]
 key = "SMTP_HOST"
 label = "SMTP Host"
-default = "smtp.example_server_address.example.com"
-description = "The hostname of your SMTP server. Delete variable to disable email functionality."
+default = ""
+description = "The hostname of your SMTP server. Leave blank to disable email functionality."
 
 [[variables]]
 key = "SMTP_PASSWORD"
 label = "SMTP Password"
-default = "a_secure_password"
-description = "The password for your SMTP server. Delete variable to disable email functionality."
+default = ""
+description = "The password for your SMTP server. External credential - leave blank to disable email functionality."
 
 [[variables]]
 key = "SMTP_PORT"
@@ -125,10 +139,10 @@ description = "The port of your SMTP server. Typically 587 for TLS or 465 for SS
 key = "SMTP_SECURE_ENABLED"
 label = "SMTP Secure Enabled"
 default = "1"
-description = "Enable SMTP_SECURE_ENABLED for TLS (port 465). Set to 1 to enable, 0 to disable."
+description = "Enable for TLS/SSL (port 465). Set to 1 to enable, 0 to disable."
 
 [[variables]]
 key = "SMTP_USER"
 label = "SMTP User"
-default = "usually_example_from_address@example.com"
-description = "The username for your SMTP server. Delete variable to disable email functionality."
+default = ""
+description = "The username for your SMTP server. Leave blank to disable email functionality."

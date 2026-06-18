@@ -3,12 +3,13 @@ name = "ChangeDetection.io"
 category = "Monitoring"
 description = "ChangeDetection.io is the self-hosted website change detection monitoring."
 keywords = ["changedetection", "changedetection.io"]
+http_port = 5000
 compose = '''
 services:
   changedetection:
     image: dgtlmoon/changedetection.io:{{VERSION}}
     environment:
-      BASE_URL: http://changedetection.{{ROOT_DOMAIN}}
+      BASE_URL: "{{APP_URL}}"
     volumes:
     - changedetection-data:/datastore
     ports:
@@ -18,10 +19,10 @@ volumes:
 '''
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Public base URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional. Public base URL of this app (e.g. https://changedetection.example.com), used to build links in change notifications. Leave blank to set later."
 
 [[variables]]
 key = "VERSION"

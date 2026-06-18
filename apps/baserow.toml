@@ -3,12 +3,13 @@ name = "Baserow"
 category = "Database"
 description = "Open Source No-Code Database And Airtable Alternative"
 keywords = ["baserow"]
+http_port = 80
 compose = '''
 services:
   baserow:
     image: baserow/baserow:{{BASEROW_VERSION}}
     environment:
-      BASEROW_PUBLIC_URL: http://baserow.{{ROOT_DOMAIN}}
+      BASEROW_PUBLIC_URL: '{{BASEROW_PUBLIC_URL}}'
       FROM_EMAIL: '{{BASEROW_FROM_EMAIL}}'
       EMAIL_SMTP: '{{BASEROW_EMAIL_SMTP_ENABLED}}'
       EMAIL_SMTP_HOST: '{{BASEROW_EMAIL_SMTP_HOST}}'
@@ -17,11 +18,19 @@ services:
       EMAIL_SMTP_PASSWORD: '{{BASEROW_EMAIL_SMTP_PASSWORD}}'
       EMAIL_SMTP_USE_TLS: '{{BASEROW_EMAIL_SMTP_USE_TLS}}'
       EMAIL_SMTP_USE_SSL: '{{BASEROW_EMAIL_SMTP_USE_SSL}}'
+    ports:
+    - '{{HTTP_PORT}}:80'
     volumes:
     - baserow-data:/baserow/data
 volumes:
   baserow-data:
 '''
+
+[[variables]]
+key = "BASEROW_PUBLIC_URL"
+label = "Public URL"
+default = "http://localhost"
+description = "The URL Baserow is served from, exactly as entered in the browser (e.g. https://your-domain). Set this to your assigned project domain after the project is created; defaults to http://localhost."
 
 [[variables]]
 key = "BASEROW_EMAIL_SMTP_ENABLED"
@@ -36,7 +45,7 @@ description = "The host of the external SMTP server that Baserow should use to s
 [[variables]]
 key = "BASEROW_EMAIL_SMTP_PASSWORD"
 label = "SMTP | Password"
-description = "The password to authenticate with the external SMTP server when sending emails"
+description = "External credential: the password to authenticate with your SMTP server. Leave blank if SMTP is not used."
 
 [[variables]]
 key = "BASEROW_EMAIL_SMTP_PORT"
@@ -68,9 +77,3 @@ key = "BASEROW_VERSION"
 label = "Version"
 default = "1.18.0"
 description = "Check out their valid tags at https://hub.docker.com/r/baserow/baserow/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

@@ -3,14 +3,14 @@ name = "Owncast"
 category = "Communication"
 description = "Self-hosted live video and web chat server"
 keywords = ["owncast"]
+http_port = 8080
 compose = '''
 services:
   owncast:
     image: gabekangas/owncast:{{OWNCAST_VERSION}}
-    hostname: owncast.{{ROOT_DOMAIN}}
     ports:
-    - '{{HTTP_PORT}}:$$cap_OWNCAST_HTTP_PORT'
-    - '{{OWNCAST_RMTP_PORT}}:{{OWNCAST_RMTP_PORT}}'
+    - '{{HTTP_PORT}}:8080'
+    - '{{OWNCAST_RMTP_PORT}}:1935'
     volumes:
     - owncast:/app/data
 volumes:
@@ -28,9 +28,3 @@ key = "OWNCAST_VERSION"
 label = "General | Version Tag"
 default = "0.0.12"
 description = "Check out their valid tags at https://hub.docker.com/r/gabekangas/owncast/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

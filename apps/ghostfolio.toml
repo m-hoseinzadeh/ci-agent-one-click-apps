@@ -3,36 +3,41 @@ name = "Ghostfolio"
 category = "CMS"
 description = "Open Source Wealth Management Software"
 keywords = ["ghostfolio"]
+http_port = 3333
 compose = '''
 services:
   ghostfolio:
     image: ghostfolio/ghostfolio:{{GHOSTFOLIO_VERSION}}
-    hostname: ghostfolio.{{ROOT_DOMAIN}}
     environment:
       NODE_ENV: '{{NODE_ENV}}'
+      HOST: 0.0.0.0
+      PORT: 3333
       ACCESS_TOKEN_SALT: '{{ACCESS_TOKEN_SALT}}'
       BASE_CURRENCY: '{{BASE_CURRENCY}}'
-      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@ghostfolio-db:5432/{{POSTGRES_DB}}?sslmode=prefer
-      HOST: ghostfolio.{{ROOT_DOMAIN}}
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@ghostfolio-db:5432/{{POSTGRES_DB}}?connect_timeout=300&sslmode=prefer
       JWT_SECRET_KEY: '{{JWT_SECRET_KEY}}'
       POSTGRES_DB: '{{POSTGRES_DB}}'
       POSTGRES_USER: '{{POSTGRES_USER}}'
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
       REDIS_HOST: ghostfolio-cache
       REDIS_PORT: 6379
+      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
     ports:
     - '{{HTTP_PORT}}:3333'
+    depends_on:
+    - ghostfolio-db
+    - ghostfolio-cache
   ghostfolio-db:
     image: postgres:{{POSTGRES_VERSION}}
     environment:
       POSTGRES_DB: '{{POSTGRES_DB}}'
       POSTGRES_USER: '{{POSTGRES_USER}}'
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
-      POSTGRES_ROOT_PASSWORD: '{{POSTGRES_ROOT_PASSWORD}}'
     volumes:
     - ghostfolio-db:/var/lib/postgresql/data
   ghostfolio-cache:
     image: redis:{{REDIS_VERSION}}
+    command: redis-server --requirepass "{{REDIS_PASSWORD}}"
 volumes:
   ghostfolio-db:
 '''
@@ -80,12 +85,6 @@ generate = true
 description = "The password of the PostgreSQL database."
 
 [[variables]]
-key = "POSTGRES_ROOT_PASSWORD"
-label = "Database Root User Password"
-generate = true
-description = "The password of the PostgreSQL database root user."
-
-[[variables]]
 key = "POSTGRES_USER"
 label = "Database User"
 default = "ghostfolio"
@@ -94,17 +93,17 @@ description = "The user of the PostgreSQL database."
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Postgres Version"
-default = "15.0-alpine"
+default = "15-alpine"
 description = "Check out their valid tags at https://hub.docker.com/_/postgres/tags"
+
+[[variables]]
+key = "REDIS_PASSWORD"
+label = "Redis Password"
+generate = true
+description = "The password protecting the internal Redis cache."
 
 [[variables]]
 key = "REDIS_VERSION"
 label = "Redis Version"
-default = "7.0-alpine"
+default = "7-alpine"
 description = "Check out their valid tags at https://hub.docker.com/_/redis/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

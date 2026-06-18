@@ -3,6 +3,7 @@ name = "Keila"
 category = "Communication"
 description = "Free and open source email newsletter tool."
 keywords = ["keila"]
+http_port = 4000
 compose = '''
 services:
   keila:
@@ -12,7 +13,7 @@ services:
       DB_ENABLE_SSL: '{{KEILA_DB_ENABLE_SSL}}'
       KEILA_USER: '{{KEILA_USER}}'
       KEILA_PASSWORD: '{{KEILA_PASSWORD}}'
-      URL_HOST: keila.{{ROOT_DOMAIN}}
+      URL_HOST: '{{KEILA_URL_HOST}}'
       URL_PATH: '{{KEILA_URL_PATH}}'
       URL_SCHEMA: '{{KEILA_URL_SCHEMA}}'
       URL_PORT: '{{KEILA_URL_PORT}}'
@@ -34,7 +35,7 @@ services:
     volumes:
     - keila-upload:/opt/app/uploads
     ports:
-    - '{{HTTP_PORT}}:$$cap_KEILA_PORT'
+    - '{{HTTP_PORT}}:{{KEILA_PORT}}'
   keila-db:
     image: postgres:{{POSTGRES_VERSION}}
     environment:
@@ -182,11 +183,11 @@ description = "Database user."
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "PostgreSQL | Version Tag"
-default = "14.5"
+default = "16"
 description = "Check out their valid tags at https://hub.docker.com/_/postgres/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "KEILA_URL_HOST"
+label = "Keila | URL Host"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public hostname Keila uses to build links (e.g. mail.example.com). Set after ci-agent assigns the project domain; leave blank to use the host header."

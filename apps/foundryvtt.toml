@@ -3,6 +3,7 @@ name = "Foundry Virtual Tabletop"
 category = "App"
 description = "Foundry VTT is an application built for experiencing multiplayer tabletop RPGs where your players connect directly through the browser. REQUIRES LICENCE"
 keywords = ["foundry", "foundryvtt", "tabletop", "virtual"]
+http_port = 30000
 compose = '''
 services:
   foundryvtt:
@@ -26,7 +27,8 @@ volumes:
 [[variables]]
 key = "FOUNDRY_ADMIN_KEY"
 label = "Admin password"
-description = "Admin password to be applied at startup. If omitted the admin password will be cleared."
+generate = true
+description = "Admin password to be applied at startup. A fresh value is generated for you; if cleared the admin password will be cleared."
 
 [[variables]]
 key = "FOUNDRY_CONTAINER_CACHE"
@@ -43,14 +45,14 @@ description = "Set to true to reduce network traffic by serving minified static 
 [[variables]]
 key = "FOUNDRY_PASSWORD"
 label = "Password"
-default = "password"
-description = "Account password for foundryvtt.com. Required for downloading an application distribution."
+default = ""
+description = "Account password for your foundryvtt.com account (an external credential you provide). Required for downloading an application distribution."
 
 [[variables]]
 key = "FOUNDRY_PROXY_SSL"
 label = "Proxy SSL"
 default = "true"
-description = "Indicates whether the software is running behind a reverse proxy that uses SSL. This allows invitation links and A/V functionality to work as if the Foundry Server had SSL configured directly. CapRover has built-in reverse proxy."
+description = "Indicates whether the software is running behind a reverse proxy that uses SSL. This allows invitation links and A/V functionality to work as if the Foundry Server had SSL configured directly."
 
 [[variables]]
 key = "FOUNDRY_TIMEZONE"
@@ -61,11 +63,11 @@ description = "Container TZ database name https://en.wikipedia.org/wiki/List_of_
 [[variables]]
 key = "FOUNDRY_USERNAME"
 label = "Username"
-default = "user"
-description = "Account username or email address for foundryvtt.com. Required for downloading an application distribution."
+default = ""
+description = "Account username or email address for your foundryvtt.com account (an external credential you provide). Required for downloading an application distribution."
 
 [[variables]]
 key = "FOUNDRY_VERSION"
 label = "Foundry VTT Version"
-default = "0.8.9"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/felddy/foundryvtt/tags"
+default = "release"
+description = "Image tag for felddy/foundryvtt. 'release' tracks the latest stable build; pin a major version (e.g. 14) to avoid major upgrades. See https://hub.docker.com/r/felddy/foundryvtt/tags"

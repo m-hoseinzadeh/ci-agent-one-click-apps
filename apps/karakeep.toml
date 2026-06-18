@@ -3,6 +3,7 @@ name = "Karakeep"
 category = "App"
 description = "Self-hosted bookmark manager with archiving, AI tagging (OpenAI/Ollama), screenshots, and full-text search."
 keywords = ["karakeep"]
+http_port = 3000
 compose = '''
 services:
   karakeep:
@@ -13,7 +14,7 @@ services:
     environment:
       NEXTAUTH_SECRET: '{{NEXTAUTH_SECRET}}'
       MEILI_MASTER_KEY: '{{MEILI_MASTER_KEY}}'
-      NEXTAUTH_URL: https://karakeep.{{ROOT_DOMAIN}}
+      NEXTAUTH_URL: '{{NEXTAUTH_URL}}'
       MEILI_ADDR: http://karakeep-meilisearch:7700
       BROWSER_WEB_URL: http://karakeep-chrome:9222
       DATA_DIR: /data
@@ -101,7 +102,7 @@ default = ""
 description = "Enter your OpenAI API key to enable automatic tagging. Leave empty to disable."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "NEXTAUTH_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "The full public URL where Karakeep will be reached (e.g. https://bookmarks.example.com). Required for login to work; set this to your project's assigned domain after creation."

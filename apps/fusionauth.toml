@@ -3,6 +3,7 @@ name = "FusionAuth"
 category = "App"
 description = "FusionAuth is a scalable, identity and user management platform built for devs"
 keywords = ["fusionauth"]
+http_port = 9011
 compose = '''
 services:
   fusionauth-db:
@@ -11,14 +12,12 @@ services:
       POSTGRES_USER: '{{DB_USER}}'
       POSTGRES_PASSWORD: '{{DB_PASS}}'
       POSTGRES_DB: fusionauth
-    restart: unless-stopped
     volumes:
     - fusionauth-db-data:/var/lib/postgresql/data
   fusionauth-elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:{{ELASTICSEARCH_VERSION}}
     volumes:
     - fusionauth-elasticsearch-data:/usr/share/elasticsearch/data
-    restart: always
     environment:
       ES_JAVA_OPTS: -Xms512m -Xmx512m
       cluster.name: '{{ELASTICSEARCH_CLUSTER_NAME}}'
@@ -28,8 +27,6 @@ services:
       discovery.type: single-node
       discovery.zen.minimum_master_nodes: '{{ELASTICSEARCH_MINIMUM_MASTER_NODES}}'
       discovery.zen.ping.unicast.hosts: '{{ELASTICSEARCH_UNICAST_HOSTS}}'
-    ports:
-    - '{{HTTP_PORT}}:$$cap_container_search_port'
   fusionauth-fusionauth:
     image: fusionauth/fusionauth-app:{{FUSIONAUTH_VERSION}}
     depends_on:
@@ -44,7 +41,8 @@ services:
       FUSIONAUTH_MEMORY: '{{FUSION_MEMORY}}'
       FUSIONAUTH_SEARCH_SERVERS: http://fusionauth-elasticsearch:9200
       FUSIONAUTH_URL: http://fusionauth-fusionauth:9011
-    restart: unless-stopped
+    ports:
+    - '{{HTTP_PORT}}:9011'
     volumes:
     - fusionauth-fusionauth-config:/usr/local/fusionauth/config
 volumes:
@@ -62,6 +60,7 @@ description = "Internal port for Elasticsearch the container listens to."
 [[variables]]
 key = "DB_PASS"
 label = "Database password"
+generate = true
 
 [[variables]]
 key = "DB_USER"
@@ -96,7 +95,7 @@ description = "Define node as master-eligible (usual first node YES, others NO).
 key = "ELASTICSEARCH_UNICAST_HOSTS"
 label = "Unicasts hosts"
 default = "false"
-description = "References to other node to attach to. (for example: srv-captain--XXX)"
+description = "References to other nodes to attach to. Leave as false for a single-node deployment."
 
 [[variables]]
 key = "ELASTICSEARCH_VERSION"

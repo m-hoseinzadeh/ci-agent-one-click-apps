@@ -3,16 +3,17 @@ name = "ArchiveBox"
 category = "App"
 description = "Open-source self-hosted web archiving."
 keywords = ["archivebox"]
+http_port = 8000
 compose = '''
 services:
   archivebox:
-    documentation: Taken from https://docs.archivebox.io/en/latest/Docker.html and https://docs.archivebox.io/en/latest/Configuration.html?highlight=Configuration#configuration
+    image: archivebox/archivebox:{{ARCHIVEBOX_VERSION}}
+    command: server --quick-init 0.0.0.0:8000
     volumes:
     - archivebox-data:/data
     environment:
       ALLOWED_HOSTS: '*'
       MEDIA_MAX_SIZE: '{{MAX_SIZE_IN_MO}}'
-    restart: always
     ports:
     - '{{HTTP_PORT}}:8000'
 volumes:
@@ -20,7 +21,13 @@ volumes:
 '''
 
 [[variables]]
+key = "ARCHIVEBOX_VERSION"
+label = "ArchiveBox version"
+default = "stable"
+description = "ArchiveBox image tag"
+
+[[variables]]
 key = "MAX_SIZE_IN_MO"
 label = "Media max size"
 default = "750m"
-description = "Max size of media in MO"
+description = "Max size of media to download per archived page"

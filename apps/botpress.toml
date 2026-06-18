@@ -3,13 +3,16 @@ name = "Botpress"
 category = "App"
 description = "Open Source Platform For Developers To Build High-Quality Digital Assistants"
 keywords = ["botpress"]
+http_port = 3000
 compose = '''
 services:
   botpress:
+    image: botpress/server:{{BOTPRESS_VERSION}}
     environment:
       DATABASE_URL: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@botpress-db/{{POSTGRES_DB}}
       REDIS_URL: redis://botpress-cache?password={{REDIS_PASSWORD}}
-      EXTERNAL_URL: http://botpress.{{ROOT_DOMAIN}}
+      CLUSTER_ENABLED: 'true'
+      EXTERNAL_URL: '{{APP_URL}}'
       BP_MODULE_NLU_DUCKLINGURL: http://botpress-lang:8000
       BP_MODULE_NLU_LANGUAGESOURCES: '[{"endpoint": "http://botpress-lang:3100"}]'
       BP_PRODUCTION: '{{BOTPRESS_PRODUCTION}}'
@@ -18,6 +21,7 @@ services:
       BP_DECISION_MIN_CONFIDENCE: '{{BOTPRESS_DECISION_MIN_CONFIDENCE}}'
       FAST_TEXT_VERBOSITY: '{{BOTPRESS_FAST_TEXT_VERBOSITY}}'
       FAST_TEXT_CLEANUP_MS: '{{BOTPRESS_FAST_TEXT_CLEANUP_MS}}'
+    command: ./bp
     depends_on:
     - botpress-lang
     - botpress-db
@@ -27,6 +31,8 @@ services:
     ports:
     - '{{HTTP_PORT}}:3000'
   botpress-lang:
+    image: botpress/server:{{BOTPRESS_VERSION}}
+    command: bash -c "./duckling -p 8000 & ./bp lang --readOnly --langDir /botpress/lang --port 3100"
     volumes:
     - botpress-lang:/botpress/lang
   botpress-db:
@@ -38,6 +44,8 @@ services:
     volumes:
     - botpress-db:/var/lib/postgresql/data
   botpress-cache:
+    image: redis:{{REDIS_VERSION}}
+    command: redis-server --requirepass {{REDIS_PASSWORD}}
     volumes:
     - botpress-cache:/data
 volumes:
@@ -46,6 +54,12 @@ volumes:
   botpress-db:
   botpress-cache:
 '''
+
+[[variables]]
+key = "APP_URL"
+label = "External URL"
+default = ""
+description = "Public base URL Botpress uses to build links (e.g. https://bot.example.com). Leave blank to set later after a domain is assigned."
 
 [[variables]]
 key = "BOTPRESS_DECISION_MIN_CONFIDENCE"
@@ -84,6 +98,12 @@ default = "0"
 description = "When set higher than `0`, Botpress will be more chatty when processing requests."
 
 [[variables]]
+key = "BOTPRESS_VERSION"
+label = "Version | Botpress"
+default = "v12_30_7"
+description = "Version of the botpress/server image. See https://hub.docker.com/r/botpress/server/tags"
+
+[[variables]]
 key = "POSTGRES_DB"
 label = "PostgreSQL | Name"
 default = "botpress"
@@ -114,7 +134,7 @@ generate = true
 description = "Password for Redis."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "REDIS_VERSION"
+label = "Version | Redis"
+default = "6-alpine"
+description = "Version of the Redis image. See https://hub.docker.com/_/redis/tags"

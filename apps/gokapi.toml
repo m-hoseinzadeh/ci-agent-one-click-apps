@@ -7,13 +7,10 @@ compose = '''
 services:
   gokapi:
     image: f0rc3/gokapi:{{GOKAPI_VERSION}}
-    container_name: gokapi
     restart: always
     volumes:
     - gokapi-gokapi-data:/app/data
     - gokapi-config-data:/app/config
-    env_file:
-    - ./.env
     ports:
     - '{{HTTP_PORT}}:53842'
 volumes:

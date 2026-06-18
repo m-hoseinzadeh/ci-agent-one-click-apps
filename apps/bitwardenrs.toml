@@ -3,20 +3,19 @@ name = "vaultwarden"
 category = "App"
 description = "Lightweight fully featured Rust implementation of Bitwarden."
 keywords = ["bitwardenrs", "vaultwarden"]
+http_port = 80
 compose = '''
 services:
   bitwardenrs:
     image: vaultwarden/server:{{BITWARDENRS_VERSION}}
     environment:
-      DOMAIN: https://bitwardenrs.{{ROOT_DOMAIN}}
-      WEBSOCKET_ENABLED: true
+      DOMAIN: '{{APP_URL}}'
       SIGNUPS_ALLOWED: '{{REGISTER_ENABLED}}'
       ADMIN_TOKEN: '{{ADMIN_TOKEN}}'
     ports:
-    - 3012:3012
+    - '{{HTTP_PORT}}:80'
     volumes:
     - bitwardenrs-data:/data
-    restart: unless-stopped
 volumes:
   bitwardenrs-data:
 '''
@@ -24,7 +23,13 @@ volumes:
 [[variables]]
 key = "ADMIN_TOKEN"
 label = "admin password"
-description = "this password enables the admin zone on /admin. If you let this password empty, the admin interface will be disabled and it will be the best safety option."
+description = "Token that enables the admin zone on /admin. Leave empty to disable the admin interface (the safest option). The app mints this itself if you generate one."
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Full base URL where this instance is reachable (e.g. https://vault.example.com). Required for WebAuthn/U2F two-factor and attachment links. Leave empty now and set it after a domain is assigned."
 
 [[variables]]
 key = "BITWARDENRS_VERSION"
@@ -35,11 +40,5 @@ description = "Check out their Docker page for the valid tags https://hub.docker
 [[variables]]
 key = "REGISTER_ENABLED"
 label = "enabled open registration"
-default = "True"
-description = "If field is true, all visitors can create an account. If false, only the administrator can invite other users."
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+default = "true"
+description = "If true, all visitors can create an account. If false, only the administrator can invite other users."

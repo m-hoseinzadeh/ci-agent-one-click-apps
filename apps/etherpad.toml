@@ -3,6 +3,7 @@ name = "Etherpad"
 category = "App"
 description = "Etherpad is a real-time collaborative editor for the web"
 keywords = ["etherpad"]
+http_port = 9001
 compose = '''
 services:
   etherpad:
@@ -25,7 +26,6 @@ services:
     image: mysql:{{MYSQL_VERSION}}
     volumes:
     - etherpad-db-data:/var/lib/mysql
-    restart: always
     environment:
       MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
       MYSQL_DATABASE: etherpad
@@ -38,15 +38,17 @@ volumes:
 [[variables]]
 key = "DB_PASS"
 label = "Database password"
+generate = true
+description = "Internal MySQL password Etherpad mints for itself."
 
 [[variables]]
 key = "ETHERPAD_VERSION"
 label = "Etherpad Docker Image"
-default = "1.8.0"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/etherpad/etherpad/tags - default is 1.8.0 as of 2020-04-09"
+default = "2.6.1"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/etherpad/etherpad/tags"
 
 [[variables]]
 key = "MYSQL_VERSION"
 label = "MySQL Version"
-default = "5.7"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mysql/tags/"
+default = "8.4"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mysql?tab=tags"

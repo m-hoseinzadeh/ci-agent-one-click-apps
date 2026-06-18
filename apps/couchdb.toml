@@ -10,7 +10,6 @@ services:
     volumes:
     - couchdb-db-data:/opt/couchdb/data
     - couchdb-db-etc:/opt/couchdb/etc
-    restart: always
     environment:
       COUCHDB_USER: '{{COUCHDB_USER}}'
       COUCHDB_PASSWORD: '{{COUCHDB_PASSWORD}}'
@@ -24,7 +23,8 @@ volumes:
 [[variables]]
 key = "COUCHDB_PASSWORD"
 label = "CouchDB Password"
-default = ""
+generate = true
+description = "Admin password for the CouchDB instance. A random one is generated; you may override it."
 
 [[variables]]
 key = "COUCHDB_USER"
@@ -34,5 +34,5 @@ default = "mainuser"
 [[variables]]
 key = "COUCHDB_VERSION"
 label = "CouchDB Version Tag"
-default = "2"
+default = "3.3"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/couchdb/tags/"

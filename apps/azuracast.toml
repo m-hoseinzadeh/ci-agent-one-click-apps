@@ -3,12 +3,11 @@ name = "AzuraCast"
 category = "App"
 description = "Self-hosted web radio management suite"
 keywords = ["azuracast"]
+http_port = 80
 compose = '''
 services:
   azuracast:
     image: ghcr.io/azuracast/azuracast:{{AZURACAST_VERSION}}
-    hostname: azuracast.{{ROOT_DOMAIN}}
-    restart: unless-stopped
     ports:
     - '{{HTTP_PORT}}:80'
     - '{{AZURACAST_SFTP_PORT}}:{{AZURACAST_SFTP_PORT}}'
@@ -180,7 +179,8 @@ volumes:
 [[variables]]
 key = "AZURACAST_DB_PASSWORD"
 label = "MariaDB Root Password"
-description = "Specify a password for the root user of the built-in MariaDB database."
+generate = true
+description = "Root password for the bundled MariaDB database. Generated automatically."
 
 [[variables]]
 key = "AZURACAST_PGID"
@@ -205,9 +205,3 @@ key = "AZURACAST_VERSION"
 label = "Version"
 default = "latest"
 description = "Valid values include \"latest\" for Rolling Release, \"stable\" for Stable release channel, and any specific version."
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

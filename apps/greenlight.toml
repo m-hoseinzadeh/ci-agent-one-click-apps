@@ -1,15 +1,18 @@
 slug = "greenlight"
-name = "Greenlight (no database)"
-category = "Database"
-description = "This will create a Greenlight only. You will need to create and configure the database information manually. Intended for advanced users."
-keywords = ["(no", "database)", "greenlight"]
+name = "Greenlight"
+category = "Video Conferencing"
+description = "Greenlight, the simple front-end for BigBlueButton, bundled with its own PostgreSQL database. Point it at an existing BigBlueButton/Scalelite server via the BigBlueButton variables."
+keywords = ["greenlight", "bigbluebutton", "video", "conferencing"]
+http_port = 80
 compose = '''
 services:
-  greenlight-greenlight:
+  app:
     image: bigbluebutton/greenlight:v2
+    depends_on:
+    - postgres
     volumes:
-    - greenlight-greenlight-log:/usr/src/app/log
-    - greenlight-greenlight-storage:/usr/src/app/storage
+    - greenlight-log:/usr/src/app/log
+    - greenlight-storage:/usr/src/app/storage
     environment:
       SECRET_KEY_BASE: '{{SECRET_KEY_BASE}}'
       BIGBLUEBUTTON_ENDPOINT: '{{BIGBLUEBUTTON_ENDPOINT}}'
@@ -38,13 +41,13 @@ services:
       MAINTENANCE_WINDOW: '{{MAINTENANCE_WINDOW}}'
       HELP_URL: '{{HELP_URL}}'
       ENABLE_SSL: '{{ENABLE_SSL}}'
-      DB_ADAPTER: '{{DB_ADAPTER}}'
-      DB_HOST: '{{DB_HOST}}'
-      DB_PORT: '{{DB_PORT}}'
-      DB_NAME: '{{DB_NAME}}'
-      DB_USERNAME: '{{DB_USERNAME}}'
-      DB_PASSWORD: '{{DB_PASSWORD}}'
-      CABLE_ADAPTER: '{{CABLE_ADAPTER}}'
+      DB_ADAPTER: postgresql
+      DB_HOST: postgres
+      DB_PORT: '5432'
+      DB_NAME: '{{POSTGRES_DB}}'
+      DB_USERNAME: '{{POSTGRES_USER}}'
+      DB_PASSWORD: '{{POSTGRES_PASSWORD}}'
+      CABLE_ADAPTER: postgresql
       DEFAULT_REGISTRATION: '{{DEFAULT_REGISTRATION}}'
       AWS_ACCESS_KEY_ID: '{{AWS_ACCESS_KEY_ID}}'
       AWS_SECRET_ACCESS_KEY: '{{AWS_SECRET_ACCESS_KEY}}'
@@ -53,238 +56,226 @@ services:
       WEB_CONCURRENCY: '{{WEB_CONCURRENCY}}'
     ports:
     - '{{HTTP_PORT}}:80'
+  postgres:
+    image: postgres:13-alpine
+    volumes:
+    - greenlight-postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: '{{POSTGRES_DB}}'
+      POSTGRES_USER: '{{POSTGRES_USER}}'
+      POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
 volumes:
-  greenlight-greenlight-log:
-  greenlight-greenlight-storage:
+  greenlight-log:
+  greenlight-storage:
+  greenlight-postgres:
 '''
-
-[[variables]]
-key = "ALLOW_GREENLIGHT_ACCOUNTS"
-label = "ALLOW_GREENLIGHT_ACCOUNTS"
-default = "true"
-description = "Set this to true if you want GreenLight to support user signup"
-
-[[variables]]
-key = "ALLOW_MAIL_NOTIFICATIONS"
-label = "ALLOW_MAIL_NOTIFICATIONS"
-default = "false"
-description = "ALLOW_MAIL_NOTIFICATIONS"
-
-[[variables]]
-key = "AWS_ACCESS_KEY_ID"
-label = "AWS_ACCESS_KEY_ID"
-default = ""
-description = "AWS_ACCESS_KEY_ID"
-
-[[variables]]
-key = "AWS_BUCKET"
-label = "AWS_BUCKET"
-default = ""
-description = "AWS_BUCKET"
-
-[[variables]]
-key = "AWS_REGION"
-label = "AWS_REGION"
-default = ""
-description = "AWS_REGION"
-
-[[variables]]
-key = "AWS_SECRET_ACCESS_KEY"
-label = "AWS_SECRET_ACCESS_KEY"
-default = ""
-description = "AWS_SECRET_ACCESS_KEY"
-
-[[variables]]
-key = "BIGBLUEBUTTON_ENDPOINT"
-label = "BIGBLUEBUTTON_ENDPOINT"
-default = "https://scalelite.eunarede.stream/bigbluebutton/"
-description = "The endpoint for your BigBlueButton"
-
-[[variables]]
-key = "BIGBLUEBUTTON_SECRET"
-label = "BIGBLUEBUTTON_SECRET"
-description = "The secret for your BigBlueButton"
-
-[[variables]]
-key = "CABLE_ADAPTER"
-label = "CABLE_ADAPTER"
-default = "postgresql"
-description = "CABLE_ADAPTER"
-
-[[variables]]
-key = "DB_ADAPTER"
-label = "DB_ADAPTER"
-default = "postgresql"
-description = "DB_ADAPTER"
-
-[[variables]]
-key = "DB_HOST"
-label = "DB_HOST"
-default = "srv-captain--postgres-db"
-description = "DB_HOST"
-
-[[variables]]
-key = "DB_NAME"
-label = "DB_NAME"
-description = "DB_NAME"
-
-[[variables]]
-key = "DB_PASSWORD"
-label = "DB_PASSWORD"
-description = "DB_PASSWORD"
-
-[[variables]]
-key = "DB_PORT"
-label = "DB_PORT"
-default = "5432"
-description = "DB_PORT"
-
-[[variables]]
-key = "DB_USERNAME"
-label = "DB_USERNAME"
-default = "postgres"
-description = "DB_USERNAME"
-
-[[variables]]
-key = "DEFAULT_REGISTRATION"
-label = "DEFAULT_REGISTRATION"
-default = "open"
-description = "Specify the default registration to be used by Greenlight"
-
-[[variables]]
-key = "ENABLE_GOOGLE_CALENDAR_BUTTON"
-label = "ENABLE_GOOGLE_CALENDAR_BUTTON"
-default = "true"
-description = "ENABLE_GOOGLE_CALENDAR_BUTTON"
-
-[[variables]]
-key = "ENABLE_SSL"
-label = "ENABLE_SSL"
-default = "false"
-description = "ENABLE_SSL"
-
-[[variables]]
-key = "GOOGLE_ANALYTICS_TRACKING_ID"
-label = "GOOGLE_ANALYTICS_TRACKING_ID"
-default = ""
-description = "GOOGLE_ANALYTICS_TRACKING_ID"
-
-[[variables]]
-key = "HELP_URL"
-label = "HELP_URL"
-default = "#"
-description = "HELP_URL"
-
-[[variables]]
-key = "MAINTENANCE_MODE"
-label = "MAINTENANCE_MODE"
-default = ""
-description = "MAINTENANCE_MODE"
-
-[[variables]]
-key = "MAINTENANCE_WINDOW"
-label = "MAINTENANCE_WINDOW"
-default = ""
-description = "MAINTENANCE_WINDOW"
-
-[[variables]]
-key = "NUMBER_OF_ROWS"
-label = "NUMBER_OF_ROWS"
-default = "10"
-description = "Specify the maximum number of rows that should be displayed per page for a paginated table"
-
-[[variables]]
-key = "PAGINATION_NUMBER"
-label = "PAGINATION_NUMBER"
-default = "10"
-description = "Specify the maximum number of records to be sent to the BigBlueButton API in one call"
-
-[[variables]]
-key = "RECAPTCHA_SECRET_KEY"
-label = "RECAPTCHA_SECRET_KEY"
-default = ""
-description = "RECAPTCHA_SECRET_KEY"
-
-[[variables]]
-key = "RECAPTCHA_SITE_KEY"
-label = "RECAPTCHA_SITE_KEY"
-default = ""
-description = "RECAPTCHA_SITE_KEY"
-
-[[variables]]
-key = "ROOM_FEATURES"
-label = "ROOM_FEATURES"
-default = "mute-on-join,require-moderator-approval,anyone-can-start,all-join-moderator,recording"
-description = "Specify which settings you would like the users to configure on room"
-
-[[variables]]
-key = "SAFE_HOSTS"
-label = "SAFE_HOSTS"
-default = "$$cap_appname.$$cap_root_domain"
-description = "The hostname that the application is accessible"
 
 [[variables]]
 key = "SECRET_KEY_BASE"
 label = "SECRET_KEY_BASE"
 generate = true
-description = "Create a Secret Key for Rails"
+description = "Secret key base used by Rails to sign cookies and sessions. Auto-generated."
 
 [[variables]]
-key = "SMTP_AUTH"
-label = "SMTP_AUTH"
+key = "BIGBLUEBUTTON_ENDPOINT"
+label = "BIGBLUEBUTTON_ENDPOINT"
 default = ""
-description = "SMTP_AUTH"
+description = "The API endpoint of your BigBlueButton or Scalelite server, e.g. https://bbb.example.com/bigbluebutton/. Required."
 
 [[variables]]
-key = "SMTP_DOMAIN"
-label = "SMTP_DOMAIN"
+key = "BIGBLUEBUTTON_SECRET"
+label = "BIGBLUEBUTTON_SECRET"
 default = ""
-description = "SMTP_DOMAIN"
+description = "The shared secret of your BigBlueButton/Scalelite server (from `bbb-conf --secret`). Required; obtain from your BBB server."
 
 [[variables]]
-key = "SMTP_PASSWORD"
-label = "SMTP_PASSWORD"
+key = "SAFE_HOSTS"
+label = "SAFE_HOSTS"
 default = ""
-description = "SMTP_PASSWORD"
+description = "The hostname the application is served from, e.g. greenlight.example.com. Set after a domain is assigned."
 
 [[variables]]
-key = "SMTP_PORT"
-label = "SMTP_PORT"
-default = ""
-description = "SMTP_PORT"
+key = "POSTGRES_DB"
+label = "Database name"
+default = "greenlight"
+description = "Name of the bundled PostgreSQL database."
 
 [[variables]]
-key = "SMTP_SENDER"
-label = "SMTP_SENDER"
-default = ""
-description = "SMTP_SENDER"
+key = "POSTGRES_USER"
+label = "Database user"
+default = "greenlight"
+description = "Username for the bundled PostgreSQL database."
+
+[[variables]]
+key = "POSTGRES_PASSWORD"
+label = "Database password"
+generate = true
+description = "Password for the bundled PostgreSQL database. Auto-generated."
+
+[[variables]]
+key = "ALLOW_GREENLIGHT_ACCOUNTS"
+label = "ALLOW_GREENLIGHT_ACCOUNTS"
+default = "true"
+description = "Set this to true if you want Greenlight to support user signup."
+
+[[variables]]
+key = "DEFAULT_REGISTRATION"
+label = "DEFAULT_REGISTRATION"
+default = "open"
+description = "The default registration method used by Greenlight (open, invite, or approval)."
+
+[[variables]]
+key = "ALLOW_MAIL_NOTIFICATIONS"
+label = "ALLOW_MAIL_NOTIFICATIONS"
+default = "false"
+description = "Enable email notifications. Requires the SMTP_* variables to be set."
 
 [[variables]]
 key = "SMTP_SERVER"
 label = "SMTP_SERVER"
 default = ""
-description = "SMTP_SERVER"
+description = "SMTP server hostname. Leave blank if email is not used."
 
 [[variables]]
-key = "SMTP_STARTTLS_AUTO"
-label = "SMTP_STARTTLS_AUTO"
+key = "SMTP_PORT"
+label = "SMTP_PORT"
 default = ""
-description = "SMTP_STARTTLS_AUTO"
+description = "SMTP server port (e.g. 587). Leave blank if email is not used."
 
 [[variables]]
-key = "SMTP_TEST_RECIPIENT"
-label = "SMTP_TEST_RECIPIENT"
+key = "SMTP_DOMAIN"
+label = "SMTP_DOMAIN"
 default = ""
-description = "SMTP_TEST_RECIPIENT"
+description = "SMTP HELO domain. Leave blank if email is not used."
 
 [[variables]]
 key = "SMTP_USERNAME"
 label = "SMTP_USERNAME"
 default = ""
-description = "SMTP_USERNAME"
+description = "SMTP username. Leave blank if email is not used."
+
+[[variables]]
+key = "SMTP_PASSWORD"
+label = "SMTP_PASSWORD"
+default = ""
+description = "SMTP password. External credential; obtain from your mail provider."
+
+[[variables]]
+key = "SMTP_AUTH"
+label = "SMTP_AUTH"
+default = ""
+description = "SMTP authentication method (e.g. plain, login). Leave blank if email is not used."
+
+[[variables]]
+key = "SMTP_STARTTLS_AUTO"
+label = "SMTP_STARTTLS_AUTO"
+default = ""
+description = "Enable automatic STARTTLS (true/false). Leave blank if email is not used."
+
+[[variables]]
+key = "SMTP_SENDER"
+label = "SMTP_SENDER"
+default = ""
+description = "From address used for outgoing email. Leave blank if email is not used."
+
+[[variables]]
+key = "SMTP_TEST_RECIPIENT"
+label = "SMTP_TEST_RECIPIENT"
+default = ""
+description = "Recipient address used to test email delivery. Leave blank if email is not used."
+
+[[variables]]
+key = "RECAPTCHA_SITE_KEY"
+label = "RECAPTCHA_SITE_KEY"
+default = ""
+description = "Google reCAPTCHA site key. External credential; leave blank to disable reCAPTCHA."
+
+[[variables]]
+key = "RECAPTCHA_SECRET_KEY"
+label = "RECAPTCHA_SECRET_KEY"
+default = ""
+description = "Google reCAPTCHA secret key. External credential; leave blank to disable reCAPTCHA."
+
+[[variables]]
+key = "GOOGLE_ANALYTICS_TRACKING_ID"
+label = "GOOGLE_ANALYTICS_TRACKING_ID"
+default = ""
+description = "Google Analytics tracking ID. External credential; leave blank to disable analytics."
+
+[[variables]]
+key = "ENABLE_GOOGLE_CALENDAR_BUTTON"
+label = "ENABLE_GOOGLE_CALENDAR_BUTTON"
+default = "true"
+description = "Show an 'Add to Google Calendar' button on room pages."
+
+[[variables]]
+key = "ENABLE_SSL"
+label = "ENABLE_SSL"
+default = "false"
+description = "Tell Greenlight it is served over HTTPS. ci-agent terminates TLS at the proxy, so leave this false unless required."
+
+[[variables]]
+key = "ROOM_FEATURES"
+label = "ROOM_FEATURES"
+default = "mute-on-join,require-moderator-approval,anyone-can-start,all-join-moderator,recording"
+description = "Comma-separated list of room settings users are allowed to configure."
+
+[[variables]]
+key = "PAGINATION_NUMBER"
+label = "PAGINATION_NUMBER"
+default = "10"
+description = "Maximum number of records sent to the BigBlueButton API in one call."
+
+[[variables]]
+key = "NUMBER_OF_ROWS"
+label = "NUMBER_OF_ROWS"
+default = "10"
+description = "Maximum number of rows displayed per page in paginated tables."
+
+[[variables]]
+key = "MAINTENANCE_MODE"
+label = "MAINTENANCE_MODE"
+default = ""
+description = "Set to a non-empty value to put Greenlight into maintenance mode."
+
+[[variables]]
+key = "MAINTENANCE_WINDOW"
+label = "MAINTENANCE_WINDOW"
+default = ""
+description = "Optional banner text announcing a scheduled maintenance window."
+
+[[variables]]
+key = "HELP_URL"
+label = "HELP_URL"
+default = "#"
+description = "URL for the in-app Help link."
+
+[[variables]]
+key = "AWS_ACCESS_KEY_ID"
+label = "AWS_ACCESS_KEY_ID"
+default = ""
+description = "AWS access key ID for S3 storage. External credential; leave blank if not using S3."
+
+[[variables]]
+key = "AWS_SECRET_ACCESS_KEY"
+label = "AWS_SECRET_ACCESS_KEY"
+default = ""
+description = "AWS secret access key for S3 storage. External credential; leave blank if not using S3."
+
+[[variables]]
+key = "AWS_REGION"
+label = "AWS_REGION"
+default = ""
+description = "AWS region for S3 storage. Leave blank if not using S3."
+
+[[variables]]
+key = "AWS_BUCKET"
+label = "AWS_BUCKET"
+default = ""
+description = "AWS S3 bucket name. Leave blank if not using S3."
 
 [[variables]]
 key = "WEB_CONCURRENCY"
 label = "WEB_CONCURRENCY"
 default = "2"
-description = "The amount of workers (separate processes) used by the web server"
+description = "Number of worker processes used by the web server."

@@ -3,6 +3,7 @@ name = "Mayan EDMS"
 category = "App"
 description = "Mayan EDMS is an open source web-based Document Management System with many advanced features."
 keywords = ["edms", "mayan"]
+http_port = 8000
 compose = '''
 services:
   mayan-edms:
@@ -10,7 +11,6 @@ services:
     - mayan-edms-db
     - mayan-edms-redis
     image: mayanedms/mayanedms:{{APP_VERSION}}
-    restart: always
     environment:
       MAYAN_CELERY_BROKER_URL: redis://:{{REDIS_PASS}}@mayan-edms-redis:6379/0
       MAYAN_CELERY_RESULT_BACKEND: redis://:{{REDIS_PASS}}@mayan-edms-redis:6379/1
@@ -31,14 +31,27 @@ services:
     ports:
     - '{{HTTP_PORT}}:8000'
   mayan-edms-redis:
+    image: redis:{{REDIS_VERSION}}
+    command:
+    - redis-server
+    - --maxmemory-policy
+    - allkeys-lru
+    - --maxmemory
+    - 100mb
+    - --databases
+    - "3"
+    - --maxclients
+    - "500"
+    - --save
+    - ""
+    - --requirepass
+    - '{{REDIS_PASS}}'
     volumes:
     - mayan-edms-redis-data:/data
-    restart: always
   mayan-edms-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - mayan-edms-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_DB: '{{DBNAME}}'
       POSTGRES_USER: '{{DBUSER}}'
@@ -89,8 +102,9 @@ description = "Use to add extra languagues for OCR (English is installed by defa
 
 [[variables]]
 key = "PASSWORD"
-label = "Password"
-default = ""
+label = "Admin password"
+generate = true
+description = "Initial password for the auto-created admin account."
 
 [[variables]]
 key = "POSTGRES_VERSION"
@@ -107,7 +121,13 @@ description = "Title and header of your site"
 [[variables]]
 key = "REDIS_PASS"
 label = "Redis password"
-default = "mayanredispassword"
+generate = true
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis version"
+default = "6.2-alpine"
+description = "Redis image tag (https://hub.docker.com/_/redis/tags)."
 
 [[variables]]
 key = "TIMEZONE"

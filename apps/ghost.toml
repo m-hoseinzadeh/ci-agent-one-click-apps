@@ -3,12 +3,13 @@ name = "Ghost"
 category = "CMS"
 description = "Ghost is a free and open source blogging platform written in JavaScript and distributed under the MIT License"
 keywords = ["ghost"]
+http_port = 2368
 compose = '''
 services:
   ghost:
     environment:
       NODE_ENV: production
-      url: https://{{GHOST_HOST}}
+      url: '{{APP_URL}}'
       database__client: mysql
       database__connection__host: ghost-db
       database__connection__user: ghost
@@ -22,7 +23,6 @@ services:
       mail__options__auth__pass: '{{SMTP_PASSWORD}}'
       mail__from: '{{SMTP_FROM}}'
     image: ghost:{{GHOST_VERSION}}
-    restart: always
     volumes:
     - ghost-data:/var/lib/ghost/content
     depends_on:
@@ -36,7 +36,6 @@ services:
       MYSQL_PASSWORD: '{{DB_PASSWORD}}'
       MYSQL_DATABASE: ghost
     image: mysql:8.0
-    restart: always
     volumes:
     - ghost-db-data:/var/lib/mysql
 volumes:
@@ -57,10 +56,10 @@ generate = true
 description = "Root password for MySQL"
 
 [[variables]]
-key = "GHOST_HOST"
-label = "Ghost Host"
-default = "blog.example.com"
-description = "Your custom domain (e.g. blog.example.com)"
+key = "APP_URL"
+label = "Public URL"
+default = "http://localhost:2368"
+description = "Full public URL Ghost serves at, including scheme (e.g. https://blog.example.com). Set this to your assigned domain after the project is created."
 
 [[variables]]
 key = "GHOST_VERSION"
@@ -71,14 +70,14 @@ description = "Check available tags at https://hub.docker.com/_/ghost/tags"
 [[variables]]
 key = "SMTP_FROM"
 label = "SMTP from address"
-default = "'Ghost' <support@example.com>"
-description = "From address for emails"
+default = ""
+description = "From address for outgoing emails (e.g. 'Ghost' <noreply@yourdomain.com>). Leave blank to skip email configuration."
 
 [[variables]]
 key = "SMTP_HOST"
 label = "SMTP host"
-default = "smtp.example.com"
-description = "SMTP server host"
+default = ""
+description = "SMTP server host from your email provider. Leave blank to skip email configuration."
 
 [[variables]]
 key = "SMTP_PASSWORD"
@@ -100,5 +99,5 @@ description = "Use TLS/SSL (true for port 465, false for port 587)"
 [[variables]]
 key = "SMTP_USER"
 label = "SMTP user"
-default = "support@example.com"
-description = "SMTP username"
+default = ""
+description = "SMTP username from your email provider. Leave blank to skip email configuration."

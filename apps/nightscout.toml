@@ -3,6 +3,7 @@ name = "Nightscout"
 category = "Monitoring"
 description = "Nightscout is a free and open-source project, and associated social movement, that enables accessing and working with continuous glucose monitor data"
 keywords = ["nightscout"]
+http_port = 1337
 compose = '''
 services:
   nightscout-mongodb:
@@ -10,21 +11,24 @@ services:
     volumes:
     - nightscout-db-data:/data/db
     - nightscout-db-config:/data/configdb
-    restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
   nightscout-nightscout:
+    image: nightscout/cgm-remote-monitor:latest
     depends_on:
     - nightscout-mongodb
-    restart: always
     environment:
+      NODE_ENV: production
+      TZ: Etc/UTC
       PORT: '1337'
       INSECURE_USE_HTTP: 'true'
       MONGO_CONNECTION: mongodb://root:{{MONGO_PASSWORD}}@nightscout-mongodb:27017/nightscout?authSource=admin
       API_SECRET: '{{API_SECRET}}'
-      BASE_URL: https://replace.me.in.settings.of.website.com
+      BASE_URL: '{{APP_URL}}'
       DISPLAY_UNITS: mg/dl
+      ENABLE: careportal rawbg iob
+      AUTH_DEFAULT_ROLES: denied
     ports:
     - '{{HTTP_PORT}}:1337'
 volumes:
@@ -35,15 +39,23 @@ volumes:
 [[variables]]
 key = "API_SECRET"
 label = "API key"
-description = "Use a random string (alphanumberic) - minimum 12 characters. See documentation for more details."
+generate = true
+description = "Random string used as the Nightscout API secret (minimum 12 alphanumeric characters). Auto-generated; keep it safe."
 
 [[variables]]
 key = "MONGO_PASSWORD"
 label = "MongoDB password"
-description = "Only use alphanumeric chars."
+generate = true
+description = "Password for the internal MongoDB root user. Auto-generated; alphanumeric only."
+
+[[variables]]
+key = "APP_URL"
+label = "Base URL"
+default = ""
+description = "Public base URL of your Nightscout site (e.g. https://nightscout.example.com). Leave blank to set later after assigning a domain."
 
 [[variables]]
 key = "MONGO_VERSION"
 label = "MongoDB Version"
-default = "4"
+default = "4.4"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"

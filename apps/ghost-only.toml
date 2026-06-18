@@ -1,14 +1,15 @@
 slug = "ghost-only"
 name = "Ghost - No Database"
-category = "Database"
+category = "CMS"
 description = "Ghost is a free and open source blogging platform written in JavaScript and distributed under the MIT License. This variant expects an external MySQL/MariaDB database."
-keywords = ["database", "ghost", "no", "only"]
+keywords = ["cms", "ghost", "blog", "no-database"]
+http_port = 2368
 compose = '''
 services:
   ghost-only:
     environment:
       NODE_ENV: production
-      url: https://{{GHOST_HOST}}
+      url: '{{APP_URL}}'
       database__client: mysql
       database__connection__host: '{{DB_HOST}}'
       database__connection__port: '{{DB_PORT}}'
@@ -23,7 +24,6 @@ services:
       mail__options__auth__pass: '{{SMTP_PASSWORD}}'
       mail__from: '{{SMTP_FROM}}'
     image: ghost:{{GHOST_VERSION}}
-    restart: always
     volumes:
     - ghost-only-data:/var/lib/ghost/content
     ports:
@@ -33,9 +33,15 @@ volumes:
 '''
 
 [[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = "http://localhost:2368"
+description = "The full public URL Ghost serves from (e.g. https://blog.example.com). Set this to your assigned domain after creation."
+
+[[variables]]
 key = "DB_HOST"
 label = "DB Host"
-description = "Database host (e.g. srv-captain--your-db)"
+description = "Hostname of your external MySQL/MariaDB server"
 
 [[variables]]
 key = "DB_NAME"
@@ -46,7 +52,7 @@ description = "Database name"
 [[variables]]
 key = "DB_PASSWORD"
 label = "DB password"
-description = "Database password"
+description = "Password for the external database user (provided by your DB server)"
 
 [[variables]]
 key = "DB_PORT"
@@ -59,12 +65,6 @@ key = "DB_USER"
 label = "DB user"
 default = "ghost"
 description = "Database user"
-
-[[variables]]
-key = "GHOST_HOST"
-label = "Ghost Host"
-default = "blog.example.com"
-description = "Your custom domain (e.g. blog.example.com)"
 
 [[variables]]
 key = "GHOST_VERSION"
@@ -87,7 +87,7 @@ description = "SMTP server host"
 [[variables]]
 key = "SMTP_PASSWORD"
 label = "SMTP password"
-description = "SMTP password"
+description = "SMTP password (provided by your mail provider)"
 
 [[variables]]
 key = "SMTP_PORT"

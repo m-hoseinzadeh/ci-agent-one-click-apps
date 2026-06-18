@@ -1,10 +1,23 @@
 slug = "cloudflare-tunnel"
 name = "Cloudflare Tunnel"
 category = "App"
-description = "Secure your web servers with a Cloudflare Tunnel. This creates an encrypted connection without exposing your server directly."
-keywords = ["cloudflare", "tunnel"]
+description = "Run a Cloudflare Tunnel (cloudflared) to securely expose your services without opening inbound ports. Paste the connector token from your Cloudflare Zero Trust dashboard."
+keywords = ["cloudflare", "tunnel", "cloudflared", "zero-trust"]
 compose = '''
 services:
   cloudflare-tunnel:
-    restart: always
+    image: cloudflare/cloudflared:{{CLOUDFLARED_VERSION}}
+    command: tunnel --no-autoupdate run --token {{TUNNEL_TOKEN}}
 '''
+
+[[variables]]
+key = "TUNNEL_TOKEN"
+label = "Tunnel Token"
+default = ""
+description = "Connector token from your Cloudflare Zero Trust dashboard (Networks > Tunnels). Obtained from Cloudflare; required."
+
+[[variables]]
+key = "CLOUDFLARED_VERSION"
+label = "cloudflared Image Tag"
+default = "latest"
+description = "Docker image tag for cloudflare/cloudflared (e.g. latest or a pinned version like 2024.12.2)."

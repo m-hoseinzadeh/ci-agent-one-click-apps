@@ -3,6 +3,7 @@ name = "Jellyfin"
 category = "App"
 description = "A free media streaming alternative to Plex. Also supports group sync."
 keywords = ["jellyfin"]
+http_port = 8096
 compose = '''
 services:
   jellyfin:
@@ -11,7 +12,7 @@ services:
       PUID: '{{PUID}}'
       PGID: '{{PGID}}'
       TZ: '{{TZ}}'
-      JELLYFIN_PublishedServerUrl: jellyfin.{{ROOT_DOMAIN}}
+      JELLYFIN_PublishedServerUrl: '{{APP_URL}}'
     volumes:
     - jellyfin-config:/config
     ports:
@@ -39,10 +40,10 @@ default = "1000"
 description = "UserID used by JellyFin to avoid permission problems, please refer to docs- https://github.com/linuxserver/docker-jellyfin#Parameters"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Published Server URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional public base URL Jellyfin advertises to clients (e.g. https://jellyfin.example.com). Leave blank to set later once ci-agent assigns a domain."
 
 [[variables]]
 key = "TZ"

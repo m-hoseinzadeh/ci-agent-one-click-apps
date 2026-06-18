@@ -1,17 +1,17 @@
 slug = "mailtrain"
 name = "Mailtrain V2(Beta)"
-category = "Database"
+category = "Marketing"
 description = "Mailtrain is a self hosted newsletter application built on Node.js (v10+) and MySQL (v8+) or MariaDB (v10+)."
-keywords = ["mailtrain", "v2(beta)"]
+keywords = ["mailtrain", "newsletter", "email"]
+http_port = 3000
 compose = '''
 services:
   mailtrain-db:
     image: mariadb:{{MARIADB_VERSION}}
     volumes:
     - mailtrain-db-data:/var/lib/mysql
-    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: '{{MARIADB_PASSWORD}}'
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PASSWORD}}'
       MYSQL_DATABASE: mailtrain
       MYSQL_USER: mailtrain
       MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
@@ -19,12 +19,10 @@ services:
     image: redis:{{REDIS_VERSION}}
     volumes:
     - mailtrain-redis-data:/data
-    restart: always
   mailtrain-mongo:
     image: mongo:{{MONGO_VERSION}}
     volumes:
     - mailtrain-mongo-data:/data/db
-    restart: always
   mailtrain:
     image: mailtrain/mailtrain:{{MAILTRAIN_VERSION}}
     depends_on:
@@ -34,30 +32,18 @@ services:
     volumes:
     - mailtrain-files:/app/server/files
     environment:
-      URL_BASE_TRUSTED: https://mailtrain.{{ROOT_DOMAIN}}
-      URL_BASE_SANDBOX: https://mailtrain-{{MAILTRAIN_SANDBOX}}-appname.{{ROOT_DOMAIN}}
-      URL_BASE_PUBLIC: https://mailtrain-{{MAILTRAIN_LISTS}}-appname.{{ROOT_DOMAIN}}
-      WWW_PROXY: true
+      URL_BASE_TRUSTED: '{{URL_BASE_TRUSTED}}'
+      URL_BASE_SANDBOX: '{{URL_BASE_SANDBOX}}'
+      URL_BASE_PUBLIC: '{{URL_BASE_PUBLIC}}'
+      WWW_PROXY: 'true'
       MONGO_HOST: mailtrain-mongo
       REDIS_HOST: mailtrain-redis
       MYSQL_HOST: mailtrain-db
+      MYSQL_DATABASE: mailtrain
+      MYSQL_USER: mailtrain
       MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
     ports:
     - '{{HTTP_PORT}}:3000'
-  mailtrain-{{MAILTRAIN_SANDBOX}}-appname:
-    image: caprover/nginx-reverse-proxy:1-ef5ffcb
-    restart: always
-    depends_on:
-    - mailtrain
-    environment:
-      UPSTREAM_HTTP_ADDRESS: http://mailtrain:3003
-  mailtrain-{{MAILTRAIN_LISTS}}-appname:
-    image: caprover/nginx-reverse-proxy:1-ef5ffcb
-    restart: always
-    depends_on:
-    - mailtrain
-    environment:
-      UPSTREAM_HTTP_ADDRESS: http://mailtrain:3004
 volumes:
   mailtrain-db-data:
   mailtrain-redis-data:
@@ -66,14 +52,22 @@ volumes:
 '''
 
 [[variables]]
-key = "MAILTRAIN_LISTS"
-label = "Mailtrain Lists"
-default = ""
+key = "URL_BASE_TRUSTED"
+label = "Trusted URL base"
+default = "http://localhost:3000"
+description = "External URL of the main UI (trusted) endpoint. Set to your project domain after creation, e.g. https://mail.example.com."
 
 [[variables]]
-key = "MAILTRAIN_SANDBOX"
-label = "Mailtrain Sandbox"
-default = ""
+key = "URL_BASE_SANDBOX"
+label = "Sandbox URL base"
+default = "http://localhost:3003"
+description = "External URL of the sandbox endpoint that hosts the WYSIWYG template editors. Set to your sandbox domain after creation."
+
+[[variables]]
+key = "URL_BASE_PUBLIC"
+label = "Public URL base"
+default = "http://localhost:3004"
+description = "External URL of the public endpoint used for subscription/list pages. Set to your public domain after creation."
 
 [[variables]]
 key = "MAILTRAIN_VERSION"
@@ -82,8 +76,16 @@ default = "latest"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/mailtrain/mailtrain/tags"
 
 [[variables]]
+key = "MARIADB_ROOT_PASSWORD"
+label = "MariaDB root password"
+generate = true
+description = "Internal MariaDB root password (auto-generated)."
+
+[[variables]]
 key = "MARIADB_PASSWORD"
-label = "Mariadb User password"
+label = "MariaDB user password"
+generate = true
+description = "Internal MariaDB password for the mailtrain database user (auto-generated)."
 
 [[variables]]
 key = "MARIADB_VERSION"
@@ -102,9 +104,3 @@ key = "REDIS_VERSION"
 label = "Redis Version"
 default = "alpine3.12"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/redis?tab=tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

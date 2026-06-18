@@ -1,59 +1,84 @@
 slug = "leantime"
 name = "Leantime"
-category = "Database"
-description = "Leantime is an open source project management system for small teams and startups written in PHP, Javascript using MySQL."
-keywords = ["leantime"]
+category = "Productivity"
+description = "Leantime is an open source project management system for small teams and startups written in PHP and JavaScript, backed by MySQL."
+keywords = ["leantime", "project-management", "productivity"]
+http_port = 80
 compose = '''
 services:
   leantime-mysql:
+    image: mysql:{{MYSQL_VERSION}}
+    command: --character-set-server=UTF8MB4 --collation-server=UTF8MB4_unicode_ci
     volumes:
     - leantime-mysql-data:/var/lib/mysql
     environment:
       MYSQL_DATABASE: leantime
-      MYSQL_ROOT_PASSWORD: '{{MYSQL_PASSWD}}'
+      MYSQL_ROOT_PASSWORD: '{{MYSQL_ROOT_PASSWORD}}'
       MYSQL_USER: leantimeuser
-      MYSQL_PASSWORD: '{{MYSQL_PASSWD}}'
+      MYSQL_PASSWORD: '{{MYSQL_PASSWORD}}'
   leantime:
     image: leantime/leantime:{{LEANTIME_VER}}
-    container_name: leantime
+    ports:
+    - '{{HTTP_PORT}}:80'
+    depends_on:
+    - leantime-mysql
+    volumes:
+    - leantime-userfiles:/var/www/html/userfiles
+    - leantime-plugins:/var/www/html/app/Plugins
     environment:
-      LEAN_APP_URL: https://leantime.{{ROOT_DOMAIN}}
+      LEAN_APP_URL: '{{APP_URL}}'
       LEAN_DB_HOST: leantime-mysql
+      LEAN_DB_PORT: 3306
       LEAN_DB_USER: leantimeuser
-      LEAN_DB_PASSWORD: '{{MYSQL_PASSWD}}'
+      LEAN_DB_PASSWORD: '{{MYSQL_PASSWORD}}'
       LEAN_DB_DATABASE: leantime
       LEAN_DEFAULT_TIMEZONE: '{{TIMEZONE}}'
-      LEAN_SESSION_PASSWORD: '{{GEN_RANDOM_HEX}}(32)'
+      LEAN_SESSION_PASSWORD: '{{LEAN_SESSION_PASSWORD}}'
       LEAN_SESSION_EXPIRATION: 28800
 volumes:
   leantime-mysql-data:
+  leantime-userfiles:
+  leantime-plugins:
 '''
-
-[[variables]]
-key = "GEN_RANDOM_HEX"
-label = "Gen Random Hex"
-default = ""
 
 [[variables]]
 key = "LEANTIME_VER"
 label = "Leantime Version"
-default = "2.3.6"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/leantime/leantime"
+default = "3.4.6"
+description = "Image tag for leantime/leantime. Check the valid tags at https://hub.docker.com/r/leantime/leantime"
 
 [[variables]]
-key = "MYSQL_PASSWD"
+key = "MYSQL_VERSION"
+label = "MySQL Version"
+default = "8.0"
+description = "Image tag for the bundled MySQL database."
+
+[[variables]]
+key = "MYSQL_ROOT_PASSWORD"
+label = "MySQL Root Password"
+generate = true
+description = "Root password for the bundled MySQL instance (auto-generated)."
+
+[[variables]]
+key = "MYSQL_PASSWORD"
 label = "MySQL User Password"
 generate = true
-description = "User password for the database instance."
+description = "Application database user password (auto-generated)."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "LEAN_SESSION_PASSWORD"
+label = "Session Encryption Password"
+generate = true
+description = "Secret used to encrypt Leantime sessions (auto-generated)."
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL Leantime uses to build links (e.g. https://leantime.example.com). Leave blank to set after a domain is assigned."
 
 [[variables]]
 key = "TIMEZONE"
 label = "Timezone"
 default = "Europe/London"
-description = "This is the timezone for the application, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+description = "Application timezone, find yours at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

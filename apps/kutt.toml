@@ -3,6 +3,7 @@ name = "Kutt"
 category = "App"
 description = "Free Modern URL Shortener"
 keywords = ["kutt"]
+http_port = 3000
 compose = '''
 services:
   kutt:
@@ -10,7 +11,7 @@ services:
     environment:
       PORT: '{{KUTT_PORT}}'
       SITE_NAME: '{{KUTT_SITE_NAME}}'
-      DEFAULT_DOMAIN: kutt.{{ROOT_DOMAIN}}
+      DEFAULT_DOMAIN: '{{KUTT_DEFAULT_DOMAIN}}'
       LINK_LENGTH: '{{KUTT_LINK_LENGTH}}'
       DB_HOST: kutt-db
       DB_NAME: '{{POSTGRES_DB}}'
@@ -42,7 +43,7 @@ services:
     - kutt-db
     - kutt-cache
     ports:
-    - '{{HTTP_PORT}}:$$cap_KUTT_PORT'
+    - '{{HTTP_PORT}}:3000'
   kutt-db:
     image: postgres:{{POSTGRES_VERSION}}
     environment:
@@ -229,7 +230,7 @@ default = "6.2-alpine"
 description = "Redis' version. Check out their valid tags at https://hub.docker.com/_/redis/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "KUTT_DEFAULT_DOMAIN"
+label = "General | Default Domain"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Domain used to build shortened links (e.g. `links.example.com`, no scheme). Leave blank until ci-agent assigns this project a domain, then set it here."

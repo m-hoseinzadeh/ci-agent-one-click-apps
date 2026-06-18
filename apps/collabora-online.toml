@@ -3,15 +3,13 @@ name = "Collabora Online"
 category = "App"
 description = "Collabora Online is an online and collaborating office suite"
 keywords = ["collabora", "online"]
+http_port = 9980
 compose = '''
 services:
   collabora-online:
     image: collabora/code:{{COLLABORA_VERSION}}
-    restart: always
     environment:
       domain: '{{WOPIHOST_DOMAIN}}'
-      cert_domain: collabora-online.{{ROOT_DOMAIN}}
-      server_name: collabora-online.{{ROOT_DOMAIN}}
       extra_params: --o:ssl.enable=false --o:ssl.termination=true
       username: '{{ADMIN_USER}}'
       password: '{{ADMIN_PASS}}'
@@ -38,12 +36,7 @@ default = "25.04.2.1.1"
 description = "Check out their docker page for the valid tags https://hub.docker.com/r/collabora/code/tags/"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
 key = "WOPIHOST_DOMAIN"
 label = "WOPI host domain ( Optional )"
-description = "Your WOPI host domain - yournextcloud.your.rootdomain.com Leave it empty if you don't use Nextcloud or ownCloud. Caution! You must add a backslash before each dot of the url"
+default = ""
+description = "Regex of allowed WOPI host domains, e.g. yournextcloud\\.your\\.domain\\.com - escape each dot with a backslash. Leave empty if you don't use Nextcloud or ownCloud."

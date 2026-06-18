@@ -1,15 +1,16 @@
 slug = "forgeminecraft"
 name = "Dynamic Minecraft itzg server"
 category = "App"
-description = "Minecraft server with dynamic versions and types."
+description = "Minecraft server with dynamic versions and types, plus an RCON web admin portal."
 keywords = ["dynamic", "forgeminecraft", "itzg", "minecraft", "server"]
+http_port = 4326
 compose = '''
 services:
   forgeminecraft:
-    image: itzg/minecraft-server:$$java_version
+    image: itzg/minecraft-server:{{JAVA_VERSION}}
     environment:
       EULA: 'true'
-      TYPE: $$server_type
+      TYPE: '{{SERVER_TYPE}}'
       VERSION: '{{MINECRAFT_VERSION}}'
       FORGE_VERSION: '{{FORGE_VERSION}}'
       MAX_PLAYERS: '{{MAX_PLAYERS}}'
@@ -28,7 +29,6 @@ services:
     - forgeminecraft-data:/data
     stdin_open: true
     tty: true
-    restart: unless-stopped
   forgeminecraft-web:
     image: itzg/rcon:multiarch
     environment:
@@ -39,18 +39,34 @@ services:
       RWA_RCON_PASSWORD: '{{RCON_PASSWORD}}'
     ports:
     - '{{HTTP_PORT}}:4326'
-    - 4327:4327
+    - '4327:4327'
 volumes:
   forgeminecraft-data:
 '''
 
 [[variables]]
+key = "JAVA_VERSION"
+label = "Java image tag"
+default = "java17"
+description = "itzg/minecraft-server image tag selecting the Java runtime (e.g. java17, java21, latest). Use java17 for Minecraft 1.20.1 / Forge 47.x."
+
+[[variables]]
+key = "SERVER_TYPE"
+label = "server type"
+default = "FORGE"
+description = "Server flavor: VANILLA, FORGE, FABRIC, PAPER, AUTO_CURSEFORGE, etc."
+
+[[variables]]
 key = "CF_API_KEY"
 label = "CurseForge API Key. Necessary only when you use AUTO_CURSEFORGE server type."
+default = ""
+description = "External CurseForge API key. Leave blank unless you use the AUTO_CURSEFORGE server type."
 
 [[variables]]
 key = "CF_PAGE_URL"
 label = "CurseForge page url. Necessary only when you use AUTO_CURSEFORGE server type."
+default = ""
+description = "CurseForge modpack page URL. Leave blank unless you use the AUTO_CURSEFORGE server type."
 
 [[variables]]
 key = "DISABLE_HEALTHCHECK"

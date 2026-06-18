@@ -1,14 +1,17 @@
 slug = "matrix-synapse-only"
 name = "Matrix Synapse - No Database"
 category = "Database"
-description = "Server for the matrix protocol (external PostgreSQL)"
-keywords = ["database", "matrix", "no", "only", "synapse"]
+description = "Matrix protocol homeserver (Synapse) without a bundled database; point it at an external PostgreSQL."
+keywords = ["database", "matrix", "synapse", "chat", "homeserver"]
+http_port = 8008
 compose = '''
 services:
   matrix-synapse-only:
-    restart: unless-stopped
+    image: matrixdotorg/synapse:{{SYNAPSE_VERSION}}
     environment:
       TZ: '{{TIME_ZONE}}'
+      SYNAPSE_SERVER_NAME: '{{SYNAPSE_SERVER_NAME}}'
+      SYNAPSE_REPORT_STATS: '{{SYNAPSE_REPORT_STATS}}'
     volumes:
     - matrix-synapse-only-data:/data
     ports:
@@ -16,6 +19,24 @@ services:
 volumes:
   matrix-synapse-only-data:
 '''
+
+[[variables]]
+key = "SYNAPSE_VERSION"
+label = "Synapse image tag"
+default = "latest"
+description = "Tag of the matrixdotorg/synapse image to deploy."
+
+[[variables]]
+key = "SYNAPSE_SERVER_NAME"
+label = "Server name"
+default = ""
+description = "Public hostname of your Matrix server (e.g. matrix.example.com). Used as part of every user/room ID and cannot be changed later. Required on first boot to generate the config."
+
+[[variables]]
+key = "SYNAPSE_REPORT_STATS"
+label = "Report anonymous statistics"
+default = "no"
+description = "Whether to report anonymous usage statistics to matrix.org (yes or no)."
 
 [[variables]]
 key = "TIME_ZONE"

@@ -1,8 +1,9 @@
 slug = "lemmy"
 name = "Lemmy"
 category = "App"
-description = "Self-hosted Lemmy with persistent config volume auto-populated by a sidecar"
-keywords = ["lemmy"]
+description = "Self-hosted Lemmy link aggregator and forum (server + web UI), with Postgres and pict-rs. A one-shot sidecar writes the config.hjson the server needs."
+keywords = ["lemmy", "forum", "fediverse", "reddit"]
+http_port = 1234
 compose = '''
 services:
   lemmy-db:
@@ -13,40 +14,36 @@ services:
       POSTGRES_DB: lemmy
     volumes:
     - lemmy-db-data:/var/lib/postgresql/data
-    restart: always
   lemmy-pictrs:
     image: asonix/pictrs:0.5.0
+    user: '991:991'
     volumes:
     - lemmy-pictrs-data:/mnt
-    restart: always
-  lemmy-config-writer-delete-me:
+  lemmy-config-writer:
     image: alpine:3.19
-    command: "sh -c '\n  CONFIG_FILE=\"/config/config.hjson\"\n  CONFIG_CONTENT=\"\n  {\n    hostname: \\\"lemmy.{{ROOT_DOMAIN}}\\\",\n    bind: \\\"0.0.0.0\\\",\n    port: 8536,\n    database: {\n      user: \\\"lemmy\\\",\n      password: \\\"{{DB_PASS}}\\\",\n      host: \\\"lemmy-db\\\",\n      port: 5432,\n      database: \\\"lemmy\\\",\n      pool_size: 5\n    },\n    pictrs: {\n      url: \\\"http://lemmy-pictrs:8080\\\"\n    },\n    email: {\n      smtp_server: \\\"{{SMTP_SERVER}}\\\",\n      smtp_login: \\\"{{SMTP_LOGIN}}\\\",\n      smtp_password: \\\"{{SMTP_PASS}}\\\",\n      smtp_from_address: \\\"{{SMTP_FROM}}\\\",\n      tls_type: \\\"{{SMTP_TLS}}\\\"\n    }\n  }\n  \";\n  if [ ! -f \\\"$$CONFIG_FILE\\\" ]; then\n    printf \"%s\\\\n\" \"$$CONFIG_CONTENT\" > \"$$CONFIG_FILE\" && chmod 644 \"$$CONFIG_FILE\" && chown 1000:1000 \"$$CONFIG_FILE\"\n  fi\n  tail -f /dev/null\n'\n"
+    command: "sh -c '\n  CONFIG_FILE=\"/config/config.hjson\"\n  CONFIG_CONTENT=\"\n  {\n    hostname: \\\"{{PUBLIC_HOST}}\\\",\n    bind: \\\"0.0.0.0\\\",\n    port: 8536,\n    database: {\n      user: \\\"lemmy\\\",\n      password: \\\"{{DB_PASS}}\\\",\n      host: \\\"lemmy-db\\\",\n      port: 5432,\n      database: \\\"lemmy\\\",\n      pool_size: 5\n    },\n    pictrs: {\n      url: \\\"http://lemmy-pictrs:8080\\\"\n    },\n    email: {\n      smtp_server: \\\"{{SMTP_SERVER}}\\\",\n      smtp_login: \\\"{{SMTP_LOGIN}}\\\",\n      smtp_password: \\\"{{SMTP_PASS}}\\\",\n      smtp_from_address: \\\"{{SMTP_FROM}}\\\",\n      tls_type: \\\"{{SMTP_TLS}}\\\"\n    }\n  }\n  \";\n  printf \"%s\\\\n\" \"$$CONFIG_CONTENT\" > \"$$CONFIG_FILE\" && chmod 644 \"$$CONFIG_FILE\" && chown 1000:1000 \"$$CONFIG_FILE\"\n'\n"
     volumes:
     - lemmy-config:/config
-    restart: 'no'
+    restart: "no"
   lemmy-server:
     image: dessalines/lemmy:{{LEMMY_VERSION}}
     depends_on:
     - lemmy-db
     - lemmy-pictrs
-    - lemmy-config-writer-delete-me
+    - lemmy-config-writer
     environment:
       RUST_LOG: warn,lemmy_server=info,lemmy_api=info
     volumes:
     - lemmy-config:/config
-    restart: always
-    ports:
-    - '{{HTTP_PORT}}:8536'
   lemmy:
     image: dessalines/lemmy-ui:{{LEMMY_UI_VERSION}}
     depends_on:
     - lemmy-server
     environment:
       LEMMY_UI_LEMMY_INTERNAL_HOST: lemmy-server:8536
-      LEMMY_UI_LEMMY_EXTERNAL_HOST: lemmy.{{ROOT_DOMAIN}}
-      LEMMY_UI_HTTPS: true
-    restart: always
+      LEMMY_UI_HTTPS: "false"
+    ports:
+    - '{{HTTP_PORT}}:1234'
 volumes:
   lemmy-db-data:
   lemmy-pictrs-data:
@@ -72,10 +69,10 @@ default = "0.19.13"
 description = "Version tag (e.g., 0.19.13)"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "PUBLIC_HOST"
+label = "Public hostname"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "The public domain this instance will be reached at (e.g., lemmy.example.com). Used for federation; set it to your project's assigned domain after creation. Leave blank to start without federation."
 
 [[variables]]
 key = "SMTP_FROM"
@@ -93,7 +90,7 @@ description = "Full username or email for SMTP"
 key = "SMTP_PASS"
 label = "SMTP password"
 default = ""
-description = "SMTP password or app password (if using Gmail/ProtonMail/etc)"
+description = "External SMTP password or app password (Gmail/ProtonMail/etc). Leave blank to disable outgoing email."
 
 [[variables]]
 key = "SMTP_SERVER"

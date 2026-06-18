@@ -6,15 +6,41 @@ keywords = ["mariadb"]
 compose = '''
 services:
   mariadb-db:
+    image: mariadb:{{MARIADB_VERSION}}
     volumes:
     - mariadb-db-data:/var/lib/mysql
-    restart: always
+    ports:
+    - '{{HTTP_PORT}}:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
+      MYSQL_ROOT_PASSWORD: '{{DB_ROOT_PASS}}'
+      MYSQL_DATABASE: '{{DB_NAME}}'
+      MYSQL_USER: '{{DB_USER}}'
+      MYSQL_PASSWORD: '{{DB_PASS}}'
 volumes:
   mariadb-db-data:
 '''
 
 [[variables]]
+key = "MARIADB_VERSION"
+label = "MariaDB version"
+default = "11"
+
+[[variables]]
+key = "DB_ROOT_PASS"
+label = "MariaDB root password"
+generate = true
+
+[[variables]]
+key = "DB_NAME"
+label = "Database name"
+default = "mariadb"
+
+[[variables]]
+key = "DB_USER"
+label = "Database user"
+default = "mariadb"
+
+[[variables]]
 key = "DB_PASS"
-label = "MariaDB Root password"
+label = "Database user password"
+generate = true

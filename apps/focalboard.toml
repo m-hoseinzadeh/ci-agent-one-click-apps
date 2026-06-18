@@ -3,6 +3,7 @@ name = "Focalboard"
 category = "App"
 description = "Focalboard is an open source, self-hosted alternative to Trello, Notion, and Asana."
 keywords = ["focalboard"]
+http_port = 8000
 compose = '''
 services:
   focalboard-db:
@@ -14,6 +15,7 @@ services:
     volumes:
     - focalboard-db-data:/var/lib/postgresql/data
   focalboard:
+    image: mattermost/focalboard:{{FOCALBOARD_VERSION}}
     environment:
       CONFIG_JSON: '{"serverRoot":"http://focalboard:8000","port":8000,"dbtype":"postgres","dbconfig":"postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@focalboard-db/{{POSTGRES_DB}}?sslmode=disable&connect_timeout=10","postgres_dbconfig":"dbname={{POSTGRES_DB}} sslmode=disable","useSSL":false,"webpath":"./pack","filespath":"./files","telemetry":false,"session_expire_time":2592000,"session_refresh_time":18000,"localOnly":false,"enableLocalMode":true,"localModeSocketLocation":"/var/tmp/focalboard_local.socket"}'
     depends_on:
@@ -23,6 +25,12 @@ services:
 volumes:
   focalboard-db-data:
 '''
+
+[[variables]]
+key = "FOCALBOARD_VERSION"
+label = "Focalboard Version"
+default = "7.11.4"
+description = "mattermost/focalboard image tag. See https://hub.docker.com/r/mattermost/focalboard/tags"
 
 [[variables]]
 key = "POSTGRES_DB"
@@ -42,5 +50,5 @@ default = "boardsuser"
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Postgres Version"
-default = "9.6.21"
+default = "16"
 description = "Check out their docker page for the valid tags https://hub.docker.com/_/postgres?tab=tags"

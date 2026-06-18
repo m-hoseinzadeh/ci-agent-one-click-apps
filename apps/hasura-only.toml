@@ -1,13 +1,13 @@
 slug = "hasura-only"
 name = "Hasura - No Database"
 category = "Database"
-description = "Instant realtime GraphQL APIs on any Postgres application, existing or new"
-keywords = ["database", "hasura", "no", "only"]
+description = "Instant realtime GraphQL APIs on any existing Postgres database (bring your own Postgres connection URL)"
+keywords = ["database", "hasura", "graphql", "postgres"]
+http_port = 8080
 compose = '''
 services:
   hasura-only:
     image: hasura/graphql-engine:{{HASURA_VERSION}}
-    restart: always
     environment:
       HASURA_GRAPHQL_DATABASE_URL: '{{DATABASE_URL}}'
       HASURA_GRAPHQL_ENABLE_CONSOLE: 'true'
@@ -19,16 +19,18 @@ services:
 
 [[variables]]
 key = "ADMIN_SECRET"
-label = "Hasura admin secret(password)"
-description = "The admin secret gives you access to the console."
+label = "Hasura admin secret (password)"
+generate = true
+description = "The admin secret gives you access to the console. A strong random secret is generated for you."
 
 [[variables]]
 key = "DATABASE_URL"
 label = "Postgres Connection URL"
-description = "postgres://username:password@host/database"
+default = ""
+description = "Connection URL for your existing Postgres database, e.g. postgres://username:password@host:5432/database. This app does not include a database."
 
 [[variables]]
 key = "HASURA_VERSION"
 label = "Hasura Version"
-default = "v1.2.2"
-description = "Check out their GitHub page for their latest version https://github.com/hasura/graphql-engine"
+default = "v2.45.5"
+description = "Check out their GitHub page for the latest version https://github.com/hasura/graphql-engine"

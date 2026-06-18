@@ -3,22 +3,21 @@ name = "Akaunting"
 category = "App"
 description = "From invoicing to expense tracking to accounting, Akaunting has all the tools you need to manage your money online, for free."
 keywords = ["akaunting"]
+http_port = 80
 compose = '''
 services:
   akaunting:
     depends_on:
     - akaunting-db
     image: akaunting/akaunting:{{APP_VERSION}}
-    restart: always
     environment:
-      APP_URL: http://akaunting.{{ROOT_DOMAIN}}
+      APP_URL: '{{APP_URL}}'
       LOCALE: en-US
-      AKAUNTING_SETUP: true
+      AKAUNTING_SETUP: "true"
       DB_HOST: akaunting-db
-      DB_PORT: 3306
+      DB_PORT: "3306"
       DB_USERNAME: akaunting
       DB_DATABASE: akaunting
-      DB_NAME: akaunting
       DB_PASSWORD: '{{DB_PASS}}'
       DB_PREFIX: '{{DB_PREFIX}}'
       COMPANY_NAME: '{{COMPANY_NAME}}'
@@ -26,23 +25,20 @@ services:
       ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
       ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
     volumes:
-    - akaunting-data:/akaunting-data
-    - akaunting-modules:/akaunting-modules
+    - akaunting-data:/var/www/html
+    ports:
+    - '{{HTTP_PORT}}:80'
   akaunting-db:
     image: mariadb:10.5.9
     volumes:
-    - akaunting-db:/var/lib/mysql/data
-    restart: always
+    - akaunting-db:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: '{{DB_PASS}}'
       MYSQL_USER: akaunting
       MYSQL_PASSWORD: '{{DB_PASS}}'
       MYSQL_DATABASE: akaunting
-    ports:
-    - '{{HTTP_PORT}}:3306'
 volumes:
   akaunting-data:
-  akaunting-modules:
   akaunting-db:
 '''
 
@@ -65,13 +61,21 @@ default = "3"
 description = "Check out their docker page for the valid tags https://hub.docker.com/r/akaunting/akaunting/tags"
 
 [[variables]]
+key = "APP_URL"
+label = "App URL"
+default = ""
+description = "OPTIONAL. Public base URL Akaunting uses to build links (set this to your assigned domain after creation, e.g. https://accounting.example.com). Leave blank to set later."
+
+[[variables]]
 key = "COMPANY_EMAIL"
 label = "Company Email"
+default = ""
 description = "OPTIONAL"
 
 [[variables]]
 key = "COMPANY_NAME"
 label = "Company Name"
+default = ""
 description = "OPTIONAL"
 
 [[variables]]
@@ -83,9 +87,3 @@ generate = true
 key = "DB_PREFIX"
 label = "Database Prefix"
 default = "aka_"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

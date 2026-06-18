@@ -3,24 +3,23 @@ name = "Netbox"
 category = "App"
 description = "IP address management (IPAM) and data center infrastructure management (DCIM) tool"
 keywords = ["netbox"]
+http_port = 8000
 compose = '''
 services:
   netbox-db:
     image: postgres:{{PG_VERSION}}
     volumes:
     - netbox-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: '{{PG_USER}}'
       POSTGRES_PASSWORD: '{{PG_PASS}}'
       POSTGRES_DB: '{{PG_NAME}}'
       PGDATA: /var/lib/postgresql/data
   netbox-redis:
+    image: redis:{{REDIS_VERSION}}
+    command: redis-server --requirepass {{REDIS_PASSWORD}}
     volumes:
     - netbox-redis-data:/data
-    restart: always
-    environment:
-      REDIS_PASSWORD: '{{REDIS_PASSWORD}}'
   netbox:
     depends_on:
     - netbox-db
@@ -30,12 +29,11 @@ services:
     - netbox-data:/config
     - netbox-scripts:/app/netbox/scripts
     - netbox-reports:/app/netbox/netbox/reports
-    restart: unless-stopped
     environment:
       TZ: '{{TIME_ZONE}}'
       SUPERUSER_EMAIL: '{{SUPERUSER_EMAIL}}'
       SUPERUSER_PASSWORD: '{{SUPERUSER_PASS}}'
-      ALLOWED_HOST: netbox.{{ROOT_DOMAIN}}
+      ALLOWED_HOST: '{{ALLOWED_HOST}}'
       DB_NAME: '{{PG_NAME}}'
       DB_USER: '{{PG_USER}}'
       DB_PASSWORD: '{{PG_PASS}}'
@@ -59,7 +57,7 @@ volumes:
 [[variables]]
 key = "NETBOX_VERSION"
 label = "Netbox Version Tag"
-default = "3.1.6"
+default = "4.6.3"
 description = "Check out the Docker page for valid tags: https://hub.docker.com/r/linuxserver/netbox/tags."
 
 [[variables]]
@@ -81,8 +79,14 @@ default = "postgres"
 [[variables]]
 key = "PG_VERSION"
 label = "Postgres Version Tag"
-default = "12.2"
+default = "16"
 description = "Check out the Docker page for valid tags https://hub.docker.com/r/library/postgres/tags/."
+
+[[variables]]
+key = "REDIS_VERSION"
+label = "Redis Version Tag"
+default = "7-alpine"
+description = "Check out the Docker page for valid tags https://hub.docker.com/r/library/redis/tags/."
 
 [[variables]]
 key = "REDIS_PASSWORD"
@@ -90,10 +94,10 @@ label = "Redis Password"
 generate = true
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "ALLOWED_HOST"
+label = "Allowed Host"
+default = "*"
+description = "Hostname Netbox responds on. Defaults to * (any). Set to your project domain once assigned."
 
 [[variables]]
 key = "SUPERUSER_EMAIL"

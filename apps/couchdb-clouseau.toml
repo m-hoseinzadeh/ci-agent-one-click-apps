@@ -10,7 +10,6 @@ services:
     volumes:
     - couchdb-clouseau-db-data:/opt/couchdb/data
     - couchdb-clouseau-db-etc:/opt/couchdb/etc
-    restart: always
     environment:
       COUCHDB_USER: '{{COUCHDB_USER}}'
       COUCHDB_PASSWORD: '{{COUCHDB_PASSWORD}}'
@@ -25,6 +24,8 @@ volumes:
 key = "COUCHDB_PASSWORD"
 label = "CouchDB Password"
 default = ""
+description = "Admin password for the CouchDB server. Auto-generated; leave blank to mint a fresh secret."
+generate = true
 
 [[variables]]
 key = "COUCHDB_USER"

@@ -2,11 +2,14 @@ slug = "imagor-s3"
 name = "Imagor (S3 storage)"
 category = "Storage"
 description = "Imagor is a fast, Docker-ready image processing server written in Go. (Stores images in S3 bucket)"
-keywords = ["(s3", "imagor", "s3", "storage)"]
+keywords = ["imagor", "s3", "storage", "image-processing"]
+http_port = 80
 compose = '''
 services:
   imagor-s3:
     image: shumc/imagor:{{IMAGOR_VERSION}}
+    ports:
+      - '{{HTTP_PORT}}:80'
     environment:
       PORT: 80
       IMAGOR_UNSAFE: '{{ENV_IMAGOR_UNSAFE}}'
@@ -21,7 +24,6 @@ services:
       S3_STORAGE_BASE_DIR: '{{ENV_S3_STORAGE_BUCKET_DIR}}'
       S3_RESULT_STORAGE_BUCKET: '{{ENV_S3_RESULT_STORAGE_BUCKET}}'
       S3_RESULT_STORAGE_BASE_DIR: '{{ENV_S3_RESULT_STORAGE_BUCKET_DIR}}'
-    restart: always
 '''
 
 [[variables]]

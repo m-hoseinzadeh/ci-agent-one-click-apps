@@ -3,6 +3,7 @@ name = "InvoicePlane"
 category = "App"
 description = "InvoicePlane is a self-hosted open source application for managing your quotes, invoices, clients and payments."
 keywords = ["invoiceplane"]
+http_port = 80
 compose = '''
 services:
   invoiceplane-db:
@@ -14,25 +15,33 @@ services:
       MYSQL_USER: '{{DB_USERNAME}}'
       MYSQL_PASSWORD: '{{DB_PASSWORD}}'
       MYSQL_DATABASE: '{{DB_DATABASE}}'
-    ports:
-    - '{{HTTP_PORT}}:3306'
   invoiceplane:
     image: thomascenni/alpine-invoiceplane:v1.5.11
+    depends_on:
+    - invoiceplane-db
     volumes:
     - invoiceplane-storage:/storage
     - invoiceplane-config:/config
     environment:
-      IP_URL: http://invoiceplane.{{ROOT_DOMAIN}}
+      IP_URL: '{{APP_URL}}'
       DB_HOSTNAME: invoiceplane-db
       DB_USERNAME: '{{DB_USERNAME}}'
       DB_PASSWORD: '{{DB_PASSWORD}}'
       DB_DATABASE: '{{DB_DATABASE}}'
       DB_PORT: '3306'
+    ports:
+    - '{{HTTP_PORT}}:80'
 volumes:
   invoiceplane-mysql-data:
   invoiceplane-storage:
   invoiceplane-config:
 '''
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Public base URL for InvoicePlane (e.g. https://invoices.example.com). Leave blank to set after the project domain is assigned."
 
 [[variables]]
 key = "DB_DATABASE"
@@ -57,9 +66,3 @@ key = "MYSQL_ROOT_PWD"
 label = "MYSQL_ROOT_PWD"
 generate = true
 description = "This is the MySQL root password. Randomly generated. Can be changed also."
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

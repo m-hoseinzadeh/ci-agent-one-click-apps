@@ -3,9 +3,11 @@ name = "Immich"
 category = "App"
 description = "Open source (AGPLv3) Google Photos alternative. Backup your phone's photos and videos to your private server."
 keywords = ["immich"]
+http_port = 2283
 compose = '''
 services:
   immich:
+    image: ghcr.io/immich-app/immich-server:{{VERSION}}
     environment:
       DB_PASSWORD: '{{APP_DB_PASS}}'
       DB_USERNAME: '{{APP_DB_USER}}'
@@ -73,7 +75,7 @@ description = "Username to access the database"
 key = "APP_UPLOAD_LOCATION"
 label = "Upload directory"
 default = "immich-data"
-description = "Full path to the directory where you plan to store all your files. It should be created beforehand. If you want caprover to create it for you just leave the default 'immich-data'"
+description = "Full path to the directory where you plan to store all your files."
 
 [[variables]]
 key = "DB_STORAGE_TYPE"

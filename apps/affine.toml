@@ -3,6 +3,7 @@ name = "Affine (Community)"
 category = "App"
 description = "Affine is a next-gen knowledge base that brings planning, sorting, and creating all together."
 keywords = ["(community)", "affine"]
+http_port = 3010
 compose = '''
 services:
   affine:
@@ -15,13 +16,12 @@ services:
       affine-migration:
         condition: service_completed_successfully
     volumes:
-    - affine-db-data:/root/.affine/config
-    - affine-db-data:/root/.affine/storage
+    - affine-config:/root/.affine/config
+    - affine-storage:/root/.affine/storage
     logging:
       driver: json-file
       options:
         max-size: 1000m
-    restart: unless-stopped
     environment:
       REDIS_SERVER_HOST: affine-redis
       DATABASE_URL: postgres://affine:{{DB_AFFINE_PASSWORD}}@affine-postgres:5432/affine
@@ -37,7 +37,7 @@ services:
       MAILER_SENDER: '{{MAILER_SENDER}}'
     ports:
     - '{{HTTP_PORT}}:3010'
-  affine-migration-delete-me-after-install:
+  affine-migration:
     image: ghcr.io/toeverything/affine:{{AFFINE_VERSION}}
     command:
     - sh
@@ -49,18 +49,17 @@ services:
       affine-postgres:
         condition: service_healthy
     volumes:
-    - affine-db-data:/root/.affine/config
-    - affine-db-data:/root/.affine/storage
-    restart: on-failure
+    - affine-config:/root/.affine/config
+    - affine-storage:/root/.affine/storage
+    restart: "no"
     environment:
       REDIS_SERVER_HOST: affine-redis
       DATABASE_URL: postgres://affine:{{DB_AFFINE_PASSWORD}}@affine-postgres:5432/affine
       AFFINE_INDEXER_ENABLED: 'false'
   affine-redis:
-    image: redis
-    restart: unless-stopped
+    image: redis:7
     volumes:
-    - affine-db-data:/data
+    - affine-redis-data:/data
     healthcheck:
       test:
       - CMD
@@ -73,7 +72,6 @@ services:
       retries: 5
   affine-postgres:
     image: pgvector/pgvector:pg16
-    restart: unless-stopped
     volumes:
     - affine-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -95,24 +93,29 @@ services:
       POSTGRES_INITDB_ARGS: --data-checksums
       POSTGRES_HOST_AUTH_METHOD: trust
 volumes:
+  affine-config:
+  affine-storage:
+  affine-redis-data:
   affine-db-data:
 '''
 
 [[variables]]
 key = "AFFINE_SERVER_EXTERNAL_URL"
 label = "AFFINE_SERVER_EXTERNAL_URL"
-description = "Used to factor url to server resources (e.g., https://affine.yourdomain.com)"
+default = ""
+description = "Public URL used to build links to server resources (e.g., https://affine.yourdomain.com). Set after the domain is assigned; leave blank initially."
 
 [[variables]]
 key = "AFFINE_SERVER_HOST"
 label = "AFFINE_SERVER_HOST"
-description = "Default access domain of AFFiNE. Make sure this matches the URL in browser. (e.g., affine.yourdomain.com)"
+default = ""
+description = "Default access domain of AFFiNE. Must match the URL in the browser (e.g., affine.yourdomain.com). Set after the domain is assigned."
 
 [[variables]]
 key = "AFFINE_SERVER_HTTPS"
 label = "AFFINE_SERVER_HTTPS"
-default = "True"
-description = "Use https prefix in url. Make sure this matches the URL in browser. (e.g., true|false)"
+default = "true"
+description = "Use https prefix in URLs. Must match the URL in the browser (true|false)."
 
 [[variables]]
 key = "AFFINE_VERSION"
@@ -129,24 +132,29 @@ description = "Database password for the affine user."
 [[variables]]
 key = "MAILER_HOST"
 label = "MAILER_HOST (Optional)"
-description = "Email server domain (optional)"
+default = ""
+description = "Email (SMTP) server domain (optional)."
 
 [[variables]]
 key = "MAILER_PASSWORD"
 label = "MAILER_PASSWORD (Optional)"
-description = "Email password (optional)"
+default = ""
+description = "Email (SMTP) password (optional). External credential — supply your own, leave blank if unused."
 
 [[variables]]
 key = "MAILER_PORT"
 label = "MAILER_PORT (Optional)"
-description = "Email server port (optional)"
+default = ""
+description = "Email (SMTP) server port (optional)."
 
 [[variables]]
 key = "MAILER_SENDER"
 label = "MAILER_SENDER (Optional)"
-description = "Email sender (optional, not available for consumer mail services)"
+default = ""
+description = "Email sender address (optional, not available for consumer mail services)."
 
 [[variables]]
 key = "MAILER_USER"
 label = "MAILER_USER (Optional)"
-description = "Email login user (optional)"
+default = ""
+description = "Email (SMTP) login user (optional)."

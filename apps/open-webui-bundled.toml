@@ -1,0 +1,53 @@
+slug = "open-webui-bundled"
+name = "Open WebUI + Ollama"
+category = "AI"
+description = "Self-contained LLM chat stack: Ollama plus the Open WebUI front-end in one project. Open WebUI talks to the bundled Ollama over the project's own network — no separate Ollama deployment or shared-category setup required. CPU-only; use the standalone Ollama (GPU) + Open WebUI apps for NVIDIA acceleration."
+keywords = ["open-webui", "ollama", "llm", "ai", "chat", "bundle"]
+http_port = 8080
+compose = '''
+services:
+  ollama:
+    image: ollama/ollama:{{OLLAMA_VERSION}}
+    environment:
+      OLLAMA_KEEP_ALIVE: '{{OLLAMA_KEEP_ALIVE}}'
+    volumes:
+    - ollama-data:/root/.ollama
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:{{OPEN_WEBUI_VERSION}}
+    depends_on:
+    - ollama
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_SECRET_KEY: '{{WEBUI_SECRET_KEY}}'
+    volumes:
+    - open-webui-data:/app/backend/data
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  ollama-data:
+  open-webui-data:
+'''
+
+[[variables]]
+key = "WEBUI_SECRET_KEY"
+label = "WebUI secret key"
+generate = true
+description = "Secret used to sign sessions/JWTs. Auto-generated; keep it stable across redeploys so users stay logged in."
+
+[[variables]]
+key = "OLLAMA_KEEP_ALIVE"
+label = "Model keep-alive"
+default = "5m"
+description = "How long a model stays loaded in memory after its last request (e.g. 5m, 1h, or -1 to keep loaded indefinitely)."
+
+[[variables]]
+key = "OLLAMA_VERSION"
+label = "Ollama Version Tag"
+default = "0.30.10"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/ollama/ollama/tags"
+
+[[variables]]
+key = "OPEN_WEBUI_VERSION"
+label = "Open WebUI Version Tag"
+default = "v0.9.6"
+description = "Check out their package page for valid tags https://github.com/open-webui/open-webui/pkgs/container/open-webui"

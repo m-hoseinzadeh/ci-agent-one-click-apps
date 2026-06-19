@@ -3,13 +3,13 @@ name = "PeerTube"
 category = "App"
 description = "PeerTube is a decentralized video hosting network, based on free/libre software."
 keywords = ["peertube"]
+http_port = 9000
 compose = '''
 services:
   peertube-db:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - peertube-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: '{{DB_USER}}'
       POSTGRES_PASSWORD: '{{DB_PASS}}'
@@ -18,7 +18,6 @@ services:
     image: redis:{{REDIS_VERSION}}
     volumes:
     - peertube-redis-data:/data
-    restart: always
   peertube:
     depends_on:
     - peertube-db
@@ -27,13 +26,12 @@ services:
     volumes:
     - peertube-peertube-data:/data
     - peertube-peertube-config:/config
-    restart: always
     environment:
       PEERTUBE_DB_USERNAME: '{{DB_USER}}'
       PEERTUBE_DB_PASSWORD: '{{DB_PASS}}'
       PEERTUBE_DB_HOSTNAME: peertube-db
       PEERTUBE_REDIS_HOSTNAME: peertube-redis
-      PEERTUBE_WEBSERVER_HOSTNAME: peertube.{{ROOT_DOMAIN}}
+      PEERTUBE_WEBSERVER_HOSTNAME: '{{APP_HOSTNAME}}'
       PEERTUBE_WEBSERVER_PORT: '443'
       PEERTUBE_WEBSERVER_HTTPS: 'true'
       PEERTUBE_TRUST_PROXY: '["127.0.0.1", "loopback", "10.0.0.0/16"]'
@@ -60,6 +58,7 @@ volumes:
 key = "ADMIN_EMAIL"
 label = "Administrator email"
 default = ""
+description = "Email address for the initial root admin account."
 
 [[variables]]
 key = "ADMIN_PASSWORD"
@@ -96,10 +95,10 @@ default = "6.2.11-alpine"
 description = "Check out their docker page for the valid tags https://hub.docker.com/r/library/redis/tags/"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_HOSTNAME"
+label = "Public hostname"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Bare hostname (no scheme) PeerTube uses to build public URLs, e.g. peertube.example.com. Set this to the domain ci-agent assigns to the project; PeerTube cannot be reconfigured after first boot."
 
 [[variables]]
 key = "SECRET"
@@ -120,6 +119,7 @@ default = ""
 key = "SMTP_PASSWORD"
 label = "SMTP password"
 default = ""
+description = "Password for your external SMTP provider. Leave blank if not sending email."
 
 [[variables]]
 key = "SMTP_PORT"

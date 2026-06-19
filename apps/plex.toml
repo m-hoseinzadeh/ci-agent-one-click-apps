@@ -3,6 +3,7 @@ name = "Plex Media Server"
 category = "App"
 description = "Plex organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices."
 keywords = ["media", "plex", "server"]
+http_port = 32400
 compose = '''
 services:
   plex:
@@ -10,19 +11,17 @@ services:
     environment:
       TZ: '{{TZ}}'
       PLEX_CLAIM: '{{PLEX_TOKEN}}'
-      ADVERTISE_IP: http://plex.{{ROOT_DOMAIN}}/
+      ADVERTISE_IP: '{{ADVERTISE_IP}}'
     ports:
     - '{{HTTP_PORT}}:32400'
-    - 32400:32400
-    - 3005:3005
-    - 8324:8324
-    - 32469:32469
-    - 1900:1900
-    - 32410:32410
-    - 32412:32412
-    - 32413:32413
-    - 32414:32414
-    hostname: plex.{{ROOT_DOMAIN}}
+    - '3005:3005'
+    - '8324:8324'
+    - '32469:32469'
+    - '1900:1900/udp'
+    - '32410:32410/udp'
+    - '32412:32412/udp'
+    - '32413:32413/udp'
+    - '32414:32414/udp'
     volumes:
     - plex-config:/config
     - plex-transcode:/transcode
@@ -36,19 +35,20 @@ volumes:
 [[variables]]
 key = "PLEX_TOKEN"
 label = "Plex Claim Token"
-description = "Get your token from https://www.plex.tv/claim"
+default = ""
+description = "Claim token to link this server to your Plex account. Get one from https://www.plex.tv/claim (valid for 4 minutes). Leave blank to claim the server manually later."
 
 [[variables]]
 key = "PLEX_VERSION"
 label = "Plex Version"
-default = "1.19.2.2737-b69929dab"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/plexinc/pms-docker/tags"
+default = "latest"
+description = "Image tag for plexinc/pms-docker. See valid tags at https://hub.docker.com/r/plexinc/pms-docker/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "ADVERTISE_IP"
+label = "Advertise URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional URL Plex advertises to clients for direct connections, e.g. http://your-host-ip:32400. Leave blank to let Plex auto-detect."
 
 [[variables]]
 key = "TZ"

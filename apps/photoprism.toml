@@ -1,51 +1,51 @@
 slug = "photoprism"
-name = "Photoprism (vbbot)"
-category = "App"
-description = "AI-Powered Photos App for the Decentralized Web"
-keywords = ["(vbbot)", "photoprism"]
+name = "PhotoPrism"
+category = "Photos"
+description = "AI-Powered Photos App for the Decentralized Web. Browse, organize and share your photo collection with automatic indexing and a chadburn-driven periodic re-index."
+keywords = ["photoprism", "photos", "gallery", "ai"]
+http_port = 2342
 compose = '''
 services:
   photoprism:
-    image: photoprism/photoprism:$$app_version
+    image: photoprism/photoprism:{{PHOTOPRISM_VERSION}}
     depends_on:
     - photoprism-db
     environment:
-      PHOTOPRISM_ADMIN_PASSWORD: $$app_admin_password
+      PHOTOPRISM_ADMIN_PASSWORD: '{{ADMIN_PASSWORD}}'
       PHOTOPRISM_AUTH_MODE: password
-      PHOTOPRISM_SITE_URL: https://photoprism.{{ROOT_DOMAIN}}
-      PHOTOPRISM_ORIGINALS_LIMIT: $$app_upload_size_limit
+      PHOTOPRISM_SITE_URL: '{{APP_URL}}'
+      PHOTOPRISM_ORIGINALS_LIMIT: '{{UPLOAD_SIZE_LIMIT}}'
       PHOTOPRISM_HTTP_COMPRESSION: gzip
       PHOTOPRISM_UPLOAD_NSFW: 'true'
       PHOTOPRISM_DATABASE_DRIVER: mysql
-      PHOTOPRISM_DATABASE_SERVER: photoprism-db
+      PHOTOPRISM_DATABASE_SERVER: photoprism-db:3306
       PHOTOPRISM_DATABASE_NAME: photoprism
       PHOTOPRISM_DATABASE_USER: photoprism
-      PHOTOPRISM_DATABASE_PASSWORD: $$db_password
+      PHOTOPRISM_DATABASE_PASSWORD: '{{DB_PASSWORD}}'
     volumes:
     - photoprism-originals:/photoprism/originals
     - photoprism-storage:/photoprism/storage
     working_dir: /photoprism
     labels:
-      photoprism-chadburn.enabled: $$chadburn_enabled
-      photoprism-chadburn.job-exec.photoprism_index.schedule: $$chadburn_index_schedule
-      photoprism-chadburn.job-exec.photoprism_index.command: photoprism index --cleanup
+      chadburn.enabled: 'true'
+      chadburn.job-exec.photoprism_index.schedule: '{{INDEX_SCHEDULE}}'
+      chadburn.job-exec.photoprism_index.command: photoprism index --cleanup
     ports:
     - '{{HTTP_PORT}}:2342'
   photoprism-db:
-    restart: unless-stopped
-    image: mariadb:$$db_version
+    image: mariadb:{{DB_VERSION}}
     volumes:
     - photoprism-db:/var/lib/mysql
     environment:
       MARIADB_AUTO_UPGRADE: '1'
-      MARIADB_INTDB_SKIP_TZINFO: '1'
+      MARIADB_INITDB_SKIP_TZINFO: '1'
       MARIADB_DATABASE: photoprism
       MARIADB_USER: photoprism
-      MARIADB_PASSWORD: $$db_password
-      MARIADB_ROOT_PASSWORD: $$db_root_password
+      MARIADB_PASSWORD: '{{DB_PASSWORD}}'
+      MARIADB_ROOT_PASSWORD: '{{DB_ROOT_PASSWORD}}'
   photoprism-chadburn:
-    restart: unless-stopped
-    image: premoweb/chadburn:$$chadburn_version
+    image: ghcr.io/premoweb/chadburn:{{CHADBURN_VERSION}}
+    command: daemon
     volumes:
     - /var/run/docker.sock:/var/run/docker.sock:ro
 volumes:
@@ -55,7 +55,55 @@ volumes:
 '''
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "ADMIN_PASSWORD"
+label = "Admin Password"
+generate = true
+description = "Initial password for the PhotoPrism 'admin' user."
+
+[[variables]]
+key = "APP_URL"
+label = "Site URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL PhotoPrism uses to build links (e.g. https://photos.example.com). Set after assigning a domain; leave blank to configure later."
+
+[[variables]]
+key = "UPLOAD_SIZE_LIMIT"
+label = "Originals size limit (MB)"
+default = "1000"
+description = "Maximum size of media files PhotoPrism will index/upload, in MB."
+
+[[variables]]
+key = "DB_PASSWORD"
+label = "Database Password"
+generate = true
+description = "Password for the photoprism MariaDB user (used by the app and the database)."
+
+[[variables]]
+key = "DB_ROOT_PASSWORD"
+label = "Database Root Password"
+generate = true
+description = "Root password for the MariaDB server."
+
+[[variables]]
+key = "DB_VERSION"
+label = "MariaDB Version"
+default = "11"
+description = "MariaDB image tag. See https://hub.docker.com/_/mariadb for valid tags."
+
+[[variables]]
+key = "PHOTOPRISM_VERSION"
+label = "PhotoPrism Version"
+default = "latest"
+description = "PhotoPrism image tag. See https://hub.docker.com/r/photoprism/photoprism/tags for valid tags."
+
+[[variables]]
+key = "CHADBURN_VERSION"
+label = "Chadburn Version"
+default = "1.9.5"
+description = "Chadburn scheduler image tag. See https://github.com/PremoWeb/Chadburn/pkgs/container/chadburn for valid tags."
+
+[[variables]]
+key = "INDEX_SCHEDULE"
+label = "Index Schedule"
+default = "@every 1h"
+description = "How often chadburn runs 'photoprism index --cleanup' (cron or @every syntax)."

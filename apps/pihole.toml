@@ -3,16 +3,19 @@ name = "Pi-hole"
 category = "App"
 description = "The Pi-hole® is a DNS sinkhole that protects your devices from unwanted content without installing any client-side software."
 keywords = ["hole", "pi", "pihole"]
+http_port = 80
 compose = '''
 services:
   pihole:
     image: pihole/pihole:{{VERSION}}
     ports:
-    - '53:53'
+    - '{{HTTP_PORT}}:80'
+    - '53:53/tcp'
+    - '53:53/udp'
     environment:
       TZ: '{{TZ}}'
-      WEBPASSWORD: '{{WEBPASSWORD}}'
-      VIRTUAL_HOST: pihole.{{ROOT_DOMAIN}}
+      FTLCONF_webserver_api_password: '{{WEBPASSWORD}}'
+      FTLCONF_dns_listeningMode: 'ALL'
     volumes:
     - pihole-pihole:/etc/pihole
     - pihole-dnsmasq:/etc/dnsmasq.d
@@ -20,12 +23,6 @@ volumes:
   pihole-pihole:
   pihole-dnsmasq:
 '''
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"
@@ -36,7 +33,7 @@ description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_
 [[variables]]
 key = "VERSION"
 label = "PiHole Version"
-default = "2024.07.0"
+default = "2026.06.0"
 description = "Check out their docker page for the valid tags https://hub.docker.com/r/pihole/pihole/tags"
 
 [[variables]]

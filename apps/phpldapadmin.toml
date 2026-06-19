@@ -1,60 +1,68 @@
 slug = "phpldapadmin"
 name = "OpenLDAP + phpLDAPadmin"
 category = "App"
-description = "OpenLDAP with administration interface"
-keywords = ["openldap", "phpldapadmin"]
+description = "OpenLDAP directory server with the phpLDAPadmin web administration interface."
+keywords = ["openldap", "phpldapadmin", "ldap", "directory"]
+http_port = 80
 compose = '''
 services:
   phpldapadmin:
     image: osixia/openldap:{{OPENLDAP_VERSION}}
-    restart: always
     volumes:
     - phpldapadmin-db:/var/lib/ldap
     - phpldapadmin-config:/etc/ldap/slapd.d
     environment:
-      LDAP_ORGANISATION: '{{OPENLDAP_LDAP}}-organisation'
-      LDAP_DOMAIN: '{{ROOT_DOMAIN}}'
-      LDAP_ADMIN_PASSWORD: '{{OPENLDAP_LDAP}}-admin-password'
+      LDAP_ORGANISATION: '{{LDAP_ORGANISATION}}'
+      LDAP_DOMAIN: '{{LDAP_DOMAIN}}'
+      LDAP_ADMIN_PASSWORD: '{{LDAP_ADMIN_PASSWORD}}'
   phpldapadmin-admin:
     image: osixia/phpldapadmin:{{PHPLDAPADMIN_VERSION}}
-    restart: always
     depends_on:
     - phpldapadmin
+    ports:
+    - '{{HTTP_PORT}}:80'
     environment:
-      PHPLDAPADMIN_TRUST_PROXY_SSL: true
+      PHPLDAPADMIN_TRUST_PROXY_SSL: "true"
       PHPLDAPADMIN_LDAP_HOSTS: phpldapadmin
-      PHPLDAPADMIN_SERVER_ADMIN: '{{PHPLDAPADMIN_ADMIN}}-email'
-      PHPLDAPADMIN_SERVER_PATH: https://phpldapadmin-admin.{{ROOT_DOMAIN}}
-      PHPLDAPADMIN_HTTPS: false
+      PHPLDAPADMIN_SERVER_ADMIN: '{{PHPLDAPADMIN_SERVER_ADMIN}}'
+      PHPLDAPADMIN_HTTPS: "false"
 volumes:
   phpldapadmin-db:
   phpldapadmin-config:
 '''
 
 [[variables]]
-key = "OPENLDAP_LDAP"
-label = "Openldap Ldap"
-default = ""
+key = "LDAP_ORGANISATION"
+label = "LDAP organisation name"
+default = "Example Inc."
+description = "Human-readable name of your organisation, stored in the directory root."
+
+[[variables]]
+key = "LDAP_DOMAIN"
+label = "LDAP domain"
+default = "example.org"
+description = "Base DNS domain for the directory; it becomes the LDAP base DN (e.g. example.org -> dc=example,dc=org)."
+
+[[variables]]
+key = "LDAP_ADMIN_PASSWORD"
+label = "LDAP admin password"
+generate = true
+description = "Password for the OpenLDAP admin account (cn=admin); used to log in to phpLDAPadmin."
 
 [[variables]]
 key = "OPENLDAP_VERSION"
-label = "Openldap Version"
-default = "1.4.0"
-description = "Check out their docker page for the valid tags https://hub.docker.com/r/osixia/openldap/tags"
-
-[[variables]]
-key = "PHPLDAPADMIN_ADMIN"
-label = "Phpldapadmin Admin"
-default = ""
+label = "OpenLDAP version"
+default = "1.5.0"
+description = "Check the valid tags at https://hub.docker.com/r/osixia/openldap/tags"
 
 [[variables]]
 key = "PHPLDAPADMIN_VERSION"
-label = "PHPLadapAdmin Version"
+label = "phpLDAPadmin version"
 default = "0.9.0"
-description = "Check out their docker page for the valid tags https://hub.docker.com/r/osixia/phpldapadmin/tags"
+description = "Check the valid tags at https://hub.docker.com/r/osixia/phpldapadmin/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "PHPLDAPADMIN_SERVER_ADMIN"
+label = "Support email"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional contact email shown in the phpLDAPadmin interface; leave blank if unused."

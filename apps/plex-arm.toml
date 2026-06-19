@@ -3,6 +3,7 @@ name = "Plex Media Server (ARM)"
 category = "App"
 description = "Plex organizes video, music and photos from personal media libraries and streams them to smart TVs, streaming boxes and mobile devices."
 keywords = ["(arm)", "arm", "media", "plex", "server"]
+http_port = 32400
 compose = '''
 services:
   plex-arm:
@@ -10,19 +11,9 @@ services:
     environment:
       TZ: '{{TZ}}'
       PLEX_CLAIM: '{{PLEX_TOKEN}}'
-      ADVERTISE_IP: http://plex-arm.{{ROOT_DOMAIN}}/
+      ADVERTISE_IP: '{{APP_URL}}'
     ports:
     - '{{HTTP_PORT}}:32400'
-    - 32400:32400
-    - 3005:3005
-    - 8324:8324
-    - 32469:32469
-    - 1900:1900
-    - 32410:32410
-    - 32412:32412
-    - 32413:32413
-    - 32414:32414
-    hostname: plex-arm.{{ROOT_DOMAIN}}
     volumes:
     - plex-arm-config:/config
     - plex-arm-transcode:/transcode
@@ -38,19 +29,20 @@ volumes:
 [[variables]]
 key = "PLEX_TOKEN"
 label = "Plex Claim Token"
-description = "Get your token from https://www.plex.tv/claim"
+default = ""
+description = "Claim token to bind this server to your Plex account. Obtain it from https://www.plex.tv/claim and paste it within 4 minutes. Leave blank to claim later from the web UI."
 
 [[variables]]
 key = "PLEX_VERSION"
 label = "Plex Version"
-default = "1.25.8"
-description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/plex/tags"
+default = "latest"
+description = "Image tag for linuxserver/plex. Check the valid tags at https://hub.docker.com/r/linuxserver/plex/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Advertised URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional public URL Plex advertises to clients (e.g. http://your-domain/). Set after the project domain is assigned, or leave blank."
 
 [[variables]]
 key = "TZ"

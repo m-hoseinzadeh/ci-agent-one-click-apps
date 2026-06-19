@@ -3,6 +3,7 @@ name = "PostHog"
 category = "Analytics"
 description = "🦔 PostHog provides open-source product analytics, session recording, feature flagging and A/B testing that you can self-host."
 keywords = ["posthog"]
+http_port = 8000
 compose = '''
 services:
   posthog-db:
@@ -14,27 +15,26 @@ services:
     volumes:
     - posthog-postgres-data:/var/lib/postgresql/data
   posthog-redis:
-    restart: on-failure
     image: redis:6.2.7-alpine
     command: sh -c "redis-server --maxmemory-policy allkeys-lru --maxmemory 200mb"
   posthog-redis7:
     image: redis:7.2-alpine
-    restart: on-failure
     command: sh -c "redis-server --maxmemory-policy allkeys-lru --maxmemory 200mb"
   posthog-zookeeper:
     image: zookeeper:3.7.0
-    restart: on-failure
     volumes:
     - posthog-zookeeper-datalog:/datalog
     - posthog-zookeeper-data:/data
     - posthog-zookeeper-logs:/logs
   posthog-clickhouse:
-    restart: on-failure
+    image: clickhouse/clickhouse-server:23.6.1.1524
+    depends_on:
+    - posthog-kafka
+    - posthog-zookeeper
     volumes:
     - clickhouse-data:/var/lib/clickhouse
   posthog-kafka:
-    image: ghcr.io/posthog/kafka-container:v2.8.2
-    restart: on-failure
+    image: bitnami/kafka:2.8.1
     environment:
       KAFKA_BROKER_ID: 1001
       KAFKA_CFG_RESERVED_BROKER_MAX_ID: 1001
@@ -49,9 +49,8 @@ services:
   posthog-worker:
     image: posthog/posthog:{{POSTHOG_VERSION}}
     command: ./bin/docker-worker-celery --with-scheduler
-    restart: on-failure
     environment:
-      SITE_URL: http://posthog-web.{{ROOT_DOMAIN}}
+      SITE_URL: '{{APP_URL}}'
       SECRET_KEY: '{{SECRET_KEY}}'
       DATABASE_URL: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@posthog-db:{{POSTGRES_PORT}}/{{POSTGRES_DB}}
       REDIS_URL: redis://posthog-redis:6379/
@@ -67,12 +66,8 @@ services:
       OBJECT_STORAGE_ENABLED: '{{ENABLE_OBJECT_STORAGE}}'
   posthog-objectstorage:
     image: minio/minio:RELEASE.2022-06-25T15-50-16Z
-    restart: on-failure
     volumes:
     - posthog-objectstorage:/data
-    ports:
-    - 19000:19000
-    - 19001:19001
     environment:
       MINIO_ROOT_USER: '{{OBJECT_STORAGE_ROOT_USER}}'
       MINIO_ROOT_PASSWORD: '{{OBJECT_STORAGE_ROOT_PASSWORD}}'
@@ -87,7 +82,7 @@ services:
     - posthog-objectstorage
     environment:
       SECRET_KEY: '{{SECRET_KEY}}'
-      SITE_URL: http://posthog-web.{{ROOT_DOMAIN}}
+      SITE_URL: '{{APP_URL}}'
       DATABASE_URL: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@posthog-db:{{POSTGRES_PORT}}/{{POSTGRES_DB}}
       REDIS_URL: redis://posthog-redis:6379/
       CLICKHOUSE_HOST: posthog-clickhouse
@@ -103,14 +98,13 @@ services:
     command: ./bin/plugin-server
   posthog-web:
     image: posthog/posthog:{{POSTHOG_VERSION}}
-    restart: on-failure
     depends_on:
     - posthog-db
     - posthog-redis
     - posthog-clickhouse
     - posthog-kafka
     environment:
-      SITE_URL: http://posthog-web.{{ROOT_DOMAIN}}
+      SITE_URL: '{{APP_URL}}'
       SECRET_KEY: '{{SECRET_KEY}}'
       DATABASE_URL: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@posthog-db:{{POSTGRES_PORT}}/{{POSTGRES_DB}}
       REDIS_URL: redis://posthog-redis:6379/
@@ -128,6 +122,7 @@ services:
     ports:
     - '{{HTTP_PORT}}:8000'
   posthog-elasticsearch:
+    image: elasticsearch:7.16.2
     environment:
       cluster.routing.allocation.disk.threshold_enabled: true
       cluster.routing.allocation.disk.watermark.low: 512mb
@@ -136,13 +131,12 @@ services:
       discovery.type: single-node
       ES_JAVA_OPTS: -Xms256m -Xmx256m
       xpack.security.enabled: false
-    image: elasticsearch:7.16.2
     expose:
     - 9200
     volumes:
     - posthog-elasticsearch:/var/lib/elasticsearch/data
   posthog-temporal:
-    restart: on-failure
+    image: temporalio/auto-setup:1.20.0
     environment:
       DB: postgresql
       DB_PORT: '{{POSTGRES_PORT}}'
@@ -152,36 +146,30 @@ services:
       ENABLE_ES: '{{ENABLE_ELASTIC_SEARCH}}'
       ES_SEEDS: posthog-elasticsearch
       ES_VERSION: v7
-    image: temporalio/auto-setup:1.20.0
-    ports:
-    - 7233:7233
     depends_on:
       posthog-db:
         condition: service_healthy
       posthog-elasticsearch:
         condition: service_started
   posthog-temporal-admin-tools:
+    image: temporalio/admin-tools:1.20.0
     environment:
       TEMPORAL_CLI_ADDRESS: posthog-temporal:7233
-    image: temporalio/admin-tools:1.20.0
     depends_on:
     - posthog-temporal
   posthog-temporal-ui:
+    image: temporalio/ui:2.10.3
     environment:
       TEMPORAL_ADDRESS: posthog-temporal:7233
       TEMPORAL_CORS_ORIGINS: http://localhost:3000
-    image: temporalio/ui:2.10.3
-    ports:
-    - 8081:8080
     depends_on:
     - posthog-temporal
     - posthog-db
   posthog-temporal-django-worker:
     image: posthog/posthog:{{POSTHOG_VERSION}}
     command: ./bin/temporal-django-worker
-    restart: on-failure
     environment:
-      SITE_URL: http://posthog-web.{{ROOT_DOMAIN}}
+      SITE_URL: '{{APP_URL}}'
       SECRET_KEY: '{{SECRET_KEY}}'
       DATABASE_URL: postgres://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@posthog-db:{{POSTGRES_PORT}}/{{POSTGRES_DB}}
       REDIS_URL: redis://posthog-redis:6379/
@@ -240,6 +228,12 @@ label = "Enable Object storage"
 default = "true"
 
 [[variables]]
+key = "APP_URL"
+label = "Public URL"
+default = ""
+description = "Public base URL PostHog uses to build links (e.g. https://posthog.example.com). Set after the domain is assigned; leave blank to use the request host."
+
+[[variables]]
 key = "OBJECT_STORAGE_ROOT_PASSWORD"
 label = "Object Storage Password Key"
 generate = true
@@ -277,14 +271,8 @@ label = "PostHog's version"
 default = "e2f4b4a8b46667f75ad9bdacf4a487a5dd2d5dbf"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
 key = "SECRET_KEY"
-label = "PostHog-LLM Secret Key"
+label = "PostHog Secret Key"
 generate = true
 
 [[variables]]

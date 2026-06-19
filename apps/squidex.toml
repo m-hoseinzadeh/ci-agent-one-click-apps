@@ -3,6 +3,7 @@ name = "Squidex"
 category = "CMS"
 description = "Squidex is an open source headless CMS and content management hub."
 keywords = ["squidex"]
+http_port = 5000
 compose = '''
 services:
   squidex:
@@ -11,10 +12,10 @@ services:
     image: squidex/squidex:{{SQUIDEX_VERSION}}
     volumes:
     - squidex-data:/app/Assets
-    restart: always
     environment:
-      URLS__BASEURL: https://squidex.{{ROOT_DOMAIN}}
-      URLS__ENFORCEHTTPS: 'True'
+      URLS__BASEURL: '{{APP_URL}}'
+      URLS__ENFORCEHTTPS: 'False'
+      EVENTSTORE__TYPE: MongoDB
       EVENTSTORE__MONGODB__CONFIGURATION: mongodb://root:{{MONGO_PASSWORD}}@squidex-db
       STORE__MONGODB__CONFIGURATION: mongodb://root:{{MONGO_PASSWORD}}@squidex-db
       IDENTITY__ADMINEMAIL: '{{ADMIN_EMAIL}}'
@@ -25,21 +26,18 @@ services:
       IDENTITY__GITHUBSECRET: '{{GITHUB_SECRET}}'
       IDENTITY__MICROSOFTCLIENT: '{{MICROSOFT_CLIENT}}'
       IDENTITY__MICROSOFTSECRET: '{{MICROSOFT_SECRET}}'
-      LETSENCRYPT_HOST: squidex.{{ROOT_DOMAIN}}
-      LETSENCRYPT_EMAIL: '{{ADMIN_EMAIL}}'
-      VIRTUAL_HOST: squidex.{{ROOT_DOMAIN}}
+      ASPNETCORE_URLS: http://+:5000
+    ports:
+    - '{{HTTP_PORT}}:5000'
   squidex-db:
     image: mongo:{{MONGO_VERSION}}
     volumes:
     - squidex-db-data:/data/db
     - squidex-db-config:/data/configdb
-    restart: always
     environment:
       MONGO_INITDB_DATABASE: squidex
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: '{{MONGO_PASSWORD}}'
-    ports:
-    - '{{HTTP_PORT}}:27017'
 volumes:
   squidex-data:
   squidex-db-data:
@@ -54,57 +52,65 @@ description = "The Email which is gonna be used to login as administrator."
 [[variables]]
 key = "ADMIN_PASSWORD"
 label = "Admin Password"
-description = "The password which is gonna be used to login as administrator.(Minimum eight characters, at least one letter, one number and one special character:)"
+generate = true
+description = "The password which is gonna be used to login as administrator. (Minimum eight characters, at least one letter, one number and one special character.)"
+
+[[variables]]
+key = "APP_URL"
+label = "Base URL"
+default = ""
+description = "Public URL Squidex is served from (e.g. https://cms.example.com). Set this to your project domain after the project is created."
 
 [[variables]]
 key = "GITHUB_CLIENT"
-label = "Github Client Id(Optional)"
-description = "The client id from Github in order to enable Github Login."
+label = "Github Client Id (Optional)"
+default = ""
+description = "The client id from Github in order to enable Github Login. Leave blank if unused."
 
 [[variables]]
 key = "GITHUB_SECRET"
-label = "Github Secret Token(Optional)"
-description = "The secret token from Github in order to enable Github Login."
+label = "Github Secret Token (Optional)"
+default = ""
+description = "The secret token from Github in order to enable Github Login. Leave blank if unused."
 
 [[variables]]
 key = "GOOGLE_CLIENT"
-label = "Google Client Id(Optional)"
-description = "The client id from Google in order to enable Google Login."
+label = "Google Client Id (Optional)"
+default = ""
+description = "The client id from Google in order to enable Google Login. Leave blank if unused."
 
 [[variables]]
 key = "GOOGLE_SECRET"
-label = "Google Secret Token(Optional)"
-description = "The secret token from Google in order to enable Google Login."
+label = "Google Secret Token (Optional)"
+default = ""
+description = "The secret token from Google in order to enable Google Login. Leave blank if unused."
 
 [[variables]]
 key = "MICROSOFT_CLIENT"
-label = "Microsoft Client Id(Optional)"
-description = "The client id from Microsoft in order to enable MS Login."
+label = "Microsoft Client Id (Optional)"
+default = ""
+description = "The client id from Microsoft in order to enable MS Login. Leave blank if unused."
 
 [[variables]]
 key = "MICROSOFT_SECRET"
-label = "Microsoft Secret Token(Optional)"
-description = "The secret token from Microsoft in order to enable MS Login."
+label = "Microsoft Secret Token (Optional)"
+default = ""
+description = "The secret token from Microsoft in order to enable MS Login. Leave blank if unused."
 
 [[variables]]
 key = "MONGO_PASSWORD"
 label = "MongoDB password"
-description = "Only use alphanumeric chars."
+generate = true
+description = "Internal MongoDB root password. Only use alphanumeric chars."
 
 [[variables]]
 key = "MONGO_VERSION"
 label = "MongoDB Version"
-default = "4"
+default = "6"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/library/mongo/tags/"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "SQUIDEX_VERSION"
 label = "Squidex Version"
-default = "4.6.0"
+default = "7"
 description = "Check out their page for the valid versions https://hub.docker.com/r/squidex/squidex/tags"

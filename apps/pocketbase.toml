@@ -1,15 +1,26 @@
 slug = "pocketbase"
 name = "PocketBase"
 category = "Database"
-description = "PocketBase is an open source Go backend: - embedded database (SQLite) with realtime subscriptions - built-in files and users management - convenient Admin dashboard UI - and simple REST-ish API"
+description = "PocketBase is an open source Go backend: an embedded SQLite database with realtime subscriptions, built-in files and users management, a convenient Admin dashboard UI, and a simple REST-ish API."
 keywords = ["pocketbase"]
+http_port = 8090
 compose = '''
 services:
   pocketbase:
+    image: ghcr.io/muchobien/pocketbase:{{POCKETBASE_VERSION}}
+    command:
+    - serve
+    - --http=0.0.0.0:8090
     volumes:
-    - pocketbase-data:/pb
+    - pocketbase-data:/pb_data
     ports:
-    - '{{HTTP_PORT}}:8080'
+    - '{{HTTP_PORT}}:8090'
 volumes:
   pocketbase-data:
 '''
+
+[[variables]]
+key = "POCKETBASE_VERSION"
+label = "PocketBase version"
+default = "0.34"
+description = "Docker image tag of ghcr.io/muchobien/pocketbase to deploy."

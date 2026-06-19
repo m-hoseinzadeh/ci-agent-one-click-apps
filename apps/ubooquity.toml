@@ -3,6 +3,7 @@ name = "Ubooquity"
 category = "App"
 description = "Ubooquity is an online cross-platform content server for reading e-books"
 keywords = ["ubooquity"]
+http_port = 2202
 compose = '''
 services:
   ubooquity:
@@ -12,7 +13,6 @@ services:
       PGID: '1000'
       TZ: '{{TZ}}'
       MAXMEM: ''
-    hostname: ubooquity.{{ROOT_DOMAIN}}
     ports:
     - '{{HTTP_PORT}}:2202'
     - '{{ADMIN_PORT}}:2203'
@@ -33,12 +33,6 @@ key = "ADMIN_PORT"
 label = "Administration Panel Port"
 default = "2203"
 description = "The port on which to run the administration panel page."
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"

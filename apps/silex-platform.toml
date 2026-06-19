@@ -1,14 +1,15 @@
 slug = "silex-platform"
-name = "silex-platform"
+name = "Silex"
 category = "App"
 description = "Silex is an online tool for visually creating static sites with dynamic data. With the free/libre spirit of internet, together."
 keywords = ["platform", "silex"]
+http_port = 6805
 compose = '''
 services:
   silex-platform:
     image: silexlabs/silex-platform:{{VERSION}}
     environment:
-      SILEX_URL: https://silex-platform.{{ROOT_DOMAIN}}
+      SILEX_URL: '{{APP_URL}}'
       STORAGE_CONNECTORS: '{{STORAGE_CONNECTOR}}'
       HOSTING_CONNECTORS: '{{HOSTING_CONNECTOR}}'
       GITLAB_DOMAIN: https://gitlab.com
@@ -26,27 +27,32 @@ services:
 [[variables]]
 key = "GITLAB2_CLIENT_ID"
 label = "GITLAB2_CLIENT_ID"
-description = "Your client-id for your other gitlab instance app"
+default = ""
+description = "Your client-id for your other gitlab instance app. Obtain from your GitLab OAuth application; leave blank if unused."
 
 [[variables]]
 key = "GITLAB2_CLIENT_SECRET"
 label = "GITLAB2_CLIENT_SECRET"
-description = "Your client-secret for your other gitlab instance app"
+default = ""
+description = "Your client-secret for your other gitlab instance app. Obtain from your GitLab OAuth application; leave blank if unused."
 
 [[variables]]
 key = "GITLAB2_DOMAIN"
 label = "GITLAB2_DOMAIN"
-description = "Domain for your other gitlab instance (e.g. https://framagit.org)"
+default = ""
+description = "Domain for your other gitlab instance (e.g. https://framagit.org); leave blank if unused."
 
 [[variables]]
 key = "GITLAB_CLIENT_ID"
 label = "GITLAB_CLIENT_ID"
-description = "Your client-id for your gitlab app (see https://docs.gitlab.com/ee/integration/oauth_provider.html#create-a-user-owned-application)"
+default = ""
+description = "Your client-id for your gitlab app. Obtain from your GitLab OAuth application (see https://docs.gitlab.com/ee/integration/oauth_provider.html#create-a-user-owned-application)."
 
 [[variables]]
 key = "GITLAB_CLIENT_SECRET"
 label = "GITLAB_CLIENT_SECRET"
-description = "Your client-secret for your gitlab app (see https://docs.gitlab.com/ee/integration/oauth_provider.html#create-a-user-owned-application)"
+default = ""
+description = "Your client-secret for your gitlab app. Obtain from your GitLab OAuth application (see https://docs.gitlab.com/ee/integration/oauth_provider.html#create-a-user-owned-application)."
 
 [[variables]]
 key = "HOSTING_CONNECTOR"
@@ -55,10 +61,10 @@ default = "gitlab,download"
 description = "Hosting connector you want to use should be one or more of following gitlab,ftp,gitlab2,download (separated with comma but no space)"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL used to build links (e.g. https://silex.example.com). Set after the project domain is assigned."
 
 [[variables]]
 key = "STORAGE_CONNECTOR"

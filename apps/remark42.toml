@@ -3,14 +3,13 @@ name = "Remark42"
 category = "App"
 description = "Self-hosted, lightweight, and simple (yet functional) comment engine, which doesn't spy on users. It can be embedded into blogs, articles or any other place where readers add comments."
 keywords = ["remark42"]
+http_port = 8080
 compose = '''
 services:
   remark42:
     image: umputun/remark42:{{TAG_VERSION}}
-    hostname: remark42.{{ROOT_DOMAIN}}
-    restart: always
     environment:
-      REMARK_URL: https://remark42.{{ROOT_DOMAIN}}
+      REMARK_URL: '{{APP_URL}}'
       SECRET: '{{SECRET}}'
       SITE: '{{SITE}}'
       STORE_TYPE: '{{STORE_TYPE}}'
@@ -40,7 +39,7 @@ services:
       IMAGE_RESIZE_HEIGHT: '{{IMAGE_RESIZE_HEIGHT}}'
       AUTH_TTL_JWT: '{{AUTH_TTL_JWT}}'
       AUTH_TTL_COOKIE: '{{AUTH_TTL_COOKIE}}'
-      AUTH_SEND_JWT_HEADER: '{{AUTH_SEND}}-jwt_header'
+      AUTH_SEND_JWT_HEADER: '{{AUTH_SEND_JWT_HEADER}}'
       AUTH_SAME_SITE: '{{AUTH_SAME_SITE}}'
       AUTH_GOOGLE_CID: '{{AUTH_GOOGLE_CID}}'
       AUTH_GOOGLE_CSEC: '{{AUTH_GOOGLE_CSEC}}'
@@ -92,7 +91,7 @@ services:
       MAX_VOTES: '{{MAX_VOTES}}'
       VOTES_IP: '{{VOTES_IP}}'
       ANON_VOTE: '{{ANON_VOTE}}'
-      VOTES_IP_TIME: '{{VOTES}}-ip_time'
+      VOTES_IP_TIME: '{{VOTES_IP_TIME}}'
       LOW_SCORE: '{{LOW_SCORE}}'
       CRITICAL_SCORE: '{{CRITICAL_SCORE}}'
       POSITIVE_SCORE: '{{POSITIVE_SCORE}}'
@@ -102,11 +101,11 @@ services:
       ADMIN_EDIT: '{{ADMIN_EDIT}}'
       READONLY_AGE: '{{READ_AGE}}'
       IMAGE_PROXY_HTTP2HTTPS: '{{IMAGE_PROXY_HTTP2HTTPS}}'
-      IMAGE_PROXY_CACHE_EXTERNAL: '{{IMAGE}}-proxy_cache_external'
+      IMAGE_PROXY_CACHE_EXTERNAL: '{{IMAGE_PROXY_CACHE_EXTERNAL}}'
       EMOJI: '{{EMOJI}}'
       SIMPLE_VIEW: '{{SIMPLE_VIEW}}'
       PROXY_CORS: '{{PROXY_CORS}}'
-      ALLOWED_HOSTS: remark42.{{ROOT_DOMAIN}},{{ALLOWED_HOSTS}}
+      ALLOWED_HOSTS: '{{ALLOWED_HOSTS}}'
       REMARK_ADDRESS: '{{ADDRESS}}'
       REMARK_PORT: '{{PORT}}'
       REMARK_WEB_ROOT: '{{WEB_ROOT}}'
@@ -157,6 +156,12 @@ key = "ALLOWED_HOSTS"
 label = "ALLOWED_HOSTS"
 default = ""
 description = "limit hosts/sources allowed to embed comments, enable all by default"
+
+[[variables]]
+key = "APP_URL"
+label = "REMARK_URL"
+default = ""
+description = "Public URL where Remark42 is reachable (REMARK_URL), e.g. https://comments.example.com. Required; set after the project domain is assigned."
 
 [[variables]]
 key = "ANON_VOTE"
@@ -267,9 +272,10 @@ default = "default"
 description = "set same site policy for cookies (`default`, `none`, `lax` or `strict`)"
 
 [[variables]]
-key = "AUTH_SEND"
-label = "Auth Send"
-default = ""
+key = "AUTH_SEND_JWT_HEADER"
+label = "AUTH_SEND_JWT_HEADER"
+default = "false"
+description = "send JWT as a header instead of a cookie"
 
 [[variables]]
 key = "AUTH_TELEGRAM"
@@ -404,9 +410,10 @@ default = "false"
 description = "enable emoji support"
 
 [[variables]]
-key = "IMAGE"
-label = "Image"
-default = ""
+key = "IMAGE_PROXY_CACHE_EXTERNAL"
+label = "IMAGE_PROXY_CACHE_EXTERNAL"
+default = "false"
+description = "enable caching for cropped external images"
 
 [[variables]]
 key = "IMAGE_BOLT_FILE"
@@ -589,12 +596,6 @@ default = ""
 description = "words banned in comments (can use `*`), _multi_"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
 key = "SECRET"
 label = "SECRET"
 generate = true
@@ -733,9 +734,10 @@ default = "0.5"
 description = "updates/sec limit"
 
 [[variables]]
-key = "VOTES"
-label = "Votes"
-default = ""
+key = "VOTES_IP_TIME"
+label = "VOTES_IP_TIME"
+default = "0s"
+description = "elapsed time to require a new vote from the same IP, `0s` - disabled"
 
 [[variables]]
 key = "VOTES_IP"

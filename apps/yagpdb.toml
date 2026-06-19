@@ -1,11 +1,14 @@
 slug = "yagpdb"
-name = "Yagpdb"
+name = "YAGPDB"
 category = "App"
-description = "Yet another general purpose discord bot"
-keywords = ["yagpdb"]
+description = "Yet another general purpose Discord bot, with a Postgres and Redis backend."
+keywords = ["yagpdb", "discord", "bot"]
+http_port = 80
 compose = '''
 services:
   yagpdb:
+    image: teyker/yagpdb:{{YAGPDB_VERSION}}
+    command: ["/app/yagpdb", "-all", "-pa", "-exthttps=true", "-https=false"]
     depends_on:
     - yagpdb-redis
     - yagpdb-postgres
@@ -14,20 +17,20 @@ services:
       YAGPDB_CLIENTID: '{{YAGPDB_BOT_CLIENT_ID}}'
       YAGPDB_CLIENTSECRET: '{{YAGPDB_BOT_CLIENT_SECRET}}'
       YAGPDB_BOTTOKEN: Bot {{YAGPDB_BOT_TOKEN}}
-      YAGPDB_HOST: yagpdb.{{ROOT_DOMAIN}}
+      YAGPDB_HOST: '{{YAGPDB_HOST}}'
       YAGPDB_PQHOST: yagpdb-postgres
       YAGPDB_PQUSERNAME: yagpdb
       YAGPDB_PQDB: yagpdb_production
       YAGPDB_PQPASSWORD: '{{POSTGRES_PASSWORD}}'
       YAGPDB_REDIS: yagpdb-redis:6379
+    ports:
+    - '{{HTTP_PORT}}:80'
     volumes:
     - yagpdb-soundboard:/app/soundboard
   yagpdb-redis:
     image: redis:6.2.5-alpine
     volumes:
     - yagpdb-redis-data:/data
-    ports:
-    - '{{HTTP_PORT}}:6379'
   yagpdb-postgres:
     image: postgres:12-alpine
     environment:
@@ -43,37 +46,43 @@ volumes:
 '''
 
 [[variables]]
+key = "YAGPDB_VERSION"
+label = "YAGPDB image tag"
+default = "v2.80.2"
+description = "Tag of the teyker/yagpdb community image to deploy (YAGPDB has no official image; this is the commonly-used community build). See https://hub.docker.com/r/teyker/yagpdb/tags"
+
+[[variables]]
 key = "POSTGRES_PASSWORD"
 label = "Postgres Password"
 generate = true
-description = "Password must be at least 12 characters. Please use a random string."
+description = "Password for the bundled Postgres database. Must be at least 12 characters; leave blank to auto-generate."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "YAGPDB_HOST"
+label = "Public hostname"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Bare hostname (no scheme) the bot is reached at, used to build OAuth redirect URLs (e.g. yagpdb.example.com). Set after a domain is assigned to the project; can be left blank initially."
 
 [[variables]]
 key = "YAGPDB_BOT_CLIENT_ID"
 label = "Discord bot OAuth2 client ID"
-default = "Insert bot OAuth2 client id here"
-description = "https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token"
+default = ""
+description = "OAuth2 client ID from your Discord application. Obtain it at https://discord.com/developers/applications"
 
 [[variables]]
 key = "YAGPDB_BOT_CLIENT_SECRET"
 label = "Discord bot OAuth2 client secret"
-default = "Insert bot OAuth2 client secret here"
-description = "https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token"
+default = ""
+description = "OAuth2 client secret from your Discord application. Obtain it at https://discord.com/developers/applications"
 
 [[variables]]
 key = "YAGPDB_BOT_OWNER"
-label = "Discord server owner ID"
-default = "Insert your server owner id here"
-description = "https://support.discordapp.com/hc/en-us/articles/206346498-Where-can-I-find-my-User-Server-Message-ID-"
+label = "Discord owner user ID"
+default = ""
+description = "Your Discord user ID, granted bot owner privileges. Enable Developer Mode in Discord and copy your user ID."
 
 [[variables]]
 key = "YAGPDB_BOT_TOKEN"
 label = "Discord bot token"
-default = "Insert bot token here"
-description = "https://github.com/reactiflux/discord-irc/wiki/Creating-a-discord-bot-&-getting-a-token"
+default = ""
+description = "Bot token from your Discord application (the value after 'Bot ' is added automatically). Obtain it at https://discord.com/developers/applications"

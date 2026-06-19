@@ -3,6 +3,7 @@ name = "Rocket.Chat"
 category = "Communication"
 description = "Slack like online chat, built with Meteor. Real-time conversations with your colleagues, other companies or customers."
 keywords = ["rocket.chat", "rocketchat"]
+http_port = 3000
 compose = '''
 services:
   rocketchat:
@@ -13,16 +14,15 @@ services:
     - rocketchat-db
     environment:
       PORT: 3000
-      ROOT_URL: http://rocketchat.{{ROOT_DOMAIN}}
+      ROOT_URL: '{{APP_URL}}'
       MONGO_URL: mongodb://{{MONGODB_DB_USERNAME}}:{{MONGODB_DB_PASSWORD}}@rocketchat-db:27017/rocketchat?replicaSet=rs0
       MONGO_OPLOG_URL: mongodb://{{MONGODB_ROOT_USERNAME}}:{{MONGODB_ROOT_PASSWORD}}@rocketchat-db:27017/local?replicaSet=rs0&authSource=admin
       ADMIN_NAME: '{{ADMIN_NAME}}'
       ADMIN_EMAIL: '{{ADMIN_EMAIL}}'
       ADMIN_USERNAME: '{{ADMIN_USERNAME}}'
       ADMIN_PASS: '{{ADMIN_PASSWORD}}'
-      OVERWRITE_SETTING_Site_Url: http://rocketchat.{{ROOT_DOMAIN}}
+      OVERWRITE_SETTING_Site_Url: '{{APP_URL}}'
       DEPLOY_METHOD: docker
-      DEPLOY_PLATFORM: caprover
     ports:
     - '{{HTTP_PORT}}:3000'
   rocketchat-db:
@@ -111,7 +111,7 @@ label = "MongoDB root user's username"
 default = "root"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Full public URL where Rocket.Chat will be reachable, e.g. https://chat.example.com. Leave blank to set later once a domain is assigned; required for correct link/redirect generation."

@@ -3,13 +3,13 @@ name = "SerpBear"
 category = "App"
 description = "SerpBear is an Open Source Search Engine Position Tracking App. It allows you to track your website's keyword positions in Google and get notified of their positions."
 keywords = ["serpbear"]
+http_port = 3000
 compose = '''
 services:
   serpbear:
-    restart: always
     image: towfiqi/serpbear:{{SERPBEAR_VERSION}}
     environment:
-      NEXT_PUBLIC_APP_URL: http://serpbear.{{ROOT_DOMAIN}}
+      NEXT_PUBLIC_APP_URL: '{{SERPBEAR_APP_URL}}'
       USER: '{{SERPBEAR_USER}}'
       PASSWORD: '{{SERPBEAR_PASSWORD}}'
       SECRET: '{{SERPBEAR_SECRET}}'
@@ -24,10 +24,10 @@ volumes:
 '''
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "SERPBEAR_APP_URL"
+label = "App URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL for the app (e.g. https://serp.example.com). Set after a domain is assigned; leave blank to use the default."
 
 [[variables]]
 key = "SERPBEAR_APIKEY"
@@ -62,4 +62,5 @@ description = "the username you want to use to login to the app"
 [[variables]]
 key = "SERPBEAR_VERSION"
 label = "SerpBear Version"
-description = "Check out the docker page for valid tags https://hub.docker.com/r/towfiqi/serpbear"
+default = "latest"
+description = "Image tag for towfiqi/serpbear. Check valid tags at https://hub.docker.com/r/towfiqi/serpbear"

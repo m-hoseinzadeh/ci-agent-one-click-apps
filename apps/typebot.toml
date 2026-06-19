@@ -3,17 +3,19 @@ name = "Typebot"
 category = "App"
 description = "Conversational Form Builder That You Can Self-Host. Open Source Alternative To Landbot."
 keywords = ["typebot"]
+http_port = 3000
 compose = '''
 services:
   typebot-builder:
     image: baptistearno/typebot-builder:{{TYPEBOT_VERSION}}
     environment:
-      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@typebot-db/{{POSTGRES_DB}}
-      NEXTAUTH_URL: http://typebot-builder.{{ROOT_DOMAIN}}
-      NEXT_PUBLIC_VIEWER_URL: http://typebot-viewer.{{ROOT_DOMAIN}}
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@typebot-db:5432/{{POSTGRES_DB}}
+      REDIS_URL: redis://typebot-redis:6379
+      NEXTAUTH_URL: '{{TYPEBOT_APP_URL}}'
+      NEXT_PUBLIC_VIEWER_URL: '{{TYPEBOT_VIEWER_URL}}'
+      NEXTAUTH_URL_INTERNAL: http://typebot-builder:3000
       ENCRYPTION_SECRET: '{{TYPEBOT_ENCRYPTION_SECRET}}'
       ADMIN_EMAIL: '{{TYPEBOT_ADMIN_EMAIL}}'
-      NEXTAUTH_URL_INTERNAL: http://typebot-builder:3000
       DEFAULT_WORKSPACE_PLAN: '{{TYPEBOT_DEFAULT_WORKSPACE_PLAN}}'
       DISABLE_SIGNUP: '{{TYPEBOT_DISABLE_SIGNUP}}'
       SMTP_USERNAME: '{{TYPEBOT_SMTP_USERNAME}}'
@@ -25,17 +27,19 @@ services:
       SMTP_AUTH_DISABLED: '{{TYPEBOT_SMTP_AUTH_DISABLED}}'
     depends_on:
     - typebot-db
+    - typebot-redis
     ports:
     - '{{HTTP_PORT}}:3000'
   typebot-viewer:
     image: baptistearno/typebot-viewer:{{TYPEBOT_VERSION}}
     environment:
-      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@typebot-db/{{POSTGRES_DB}}
-      NEXTAUTH_URL: http://typebot-builder.{{ROOT_DOMAIN}}
-      NEXT_PUBLIC_VIEWER_URL: http://typebot-viewer.{{ROOT_DOMAIN}}
+      DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@typebot-db:5432/{{POSTGRES_DB}}
+      REDIS_URL: redis://typebot-redis:6379
+      NEXTAUTH_URL: '{{TYPEBOT_APP_URL}}'
+      NEXT_PUBLIC_VIEWER_URL: '{{TYPEBOT_VIEWER_URL}}'
+      NEXTAUTH_URL_INTERNAL: http://typebot-builder:3000
       ENCRYPTION_SECRET: '{{TYPEBOT_ENCRYPTION_SECRET}}'
       ADMIN_EMAIL: '{{TYPEBOT_ADMIN_EMAIL}}'
-      NEXTAUTH_URL_INTERNAL: http://typebot-builder:3000
       DEFAULT_WORKSPACE_PLAN: '{{TYPEBOT_DEFAULT_WORKSPACE_PLAN}}'
       DISABLE_SIGNUP: '{{TYPEBOT_DISABLE_SIGNUP}}'
       SMTP_USERNAME: '{{TYPEBOT_SMTP_USERNAME}}'
@@ -47,6 +51,7 @@ services:
       SMTP_AUTH_DISABLED: '{{TYPEBOT_SMTP_AUTH_DISABLED}}'
     depends_on:
     - typebot-db
+    - typebot-redis
   typebot-db:
     image: postgres:{{POSTGRES_VERSION}}
     environment:
@@ -55,8 +60,14 @@ services:
       POSTGRES_PASSWORD: '{{POSTGRES_PASSWORD}}'
     volumes:
     - typebot-db-data:/var/lib/postgresql/data
+  typebot-redis:
+    image: redis:7-alpine
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+    - typebot-redis-data:/data
 volumes:
   typebot-db-data:
+  typebot-redis-data:
 '''
 
 [[variables]]
@@ -80,18 +91,25 @@ description = "Name of the database user."
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "POSTGRES_VERSION"
-default = "14.0-alpine"
+default = "16-alpine"
 description = "Check out their valid tags at https://hub.docker.com/_/postgres/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "TYPEBOT_APP_URL"
+label = "Builder URL (NEXTAUTH_URL)"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public URL of the Typebot builder. Set this to your project domain after the app is assigned one (e.g. https://typebot.example.com). Required for sign-in to work."
+
+[[variables]]
+key = "TYPEBOT_VIEWER_URL"
+label = "Viewer URL (NEXT_PUBLIC_VIEWER_URL)"
+default = ""
+description = "Public URL where published bots are served. Set this after a domain is assigned (e.g. https://bots.example.com). The viewer service is internal by default; expose it on its own domain to use this."
 
 [[variables]]
 key = "TYPEBOT_ADMIN_EMAIL"
 label = "ADMIN_EMAIL"
+default = ""
 description = "The email that will get an UNLIMITED plan on user creation. The associated user will be able to bypass database rules. You can provide multiple emails separated by a comma without spaces."
 
 [[variables]]
@@ -115,7 +133,8 @@ description = "A 256-bit key used to encrypt sensitive data. The secret should b
 [[variables]]
 key = "TYPEBOT_NEXT_PUBLIC_SMTP_FROM"
 label = "NEXT_PUBLIC_SMTP_FROM"
-description = "From name and email (i.e. `Typebot Notifications <notifications@host.com>`)"
+default = ""
+description = "From name and email (i.e. `Typebot Notifications <notifications@host.com>`). External SMTP config; leave blank if not using email."
 
 [[variables]]
 key = "TYPEBOT_SMTP_AUTH_DISABLED"
@@ -126,12 +145,14 @@ description = "To disable the authentication by email but still use the provided
 [[variables]]
 key = "TYPEBOT_SMTP_HOST"
 label = "SMTP_HOST"
-description = "SMTP host."
+default = ""
+description = "SMTP host. External credential; leave blank if not using email."
 
 [[variables]]
 key = "TYPEBOT_SMTP_PASSWORD"
 label = "SMTP_PASSWORD"
-description = "SMTP password."
+default = ""
+description = "SMTP password. External credential; leave blank if not using email."
 
 [[variables]]
 key = "TYPEBOT_SMTP_PORT"
@@ -148,7 +169,8 @@ description = "If \"true\" the connection will use TLS when connecting to server
 [[variables]]
 key = "TYPEBOT_SMTP_USERNAME"
 label = "SMTP_USERNAME"
-description = "SMTP username."
+default = ""
+description = "SMTP username. External credential; leave blank if not using email."
 
 [[variables]]
 key = "TYPEBOT_VERSION"

@@ -3,6 +3,7 @@ name = "Pyload"
 category = "App"
 description = "The free and open-source Download Manager written in pure Python"
 keywords = ["pyload"]
+http_port = 8000
 compose = '''
 services:
   pyload:
@@ -11,7 +12,6 @@ services:
       TZ: '{{TZ}}'
       PUID: '{{PUID}}'
       PGID: '{{GUID}}'
-    hostname: pyload.{{ROOT_DOMAIN}}
     volumes:
     - pyload-config:/config
     - '{{PATH_TO_DOWNLOADS}}:/downloads'
@@ -45,12 +45,6 @@ key = "PYLOAD_VERSION"
 label = "Pyload Version"
 default = "0.5.0"
 description = "Check out their Docker page for the valid tags https://github.com/linuxserver/docker-pyload-ng/pkgs/container/pyload-ng"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"

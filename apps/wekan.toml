@@ -3,22 +3,25 @@ name = "WeKan"
 category = "App"
 description = "WeKan ® is an completely Open Source and Free software collaborative kanban board application with MIT license."
 keywords = ["wekan"]
+http_port = 8080
 compose = '''
 services:
   wekan-db:
     image: mongo:6
+    command: mongod --oplogSize 128
     volumes:
     - wekan-mongo:/data/db
     - wekan-db-data-dump:/dump
   wekan:
     depends_on:
     - wekan-db
-    image: wekanteam/wekan:{{MYAPP_VERSION}}
-    hostname: wekan.{{ROOT_DOMAIN}}
-    restart: always
+    image: wekanteam/wekan:{{WEKAN_VERSION}}
     environment:
-      ROOT_URL: https://wekan.{{ROOT_DOMAIN}}
+      WRITABLE_PATH: /data
       MONGO_URL: mongodb://wekan-db:27017/wekan
+      ROOT_URL: {{APP_URL}}
+      WITH_API: "true"
+      PORT: "8080"
     volumes:
     - wekan-data:/data
     ports:
@@ -30,13 +33,13 @@ volumes:
 '''
 
 [[variables]]
-key = "MYAPP_VERSION"
+key = "WEKAN_VERSION"
 label = "WeKan version"
 default = "v7.60"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/wekanteam/wekan/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "APP_URL"
+label = "Public URL"
+default = "http://localhost"
+description = "Root URL Wekan uses to build links (ROOT_URL). Set this to your project's public domain after the project is created, e.g. https://wekan.example.com."

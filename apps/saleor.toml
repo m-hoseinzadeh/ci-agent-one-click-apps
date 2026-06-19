@@ -3,19 +3,20 @@ name = "Saleor"
 category = "App"
 description = "An open-source, GraphQL-first e-commerce platform delivering ultra-fast, dynamic and personalized shopping experiences"
 keywords = ["saleor"]
+http_port = 8000
 compose = '''
 services:
   saleor-api:
     image: ghcr.io/saleor/saleor:{{SALEOR_CORE_VERSION}}
     environment:
-      DASHBOARD_URL: http://saleor.{{ROOT_DOMAIN}}
+      DASHBOARD_URL: '{{APP_URL}}'
       DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@saleor-db/{{POSTGRES_DB}}
       CELERY_BROKER_URL: redis://saleor-cache
       DEFAULT_FROM_EMAIL: '{{SALEOR_DEFAULT_FROM_EMAIL}}'
       SECRET_KEY: '{{SALEOR_SECRET_KEY}}'
       DEFAULT_CHANNEL_SLUG: default-channel
-      ALLOWED_HOSTS: saleor-api.{{ROOT_DOMAIN}}
-      ALLOWED_CLIENT_HOSTS: saleor-api.{{ROOT_DOMAIN}}
+      ALLOWED_HOSTS: '{{ALLOWED_HOSTS}}'
+      ALLOWED_CLIENT_HOSTS: '{{ALLOWED_HOSTS}}'
       ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL: '{{ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL}}'
     depends_on:
     - saleor-db
@@ -27,7 +28,7 @@ services:
   saleor:
     image: ghcr.io/saleor/saleor-dashboard:{{SALEOR_DASHBOARD_VERSION}}
     environment:
-      API_URL: http://saleor-api.{{ROOT_DOMAIN}}/graphql/
+      API_URL: '{{API_URL}}'
   saleor-db:
     image: postgres:{{POSTGRES_VERSION}}
     environment:
@@ -41,16 +42,19 @@ services:
     volumes:
     - saleor-cache:/data
   saleor-worker:
+    image: ghcr.io/saleor/saleor:{{SALEOR_CORE_VERSION}}
+    command: celery -A saleor --app=saleor.celeryconf:app worker --loglevel=info -B
     environment:
       DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@saleor-db/{{POSTGRES_DB}}
       CELERY_BROKER_URL: redis://saleor-cache
       DEFAULT_FROM_EMAIL: '{{SALEOR_DEFAULT_FROM_EMAIL}}'
       SECRET_KEY: '{{SALEOR_SECRET_KEY}}'
       DEFAULT_CHANNEL_SLUG: default-channel
-      ALLOWED_HOSTS: saleor-api.{{ROOT_DOMAIN}}
-      ALLOWED_CLIENT_HOSTS: saleor-api.{{ROOT_DOMAIN}}
+      ALLOWED_HOSTS: '{{ALLOWED_HOSTS}}'
+      ALLOWED_CLIENT_HOSTS: '{{ALLOWED_HOSTS}}'
       ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL: '{{ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL}}'
     depends_on:
+    - saleor-db
     - saleor-cache
     volumes:
     - saleor-media:/app/media
@@ -65,6 +69,24 @@ key = "ENABLE_ACCOUNT_CONFIRMATION_BY_EMAIL"
 label = "Core | Email Confirmation"
 default = "False"
 description = "Whether registering new customer accounts should require email confirmation."
+
+[[variables]]
+key = "ALLOWED_HOSTS"
+label = "Core | Allowed Hosts"
+default = "*"
+description = "Comma-separated hostnames the API and client may use. Defaults to '*' (all hosts); set to your project domain(s) once assigned for a tighter policy."
+
+[[variables]]
+key = "APP_URL"
+label = "Core | Dashboard URL"
+default = ""
+description = "Public URL of the Saleor dashboard, used to build links in confirmation/reset emails. Leave blank until ci-agent assigns the project domain, then set it (e.g. https://shop.example.com)."
+
+[[variables]]
+key = "API_URL"
+label = "Dashboard | API URL"
+default = ""
+description = "Browser-reachable GraphQL endpoint of the Saleor API (e.g. https://shop.example.com/graphql/). Leave blank until the project domain is assigned, then set it."
 
 [[variables]]
 key = "POSTGRES_DB"
@@ -97,12 +119,6 @@ default = "7.0-alpine"
 description = "Redis version. Check out their valid tags at https://hub.docker.com/_/redis/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
 key = "SALEOR_CORE_VERSION"
 label = "Core | Version"
 default = "3.12.5"
@@ -116,7 +132,7 @@ description = "Saleor dashboard version. Check out their valid tags at https://g
 
 [[variables]]
 key = "SALEOR_DEFAULT_FROM_EMAIL"
-label = "Mail | Version"
+label = "Mail | From Address"
 default = "noreply@example.com"
 description = "Sender email address."
 
@@ -124,4 +140,4 @@ description = "Sender email address."
 key = "SALEOR_SECRET_KEY"
 label = "Security | Secret Key"
 generate = true
-description = "Secret key."
+description = "Django secret key used for cryptographic signing. Generated automatically."

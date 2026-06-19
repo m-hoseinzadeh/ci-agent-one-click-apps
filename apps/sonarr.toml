@@ -3,6 +3,7 @@ name = "Sonarr"
 category = "Dev tools"
 description = "Sonarr (formerly NZBdrone) is a PVR for usenet and bittorrent users. It can monitor multiple RSS feeds for new episodes of your favorite shows and will grab, sort and rename them."
 keywords = ["sonarr"]
+http_port = 8989
 compose = '''
 services:
   sonarr:
@@ -11,7 +12,6 @@ services:
       TZ: '{{TZ}}'
       PUID: '{{PUID}}'
       PGID: '{{GUID}}'
-    hostname: sonarr.{{ROOT_DOMAIN}}
     volumes:
     - sonarr-config:/config
     - '{{PATH_TO_TV}}:/tv'
@@ -43,12 +43,6 @@ key = "PUID"
 label = "User ID"
 default = "1000"
 description = "User ID that the process uses, run (id $user) in your instance to see the id"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "SONARR_VERSION"

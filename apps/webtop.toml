@@ -3,11 +3,11 @@ name = "Webtop"
 category = "App"
 description = "Linux in a web browser supporting popular desktop environments."
 keywords = ["webtop"]
+http_port = 3000
 compose = '''
 services:
   webtop:
     image: lscr.io/linuxserver/webtop:{{WEBTOP_VERSION}}
-    hostname: webtop.{{ROOT_DOMAIN}}
     environment:
       TZ: '{{WEBTOP_TZ}}'
       PUID: '{{WEBTOP_PUID}}'
@@ -22,12 +22,6 @@ services:
 volumes:
   webtop-config:
 '''
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "WEBTOP_CUSTOM_USER"

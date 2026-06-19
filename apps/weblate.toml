@@ -1,19 +1,19 @@
 slug = "weblate"
-name = "weblate"
+name = "Weblate"
 category = "App"
 description = "Weblate is a copylefted libre software web-based continuous localization system, used by over 1150 libre projects and companies in more than 115 countries."
-keywords = ["weblate"]
+keywords = ["weblate", "localization", "translation", "i18n"]
+http_port = 8080
 compose = '''
 services:
   weblate-redis:
     image: redis:{{REDIS_VERSION}}
     volumes:
-    - weblate-cache-data:/app/data
+    - weblate-cache-data:/data
   weblate-postgres:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - weblate-postgres-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: weblate
       POSTGRES_PASSWORD: '{{PG_PASS}}'
@@ -25,7 +25,6 @@ services:
     - weblate-redis
     volumes:
     - weblate-data:/app/data
-    restart: always
     environment:
       WEBLATE_DEBUG: 0
       WEBLATE_LOGLEVEL: INFO
@@ -38,12 +37,13 @@ services:
       POSTGRES_USER: weblate
       POSTGRES_DATABASE: weblate
       POSTGRES_HOST: weblate-postgres
-      REDIS_HOST: weblate-redis
-      WEBLATE_SITE_DOMAIN: weblate.{{ROOT_DOMAIN}}
-      WEBLATE_SITE_TITLE: weblate Weblate
-      WEBLATE_ADMIN_NAME: Weblate Admin
       POSTGRES_PORT: 5432
+      REDIS_HOST: weblate-redis
       REDIS_PORT: 6379
+      WEBLATE_SITE_DOMAIN: '{{APP_DOMAIN}}'
+      WEBLATE_ALLOWED_HOSTS: '*'
+      WEBLATE_SITE_TITLE: Weblate
+      WEBLATE_ADMIN_NAME: Weblate Admin
     ports:
     - '{{HTTP_PORT}}:8080'
 volumes:
@@ -54,55 +54,59 @@ volumes:
 
 [[variables]]
 key = "ADMIN_EMAIL"
-label = "Email of the first user and administrator of weblate"
-description = "Will be used to login to weblate"
+label = "Email of the first user and administrator of Weblate"
+description = "Will be used to login to Weblate."
 
 [[variables]]
 key = "ADMIN_PASSWORD"
-label = "Password of the first user and administrator of weblate"
-description = "Will be used to login to weblate"
+label = "Password of the first user and administrator of Weblate"
+description = "Will be used to login to Weblate."
+generate = true
 
 [[variables]]
 key = "EMAIL_FROM"
-label = "Weblate FROM email"
-description = "(eg weblate@example.com)"
+label = "Weblate default FROM email"
+default = "weblate@example.com"
+description = "Address used as the sender for outgoing email (eg weblate@example.com)."
+
+[[variables]]
+key = "SERVER_EMAIL"
+label = "Weblate server email"
+default = "weblate@example.com"
+description = "Address used for error and admin notifications (eg weblate@example.com)."
 
 [[variables]]
 key = "OPEN_REGISTRATION"
-label = "Allow open registration of people (0/1)"
+label = "Allow open registration (0/1)"
 default = "0"
-description = "Do you allow people to register openly to the platform?"
+description = "Do you allow people to register openly on the platform?"
+
+[[variables]]
+key = "APP_DOMAIN"
+label = "Site domain"
+default = ""
+description = "Public domain Weblate uses to build URLs (eg weblate.example.com). Leave blank now and set it after the project gets a domain."
 
 [[variables]]
 key = "PG_PASS"
-label = "Postgres Password"
-description = "Password must be at least 30 characters.  Please use a random string."
+label = "Postgres password"
+description = "Internal database password. Leave the generated value."
+generate = true
 
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Postgres Docker version"
-default = "14-alpine"
-description = "Check out their Docker page for the valid versions https://hub.docker.com/r/library/postgres/tags"
+default = "16-alpine"
+description = "Check the Docker page for valid versions https://hub.docker.com/r/library/postgres/tags"
 
 [[variables]]
 key = "REDIS_VERSION"
 label = "Redis Docker version"
 default = "7-alpine"
-description = "Check out their Docker page for the valid versions https://hub.docker.com/r/library/redis/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
-key = "SERVER_EMAIL"
-label = "Weblate server email"
-description = "(eg weblate@example.com)"
+description = "Check the Docker page for valid versions https://hub.docker.com/r/library/redis/tags"
 
 [[variables]]
 key = "WEBLATE_VERSION"
-label = "weblate Docker Image tag"
-default = "4.14.1-1"
-description = "latest, edge, bleeding, or version - Check out their Docker page for the valid tags https://hub.docker.com/r/weblate/weblate/tags"
+label = "Weblate Docker image tag"
+default = "5.17.1.0"
+description = "latest, edge, bleeding, or a version - check the Docker page for valid tags https://hub.docker.com/r/weblate/weblate/tags"

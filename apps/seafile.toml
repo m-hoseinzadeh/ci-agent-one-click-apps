@@ -2,35 +2,47 @@ slug = "seafile"
 name = "Seafile (memcached)"
 category = "Storage"
 description = "Seafile is an open source cloud storage system with file encryption and group sharing."
-keywords = ["(memcached)", "seafile"]
+keywords = ["memcached", "seafile", "storage"]
+http_port = 80
 compose = '''
 services:
   seafile-db:
     image: mariadb:{{MARIADB_VERSION}}
     environment:
       MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PASSWD}}'
+      MYSQL_LOG_CONSOLE: 'true'
     volumes:
     - seafile-db-data:/var/lib/mysql
-    ports:
-    - '{{HTTP_PORT}}:3306'
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   seafile-memcached:
     image: memcached:{{MEMCACHED_VERSION}}
     entrypoint: memcached -m 256
+    healthcheck:
+      test: ["CMD-SHELL", "echo stats | nc -w 1 127.0.0.1 11211 | grep -q uptime"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
   seafile:
     image: seafileltd/seafile-mc:{{SEAFILE_VERSION}}
+    ports:
+    - '{{HTTP_PORT}}:80'
     volumes:
     - seafile-seafile-data:/shared
     environment:
       DB_HOST: seafile-db
       DB_ROOT_PASSWD: '{{MARIADB_ROOT_PASSWD}}'
-      TIME_ZONE: $$cap_timezone
+      TIME_ZONE: '{{TIME_ZONE}}'
       SEAFILE_ADMIN_EMAIL: '{{SEAFILE_ADMIN_EMAIL}}'
       SEAFILE_ADMIN_PASSWORD: '{{SEAFILE_ADMIN_PASSWORD}}'
       SEAFILE_SERVER_HOSTNAME: '{{SEAFILE_HOSTNAME}}'
     depends_on:
       seafile-db:
         condition: service_healthy
-      $$capp_appname-memcached:
+      seafile-memcached:
         condition: service_healthy
 volumes:
   seafile-db-data:
@@ -41,39 +53,46 @@ volumes:
 key = "MARIADB_ROOT_PASSWD"
 label = "MariaDB Root Password"
 generate = true
-description = "Default password for root user of MariaDB. Must have at least 8 chars, 1 letter and 1 number"
+description = "Root password for the bundled MariaDB. Must have at least 8 chars, 1 letter and 1 number."
 
 [[variables]]
 key = "MARIADB_VERSION"
 label = "MariaDB Version"
-default = "10.6.4"
+default = "10.11"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/mariadb?tab=tags"
 
 [[variables]]
 key = "MEMCACHED_VERSION"
 label = "Memcached Version"
-default = "1.6.12"
+default = "1.6.18"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/memcached?tab=tags"
+
+[[variables]]
+key = "TIME_ZONE"
+label = "Time Zone"
+default = "Etc/UTC"
+description = "IANA time zone for the Seafile server, e.g. Europe/Berlin or America/New_York."
 
 [[variables]]
 key = "SEAFILE_ADMIN_EMAIL"
 label = "Seafile Admin Email"
-default = "admin@localhost"
-description = "Email for admin user of Seafile"
+default = "admin@example.com"
+description = "Email/login for the initial Seafile admin account."
 
 [[variables]]
 key = "SEAFILE_ADMIN_PASSWORD"
 label = "Seafile Admin Password"
 generate = true
-description = "Password for admin user of Seafile. Must have at least 8 chars, 1 letter and 1 number"
+description = "Password for the initial Seafile admin account. Must have at least 8 chars, 1 letter and 1 number."
 
 [[variables]]
 key = "SEAFILE_HOSTNAME"
 label = "Seafile Hostname"
-description = "Hostname of Seafile instance (that will be used by it in future)"
+default = ""
+description = "Public hostname/URL Seafile uses for itself (e.g. seafile.example.com). Set this to the domain you assign after creating the project; leave blank to configure later."
 
 [[variables]]
 key = "SEAFILE_VERSION"
 label = "Seafile Version"
-default = "8.0.7"
+default = "11.0.13"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/seafileltd/seafile-mc/tags"

@@ -3,12 +3,17 @@ name = "Redash"
 category = "App"
 description = "Connect to any data source, easily visualize and share your data"
 keywords = ["redash"]
+http_port = 5000
 compose = '''
 services:
   redash:
+    image: redash/redash:{{REDASH_VERSION}}
+    command: server
     environment:
+      PYTHONUNBUFFERED: '0'
+      REDASH_LOG_LEVEL: INFO
       REDASH_WEB_WORKERS: '{{REDASH_WEB_WORKERS}}'
-      REDASH_HOST: http://redash.{{ROOT_DOMAIN}}
+      REDASH_HOST: '{{REDASH_HOST}}'
       REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
       REDASH_SECRET_KEY: '{{REDASH_SECRET_KEY}}'
       REDASH_MAIL_SERVER: '{{REDASH_MAIL_SERVER}}'
@@ -18,7 +23,7 @@ services:
       REDASH_MAIL_USERNAME: '{{REDASH_MAIL_USERNAME}}'
       REDASH_MAIL_PASSWORD: '{{REDASH_MAIL_PASSWORD}}'
       REDASH_MAIL_DEFAULT_SENDER: '{{REDASH_MAIL_DEFAULT_SENDER}}'
-      REDASH_REDIS_URL: redis://redash-queue
+      REDASH_REDIS_URL: redis://redash-queue:6379/0
       REDASH_DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@redash-db/{{POSTGRES_DB}}
     depends_on:
     - redash-db
@@ -26,29 +31,61 @@ services:
     ports:
     - '{{HTTP_PORT}}:5000'
   redash-scheduler:
+    image: redash/redash:{{REDASH_VERSION}}
+    command: scheduler
     environment:
+      PYTHONUNBUFFERED: '0'
+      REDASH_LOG_LEVEL: INFO
       QUEUES: celery
       WORKERS_COUNT: '{{REDASH_SCHEDULER_WORKERS}}'
       REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
-      REDASH_REDIS_URL: redis://redash-queue
+      REDASH_SECRET_KEY: '{{REDASH_SECRET_KEY}}'
+      REDASH_REDIS_URL: redis://redash-queue:6379/0
+      REDASH_DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@redash-db/{{POSTGRES_DB}}
     depends_on:
     - redash-db
     - redash-queue
   redash-scheduled-worker:
+    image: redash/redash:{{REDASH_VERSION}}
+    command: worker
     environment:
+      PYTHONUNBUFFERED: '0'
+      REDASH_LOG_LEVEL: INFO
       QUEUES: scheduled_queries,schemas
       WORKERS_COUNT: '{{REDASH_SCHEDULED_WORKERS}}'
       REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
-      REDASH_REDIS_URL: redis://redash-queue
+      REDASH_SECRET_KEY: '{{REDASH_SECRET_KEY}}'
+      REDASH_REDIS_URL: redis://redash-queue:6379/0
+      REDASH_DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@redash-db/{{POSTGRES_DB}}
     depends_on:
     - redash-db
     - redash-queue
   redash-adhoc-worker:
+    image: redash/redash:{{REDASH_VERSION}}
+    command: worker
     environment:
+      PYTHONUNBUFFERED: '0'
+      REDASH_LOG_LEVEL: INFO
       QUEUES: queries
       WORKERS_COUNT: '{{REDASH_ADHOC_WORKERS}}'
       REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
-      REDASH_REDIS_URL: redis://redash-queue
+      REDASH_SECRET_KEY: '{{REDASH_SECRET_KEY}}'
+      REDASH_REDIS_URL: redis://redash-queue:6379/0
+      REDASH_DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@redash-db/{{POSTGRES_DB}}
+    depends_on:
+    - redash-db
+    - redash-queue
+  redash-create-db:
+    image: redash/redash:{{REDASH_VERSION}}
+    command: create_db
+    restart: "no"
+    environment:
+      PYTHONUNBUFFERED: '0'
+      REDASH_LOG_LEVEL: INFO
+      REDASH_COOKIE_SECRET: '{{REDASH_COOKIE_SECRET}}'
+      REDASH_SECRET_KEY: '{{REDASH_SECRET_KEY}}'
+      REDASH_REDIS_URL: redis://redash-queue:6379/0
+      REDASH_DATABASE_URL: postgresql://{{POSTGRES_USER}}:{{POSTGRES_PASSWORD}}@redash-db/{{POSTGRES_DB}}
     depends_on:
     - redash-db
     - redash-queue
@@ -65,6 +102,18 @@ services:
 volumes:
   redash-db:
 '''
+
+[[variables]]
+key = "REDASH_VERSION"
+label = "Application | Version"
+default = "26.3.0"
+description = "Redash image version. Check out their valid tags at https://hub.docker.com/r/redash/redash/tags"
+
+[[variables]]
+key = "REDASH_HOST"
+label = "Application | Public URL"
+default = ""
+description = "Public base URL used to build links in emails and shares (e.g. https://redash.example.com). Optional; set after you assign a domain."
 
 [[variables]]
 key = "POSTGRES_DB"
@@ -105,12 +154,14 @@ description = "Secret for signing cookies."
 [[variables]]
 key = "REDASH_MAIL_DEFAULT_SENDER"
 label = "Application | SMTP Default Sender"
+default = ""
 description = "Mail address to send from. This is optional."
 
 [[variables]]
 key = "REDASH_MAIL_PASSWORD"
 label = "Application | SMTP Password"
-description = "SMTP password for system mail delivery. This is optional."
+default = ""
+description = "SMTP password for system mail delivery. External credential; leave blank if mail is unused."
 
 [[variables]]
 key = "REDASH_MAIL_PORT"
@@ -121,11 +172,13 @@ description = "SMTP port for system mail delivery."
 [[variables]]
 key = "REDASH_MAIL_SERVER"
 label = "Application | SMTP Host"
+default = ""
 description = "SMTP server for system mail delivery. This is optional."
 
 [[variables]]
 key = "REDASH_MAIL_USERNAME"
 label = "Application | SMTP Username"
+default = ""
 description = "SMTP user name for system mail delivery. This is optional."
 
 [[variables]]
@@ -169,9 +222,3 @@ key = "REDIS_VERSION"
 label = "Queue | Version"
 default = "7.0-alpine"
 description = "Redis version. Check out their valid tags at https://hub.docker.com/_/redis/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

@@ -3,6 +3,7 @@ name = "Raneto"
 category = "App"
 description = "Raneto - is an open source Knowledgebase platform that uses static Markdown files to power your Knowledgebase."
 keywords = ["raneto"]
+http_port = 3000
 compose = '''
 services:
   raneto:
@@ -10,8 +11,7 @@ services:
     environment:
       TZ: '{{TZ}}'
       PUID: '1000'
-      GUID: '1000'
-    hostname: raneto.{{ROOT_DOMAIN}}
+      PGID: '1000'
     volumes:
     - raneto-config:/config
     ports:
@@ -25,12 +25,6 @@ key = "RANETO_VERSION"
 label = "Raneto Version"
 default = "0.17.0-ls49"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/raneto/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"

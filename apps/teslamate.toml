@@ -1,13 +1,13 @@
 slug = "teslamate"
 name = "TeslaMate"
 category = "App"
-description = "A powerful, self-hosted data logger for your Tesla."
-keywords = ["teslamate"]
+description = "A powerful, self-hosted data logger for your Tesla. The main web UI is served by the teslamate service; the bundled Grafana dashboards are reachable internally."
+keywords = ["teslamate", "tesla", "logger", "grafana"]
+http_port = 4000
 compose = '''
 services:
   teslamate-db:
     image: postgres:{{POSTGRES_VERSION}}
-    restart: always
     environment:
       POSTGRES_DB: '{{DATABASE_NAME}}'
       POSTGRES_USER: '{{DATABASE_USER}}'
@@ -16,23 +16,21 @@ services:
     - teslamate-db:/var/lib/postgresql/data
   teslamate-grafana:
     image: teslamate/grafana:{{GRAFANA_VERSION}}
-    restart: always
     environment:
       DATABASE_USER: '{{DATABASE_USER}}'
       DATABASE_PASS: '{{DATABASE_PASS}}'
       DATABASE_NAME: '{{DATABASE_NAME}}'
       DATABASE_HOST: teslamate-db
     volumes:
-    - teslamate-db:/var/lib/postgresql/data
+    - teslamate-grafana-data:/var/lib/grafana
     depends_on:
     - teslamate-db
-    ports:
-    - '{{HTTP_PORT}}:3000'
   teslamate-mqtt:
+    image: eclipse-mosquitto:{{MOSQUITTO_VERSION}}
+    command: mosquitto -c /mosquitto-no-auth.conf
     volumes:
     - teslamate-mosquitto-conf:/mosquitto/config
     - teslamate-mosquitto-data:/mosquitto/data
-    restart: always
   teslamate:
     image: teslamate/teslamate:{{TESLAMATE_VERSION}}
     environment:
@@ -44,10 +42,14 @@ services:
       MQTT_HOST: teslamate-mqtt
     volumes:
     - teslamate-import:/opt/app/import
+    ports:
+    - '{{HTTP_PORT}}:4000'
     depends_on:
     - teslamate-db
+    - teslamate-mqtt
 volumes:
   teslamate-db:
+  teslamate-grafana-data:
   teslamate-mosquitto-conf:
   teslamate-mosquitto-data:
   teslamate-import:
@@ -74,23 +76,29 @@ description = "Username for the PostgreSQL database."
 [[variables]]
 key = "GRAFANA_VERSION"
 label = "Grafana | Version"
-default = "1.28"
+default = "latest"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/teslamate/grafana/tags"
+
+[[variables]]
+key = "MOSQUITTO_VERSION"
+label = "MQTT | Mosquitto Version"
+default = "2"
+description = "Eclipse Mosquitto image tag https://hub.docker.com/_/eclipse-mosquitto/tags"
 
 [[variables]]
 key = "POSTGRES_VERSION"
 label = "Database | Version"
-default = "15"
+default = "16"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/_/postgres/tags"
 
 [[variables]]
 key = "SECRET_KEY"
 label = "Application | Encryption"
 generate = true
-description = "A secure key to encrypt your Tesla API tokens"
+description = "A secure key to encrypt your Tesla API tokens."
 
 [[variables]]
 key = "TESLAMATE_VERSION"
 label = "Application | Version"
-default = "1.28"
+default = "latest"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/teslamate/teslamate/tags"

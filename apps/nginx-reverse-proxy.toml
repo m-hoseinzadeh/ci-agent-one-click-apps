@@ -30,5 +30,5 @@ description = "The destination all requests are forwarded to, e.g. https://examp
 [[variables]]
 key = "IMAGE_VERSION"
 label = "Image version"
-default = "1-ef5ffcb"
+default = "1-cc035d1"
 description = "Image tag for caprover/nginx-reverse-proxy. Additional tags are listed at https://hub.docker.com/r/caprover/nginx-reverse-proxy/tags"

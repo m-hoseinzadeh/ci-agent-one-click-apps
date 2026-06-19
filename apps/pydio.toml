@@ -3,6 +3,7 @@ name = "Pydio Cells"
 category = "App"
 description = "Privacy-conscious file sharing platform that connects all your teams in one place."
 keywords = ["cells", "pydio"]
+http_port = 8811
 compose = '''
 services:
   pydio:
@@ -11,7 +12,7 @@ services:
       CELLS_LOG_LEVEL: production
       CELLS_BIND: :8811
       CELLS_NO_TLS: '1'
-      CELLS_EXTERNAL: https://pydio.{{ROOT_DOMAIN}}
+      CELLS_EXTERNAL: '{{APP_URL}}'
     volumes:
     - pydio-data:/var/cells/data
     - pydio-cellsdir:/var/cells
@@ -20,10 +21,10 @@ services:
   pydio-mariadb:
     image: mariadb:{{MARIADB_VERSION}}
     environment:
-      MYSQL_RANDOM_ROOT_PASSWORD: '1'
-      MYSQL_DATABASE: '{{MARIADB}}-db'
-      MYSQL_USER: '{{MARIADB}}-user'
-      MYSQL_PASSWORD: '{{MARIADB}}-pass'
+      MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PASSWORD}}'
+      MYSQL_DATABASE: '{{MARIADB_DATABASE}}'
+      MYSQL_USER: '{{MARIADB_USER}}'
+      MYSQL_PASSWORD: '{{MARIADB_PASSWORD}}'
     volumes:
     - pydio-mariadb-data:/var/lib/mysql
 volumes:
@@ -33,24 +34,39 @@ volumes:
 '''
 
 [[variables]]
-key = "MARIADB"
-label = "Mariadb"
-default = ""
+key = "PYDIO_VERSION"
+label = "Pydio Version"
+default = "4.4.13"
+description = "Checkout their docker page for the valid tags https://hub.docker.com/r/pydio/cells/tags"
 
 [[variables]]
 key = "MARIADB_VERSION"
 label = "MariaDB Version"
-default = "10.6.1"
+default = "11.4"
 description = "Checkout their docker page for the valid tags https://hub.docker.com/r/library/mariadb/tags/"
 
 [[variables]]
-key = "PYDIO_VERSION"
-label = "Pydio Version"
-default = "2.2.8"
-description = "Checkout their docker page for the valid tags https://hub.docker.com/r/pydio/cells/tags"
+key = "MARIADB_DATABASE"
+label = "Database name"
+default = "cells"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "MARIADB_USER"
+label = "Database user"
+default = "pydio"
+
+[[variables]]
+key = "MARIADB_PASSWORD"
+label = "Database password"
+generate = true
+
+[[variables]]
+key = "MARIADB_ROOT_PASSWORD"
+label = "Database root password"
+generate = true
+
+[[variables]]
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "External base URL Cells uses to build links (e.g. https://files.example.com). Leave blank to set after the project gets a domain."

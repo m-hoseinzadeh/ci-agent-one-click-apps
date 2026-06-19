@@ -3,29 +3,38 @@ name = "SeaTable"
 category = "App"
 description = "SeaTable is the new flexible way for teams to work on tasks, projects or ideas."
 keywords = ["seatable"]
+http_port = 80
 compose = '''
 services:
   seatable-db:
     image: mariadb:{{MARIADB_VERSION}}
     environment:
       MYSQL_ROOT_PASSWORD: '{{MARIADB_ROOT_PASSWD}}'
+      MYSQL_LOG_CONSOLE: 'true'
     volumes:
     - seatable-db-data:/var/lib/mysql
-    ports:
-    - '{{HTTP_PORT}}:3306'
   seatable-memcached:
     image: memcached:{{MEMCACHED_VERSION}}
     entrypoint: memcached -m 256
   seatable-redis:
     image: redis:{{REDIS_VERSION}}
+    volumes:
+    - seatable-redis-data:/data
   seatable:
+    image: seatable/seatable:{{SEATABLE_VERSION}}
     volumes:
     - seatable-data:/shared
+    ports:
+    - '{{HTTP_PORT}}:80'
     environment:
       DB_HOST: seatable-db
       DB_ROOT_PASSWD: '{{MARIADB_ROOT_PASSWD}}'
+      REDIS_HOST: seatable-redis
+      REDIS_PORT: '6379'
       SEATABLE_SERVER_LETSENCRYPT: 'False'
-      SEATABLE_SERVER_HOSTNAME: seatable.{{ROOT_DOMAIN}}
+      SEATABLE_SERVER_HOSTNAME: '{{SEATABLE_SERVER_HOSTNAME}}'
+      SEATABLE_ADMIN_EMAIL: '{{SEATABLE_ADMIN_EMAIL}}'
+      SEATABLE_ADMIN_PASSWORD: '{{SEATABLE_ADMIN_PASSWORD}}'
       TIME_ZONE: '{{TIMEZONE}}'
     depends_on:
     - seatable-db
@@ -33,6 +42,7 @@ services:
     - seatable-redis
 volumes:
   seatable-db-data:
+  seatable-redis-data:
   seatable-data:
 '''
 
@@ -40,30 +50,52 @@ volumes:
 key = "MARIADB_ROOT_PASSWD"
 label = "MariaDB Root Password"
 generate = true
+description = "Password for the root user of the bundled MariaDB. Must have at least 8 chars, 1 letter and 1 number."
 
 [[variables]]
 key = "MARIADB_VERSION"
 label = "MariaDB Version"
 default = "10.5"
+description = "MariaDB image tag https://hub.docker.com/_/mariadb?tab=tags"
 
 [[variables]]
 key = "MEMCACHED_VERSION"
 label = "Memcached Version"
-default = "1.5.6"
+default = "1.6.18"
+description = "Memcached image tag https://hub.docker.com/_/memcached?tab=tags"
 
 [[variables]]
 key = "REDIS_VERSION"
 label = "Redis Version"
-default = "5.0.7"
+default = "7.2"
+description = "Redis image tag https://hub.docker.com/_/redis?tab=tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "SEATABLE_VERSION"
+label = "SeaTable Version"
+default = "5.2.7"
+description = "SeaTable image tag https://hub.docker.com/r/seatable/seatable/tags"
+
+[[variables]]
+key = "SEATABLE_SERVER_HOSTNAME"
+label = "SeaTable Hostname"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public hostname SeaTable serves on (e.g. seatable.example.com). Leave empty to set after a domain is assigned."
+
+[[variables]]
+key = "SEATABLE_ADMIN_EMAIL"
+label = "SeaTable Admin Email"
+default = "admin@example.com"
+description = "Email for the initial SeaTable admin account."
+
+[[variables]]
+key = "SEATABLE_ADMIN_PASSWORD"
+label = "SeaTable Admin Password"
+generate = true
+description = "Password for the initial SeaTable admin account. Must have at least 8 chars, 1 letter and 1 number."
 
 [[variables]]
 key = "TIMEZONE"
 label = "Time zone"
 default = "Etc/UTC"
-description = "List of tz database time zones https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
+description = "tz database time zone https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"

@@ -3,18 +3,18 @@ name = "wakapi"
 category = "App"
 description = "Wakapi is an open-source tool that helps you keep track of the time you have spent coding on different projects in different programming languages and more."
 keywords = ["wakapi"]
+http_port = 3000
 compose = '''
 services:
   wakapi:
     image: ghcr.io/muety/wakapi:{{WAKAPI_VERSION}}
-    restart: always
     volumes:
     - wakapi-data:/data
     environment:
       ENVIRONMENT: production
       WAKAPI_SUPPORT_CONTACT: '{{WAKAPI_EMAIL}}'
       WAKAPI_PASSWORD_SALT: '{{WAKAPI_SALT}}'
-      WAKAPI_PUBLIC_URL: wakapi.{{ROOT_DOMAIN}}
+      WAKAPI_PUBLIC_URL: '{{APP_URL}}'
       WAKAPI_ALLOW_SIGNUP: '{{WAKAPI_SIGNUP}}'
       WAKAPI_DB_HOST: wakapi-db
       WAKAPI_DB_USER: wakapi
@@ -30,7 +30,6 @@ services:
     image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - wakapi-db-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_DB: wakapi
       POSTGRES_USER: wakapi
@@ -44,13 +43,14 @@ volumes:
 [[variables]]
 key = "PG_INITDB_ARGS"
 label = "OPTIONAL: Arguments for 'postgres initdb'"
+default = ""
 description = "For example, --data-checksums"
 
 [[variables]]
 key = "POSTGRES_PASS"
-label = "Potgress Database password"
+label = "Postgres Database password"
 generate = true
-description = "Password for postgres"
+description = "Password for the Postgres database (auto-generated)."
 
 [[variables]]
 key = "POSTGRES_VERSION"
@@ -59,10 +59,10 @@ default = "16.1-alpine"
 description = "Checkout their page for the valid tags https://hub.docker.com/_/postgres"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "APP_URL"
+label = "Public URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Public base URL Wakapi uses to build links (e.g. https://wakapi.example.com). Leave blank to set later after a domain is assigned."
 
 [[variables]]
 key = "WAKAPI_EMAIL"

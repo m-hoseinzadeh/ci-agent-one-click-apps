@@ -3,19 +3,21 @@ name = "qBittorrent"
 category = "App"
 description = "qBittorrent BitTorrent client"
 keywords = ["qbittorrent"]
+http_port = 8080
 compose = '''
 services:
   qbittorrent:
     image: linuxserver/qbittorrent:{{QBITTORRENT_VERSION}}
     environment:
+      PUID: '1000'
+      PGID: '1000'
       TZ: '{{TZ}}'
-      UMASK: 18
-      WEBUI_PORT: '{{WEBUI_PORT}}'
+      UMASK: '022'
+      WEBUI_PORT: '8080'
     ports:
-    - '{{HTTP_PORT}}:$$cap_webui_port'
-    - '{{WEBUI_PORT}}:8080'
-    - 6881:6881
-    hostname: qbittorrent.{{ROOT_DOMAIN}}
+    - '{{HTTP_PORT}}:8080'
+    - '6881:6881'
+    - '6881:6881/udp'
     volumes:
     - qbittorrent-config:/config
     - '{{PATH_TO_DOWNLOADS}}:/downloads'
@@ -32,23 +34,11 @@ description = "Path to downloads folder where you want to save the downloaded to
 [[variables]]
 key = "QBITTORRENT_VERSION"
 label = "qBittorrent Version"
-default = "version-14.3.5.99202105022253-7365-063844ed4ubuntu20.04.1"
+default = "latest"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/qbittorrent/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
 
 [[variables]]
 key = "TZ"
 label = "Time Zone"
 default = "Europe/Brussels"
 description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
-
-[[variables]]
-key = "WEBUI_PORT"
-label = "qBittorrent WebUI Port"
-default = "8081"
-description = "The port used to access qBittorrent"

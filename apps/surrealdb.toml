@@ -2,24 +2,39 @@ slug = "surrealdb"
 name = "SurrealDB"
 category = "Database"
 description = "SurrealDB is an innovative NewSQL cloud database, suitable for serverless applications, jamstack applications, single-page applications, and traditional applications."
-keywords = ["surrealdb"]
+keywords = ["surrealdb", "database", "newsql"]
 compose = '''
 services:
   surrealdb-db:
+    image: surrealdb/surrealdb:{{SURREALDB_VERSION}}
+    command:
+      - start
+      - --user
+      - '{{DB_USER}}'
+      - --pass
+      - '{{DB_PASS}}'
+      - --bind
+      - 0.0.0.0:8000
+      - rocksdb:/data/database.db
+    ports:
+      - '{{HTTP_PORT}}:8000'
     volumes:
-    - surrealdb-db-data:/data
-    restart: always
-    environment:
-      USER: '{{DB_USER}}'
-      PASS: '{{DB_PASS}}'
+      - surrealdb-db-data:/data
 volumes:
   surrealdb-db-data:
 '''
 
 [[variables]]
-key = "DB_PASS"
-label = "SurrealDB root password"
+key = "SURREALDB_VERSION"
+label = "SurrealDB image tag"
+default = "v2"
 
 [[variables]]
 key = "DB_USER"
 label = "SurrealDB root user"
+default = "root"
+
+[[variables]]
+key = "DB_PASS"
+label = "SurrealDB root password"
+generate = true

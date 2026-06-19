@@ -3,13 +3,11 @@ name = "RSS Bridge"
 category = "App"
 description = "RSS-Bridge is a PHP project capable of generating RSS and Atom feeds for websites that don't have one. It can be used on webservers or as a stand-alone application in CLI mode."
 keywords = ["bridge", "rss"]
+http_port = 80
 compose = '''
 services:
   rss-bridge:
     image: rssbridge/rss-bridge:{{APP_VERSION}}
-    restart: always
-    environment:
-      APP_URL: http://rss-bridge.{{ROOT_DOMAIN}}
     volumes:
     - rss-bridge-config:/config
     ports:
@@ -21,11 +19,5 @@ volumes:
 [[variables]]
 key = "APP_VERSION"
 label = "RSS Bridge"
-default = "2021-04-25"
+default = "latest"
 description = "Check out their docker page for the valid tags https://hub.docker.com/r/rssbridge/rss-bridge/tags"
-
-[[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."

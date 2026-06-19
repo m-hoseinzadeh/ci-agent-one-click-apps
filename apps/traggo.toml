@@ -3,12 +3,13 @@ name = "Traggo"
 category = "App"
 description = "Traggo is a simple tag-based time tracking tool. In Traggo there are no tasks, only tagged time spans."
 keywords = ["traggo"]
+http_port = 3030
 compose = '''
 services:
   traggo:
+    image: traggo/server:0.8.3
     volumes:
     - traggo-data:/opt/traggo/data
-    restart: always
     environment:
       TRAGGO_DEFAULT_USER_NAME: '{{TRAGGO_USER}}'
       TRAGGO_DEFAULT_USER_PASS: '{{TRAGGO_PW}}'
@@ -19,9 +20,12 @@ volumes:
 '''
 
 [[variables]]
-key = "TRAGGO_PW"
-label = "Default User's Password"
-
-[[variables]]
 key = "TRAGGO_USER"
 label = "Default User's Username"
+default = "admin"
+
+[[variables]]
+key = "TRAGGO_PW"
+label = "Default User's Password"
+description = "Password for the initial admin user."
+generate = true

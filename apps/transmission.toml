@@ -3,10 +3,11 @@ name = "Transmission"
 category = "App"
 description = "Transmission is a BitTorrent client which features a variety of user interfaces on top of a cross-platform back-end."
 keywords = ["transmission"]
+http_port = 9091
 compose = '''
 services:
   transmission:
-    image: ghcr.io/linuxserver/transmission:{{TRANSMISSION_VERSION}}
+    image: lscr.io/linuxserver/transmission:{{TRANSMISSION_VERSION}}
     environment:
       PUID: '1000'
       PGID: '1000'
@@ -20,7 +21,7 @@ services:
     ports:
     - '{{HTTP_PORT}}:9091'
     - 51413:51413
-    hostname: transmission.{{ROOT_DOMAIN}}
+    - 51413:51413/udp
     volumes:
     - transmission-config:/config
     - '{{PATH_TO_DOWNLOADS}}:/downloads'
@@ -33,7 +34,8 @@ volumes:
 [[variables]]
 key = "PASS"
 label = "Password"
-default = "password"
+generate = true
+description = "Web UI admin password. A random one is generated; change it if you prefer."
 
 [[variables]]
 key = "PATH_TO_DOWNLOADS"
@@ -42,21 +44,15 @@ default = "transmission-downloads"
 description = "Path to downloads folder where you want to save the downloaded torrents. You can mention an existing directory here too. Eg. /home/user/torrents/"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
-
-[[variables]]
 key = "TRANSMISSION_VERSION"
 label = "Transmission Version"
-default = "arm64v8-version-3.00-r2"
+default = "latest"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/linuxserver/transmission/tags"
 
 [[variables]]
 key = "TZ"
 label = "Time Zone"
-default = "Asia/Kolkata"
+default = "Etc/UTC"
 description = "Get yours from https://en.wikipedia.org/wiki/List_of_tz_database_time_zones"
 
 [[variables]]
@@ -69,3 +65,4 @@ description = "Specify an alternative UI options are combustion-release, transmi
 key = "USER"
 label = "Username"
 default = "admin"
+description = "Web UI admin username."

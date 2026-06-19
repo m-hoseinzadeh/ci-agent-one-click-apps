@@ -3,29 +3,23 @@ name = "RustFS"
 category = "Storage"
 description = "RustFS is a high-performance distributed object storage software built using Rust"
 keywords = ["rustfs"]
+http_port = 9001
 compose = '''
 services:
   rustfs:
     image: rustfs/rustfs:{{RUSTFS_VERSION}}
     volumes:
     - rustfs-db-data:/data
-    restart: always
     environment:
       RUSTFS_VOLUMES: /data
+      RUSTFS_ADDRESS: 0.0.0.0:9000
       RUSTFS_CONSOLE_ENABLE: 'true'
-      RUSTFS_EXTERNAL_ADDRESS: https://rustfs-api.{{ROOT_DOMAIN}}
+      RUSTFS_CONSOLE_ADDRESS: 0.0.0.0:9001
+      RUSTFS_EXTERNAL_ADDRESS: '{{APP_URL}}'
       RUSTFS_ACCESS_KEY: '{{ACCESS_KEY}}'
       RUSTFS_SECRET_KEY: '{{SECRET_KEY}}'
     ports:
     - '{{HTTP_PORT}}:9001'
-  rustfs-api:
-    image: caprover/nginx-reverse-proxy:1-cc035d1
-    restart: always
-    depends_on:
-    - rustfs
-    environment:
-      UPSTREAM_HTTP_ADDRESS: http://rustfs:9000
-      CLIENT_MAX_BODY_SIZE: '0'
 volumes:
   rustfs-db-data:
 '''
@@ -37,19 +31,19 @@ generate = true
 description = "Access key for `RUSTFS_ACCESS_KEY`. If unset, RustFS defaults to `rustfsadmin`. RustFS strongly recommends specifying a unique, long, and random value for all environments."
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
+key = "SECRET_KEY"
+label = "RustFS Secret Key"
+generate = true
+description = "Secret key for `RUSTFS_SECRET_KEY`. If unset, RustFS defaults to `rustfsadmin`. RustFS strongly recommends specifying a unique, long, and random value for all environments."
+
+[[variables]]
+key = "APP_URL"
+label = "External S3 endpoint URL"
 default = ""
-description = "Domain used to build public URLs (set your project domain)."
+description = "Optional public S3 API base URL (RUSTFS_EXTERNAL_ADDRESS) used to build object/presigned URLs, e.g. https://rustfs.example.com. Leave blank to use the request host. Set after assigning a domain."
 
 [[variables]]
 key = "RUSTFS_VERSION"
 label = "RustFS Version"
 default = "1.0.0-alpha.77"
 description = "Check out their Docker page for the valid tags https://hub.docker.com/r/rustfs/rustfs/tags"
-
-[[variables]]
-key = "SECRET_KEY"
-label = "RustFS Secret Key"
-generate = true
-description = "Secret key for `RUSTFS_SECRET_KEY`. If unset, RustFS defaults to `rustfsadmin`. RustFS strongly recommends specifying a unique, long, and random value for all environments."

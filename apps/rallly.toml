@@ -1,17 +1,17 @@
 slug = "rallly"
 name = "Rallly"
-category = "Database"
+category = "Productivity"
 description = "Doodle poll alternative. Find the best date for a meeting with your colleagues or friends without the back and forth emails. This app is packaged with PostgreSQL."
-keywords = ["rallly"]
+keywords = ["rallly", "scheduling", "polls", "meetings"]
+http_port = 3000
 compose = '''
 services:
   rallly:
-    restart: always
     depends_on:
     - rallly-postgres
     image: lukevella/rallly:{{RALLLY_VERSION}}
     environment:
-      NEXT_PUBLIC_BASE_URL: http://rallly.{{ROOT_DOMAIN}}
+      NEXT_PUBLIC_BASE_URL: '{{APP_URL}}'
       DATABASE_URL: postgres://rallly:{{RALLLY_POSTGRES_PASSWORD}}@rallly-postgres:5432/db
       SECRET_PASSWORD: '{{RALLLY_PASSWD}}'
       SUPPORT_EMAIL: '{{RALLLY_EMAIL}}'
@@ -23,10 +23,9 @@ services:
     ports:
     - '{{HTTP_PORT}}:3000'
   rallly-postgres:
-    image: postgres:12
+    image: postgres:{{POSTGRES_VERSION}}
     volumes:
     - rallly-postgres-data:/var/lib/postgresql/data
-    restart: always
     environment:
       POSTGRES_USER: rallly
       POSTGRES_PASSWORD: '{{RALLLY_POSTGRES_PASSWORD}}'
@@ -36,57 +35,67 @@ volumes:
 '''
 
 [[variables]]
+key = "APP_URL"
+label = "Public Base URL"
+default = ""
+description = "Base URL where this instance is reachable, including scheme (e.g. https://rallly.example.com). Leave blank to set after the project domain is assigned."
+
+[[variables]]
 key = "RALLLY_EMAIL"
 label = "Rallly From Email"
+default = ""
 description = "An email address that will appear as the FROM email for all emails being sent out."
 
 [[variables]]
 key = "RALLLY_PASSWD"
-label = "Rallly Password"
+label = "Rallly Secret Password"
 generate = true
 description = "A long string (minimum 32 characters) that is used to encrypt session data."
 
 [[variables]]
 key = "RALLLY_POSTGRES_PASSWORD"
-label = "Password"
+label = "Postgres Password"
 generate = true
-description = "Postgres password (minimum 12 characters)"
+description = "Postgres password (minimum 12 characters)."
 
 [[variables]]
 key = "RALLLY_SMTP_HOST"
 label = "Rallly SMTP Host"
-description = "Host name of your SMTP server"
+default = ""
+description = "Host name of your SMTP server. Required to send login and notification emails."
 
 [[variables]]
 key = "RALLLY_SMTP_PORT"
 label = "Rallly SMTP Port"
-default = "465"
-description = "Port of your SMTP server"
+default = "587"
+description = "Port of your SMTP server (e.g. 25, 465, 587)."
 
 [[variables]]
 key = "RALLLY_SMTP_PWD"
-label = "Rallly SMTP password"
-description = "Password to use for your SMTP connection"
+label = "Rallly SMTP Password"
+default = ""
+description = "Password to use for your SMTP connection. Obtain this from your email provider."
 
 [[variables]]
 key = "RALLLY_SMTP_SECURE"
 label = "Requires secure SMTP connection? true/false"
-default = "False"
-description = "Set to \"true\" if SSL is enabled for your SMTP connection"
+default = "false"
+description = "Set to \"true\" if SSL is enabled for your SMTP connection."
 
 [[variables]]
 key = "RALLLY_SMTP_USER"
-label = "Rallly SMTP user"
-description = "Username to use for your SMTP connection"
+label = "Rallly SMTP User"
+default = ""
+description = "Username to use for your SMTP connection."
 
 [[variables]]
 key = "RALLLY_VERSION"
 label = "Rallly Version"
-default = "ac55701890cd866ee946deb25e2b2839fb14900e"
-description = "Check out the docker page for valid tags https://hub.docker.com/r/lukevella/rallly/tags"
+default = "4"
+description = "Image tag for lukevella/rallly. See https://hub.docker.com/r/lukevella/rallly/tags"
 
 [[variables]]
-key = "ROOT_DOMAIN"
-label = "Public domain"
-default = ""
-description = "Domain used to build public URLs (set your project domain)."
+key = "POSTGRES_VERSION"
+label = "PostgreSQL Version"
+default = "14-alpine"
+description = "PostgreSQL image tag used for the bundled database."

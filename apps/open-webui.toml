@@ -1,0 +1,38 @@
+slug = "open-webui"
+name = "Open WebUI"
+category = "AI"
+description = "Feature-rich, self-hosted web interface for chatting with LLMs. Connects to an Ollama server (or any OpenAI-compatible API). Deploy the Ollama app first; this app reaches it over the shared network as `http://ollama:11434` (both projects must be in the same category)."
+keywords = ["open-webui", "ollama", "llm", "ai", "chat"]
+http_port = 8080
+compose = '''
+services:
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:{{OPEN_WEBUI_VERSION}}
+    environment:
+      OLLAMA_BASE_URL: '{{OLLAMA_BASE_URL}}'
+      WEBUI_SECRET_KEY: '{{WEBUI_SECRET_KEY}}'
+    volumes:
+    - open-webui-data:/app/backend/data
+    ports:
+    - '{{HTTP_PORT}}:8080'
+volumes:
+  open-webui-data:
+'''
+
+[[variables]]
+key = "OLLAMA_BASE_URL"
+label = "Ollama API URL"
+default = "http://ollama:11434"
+description = "URL of the Ollama server to connect to. The default reaches a separately-deployed Ollama app (slug `ollama`) over the shared network — both projects must share a category. Point elsewhere for a remote Ollama or an OpenAI-compatible endpoint."
+
+[[variables]]
+key = "WEBUI_SECRET_KEY"
+label = "WebUI secret key"
+generate = true
+description = "Secret used to sign sessions/JWTs. Auto-generated; keep it stable across redeploys so users stay logged in."
+
+[[variables]]
+key = "OPEN_WEBUI_VERSION"
+label = "Open WebUI Version Tag"
+default = "v0.9.6"
+description = "Check out their package page for valid tags https://github.com/open-webui/open-webui/pkgs/container/open-webui. Use a `-cuda` tag for built-in GPU acceleration of local features."

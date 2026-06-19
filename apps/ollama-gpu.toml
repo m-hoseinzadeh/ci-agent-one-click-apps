@@ -1,0 +1,39 @@
+slug = "ollama-gpu"
+name = "Ollama (NVIDIA GPU)"
+category = "AI"
+description = "Run large language models locally with NVIDIA GPU acceleration. Same as the Ollama app but reserves all NVIDIA GPUs for inference. Requires the NVIDIA Container Toolkit installed on the host (nvidia-ctk / nvidia-container-runtime); use the plain Ollama app for CPU-only hosts."
+keywords = ["ollama", "llm", "ai", "inference", "gpu", "nvidia", "cuda"]
+http_port = 11434
+compose = '''
+services:
+  ollama:
+    image: ollama/ollama:{{OLLAMA_VERSION}}
+    environment:
+      OLLAMA_KEEP_ALIVE: '{{OLLAMA_KEEP_ALIVE}}'
+    volumes:
+    - ollama-data:/root/.ollama
+    ports:
+    - '{{HTTP_PORT}}:11434'
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities:
+            - gpu
+volumes:
+  ollama-data:
+'''
+
+[[variables]]
+key = "OLLAMA_VERSION"
+label = "Ollama Version Tag"
+default = "0.30.10"
+description = "Check out their Docker page for the valid tags https://hub.docker.com/r/ollama/ollama/tags. For AMD GPUs use the plain Ollama app with a `-rocm` tag instead."
+
+[[variables]]
+key = "OLLAMA_KEEP_ALIVE"
+label = "Model keep-alive"
+default = "5m"
+description = "How long a model stays loaded in GPU memory after its last request (e.g. 5m, 1h, or -1 to keep loaded indefinitely)."

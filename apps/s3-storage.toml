@@ -1,0 +1,118 @@
+slug = "s3-storage"
+name = "s3-storage"
+category = "Storage"
+description = "Minimal S3-compatible file server that stores raw uploaded files directly on disk, with an embedded web admin panel."
+keywords = ["s3", "storage", "object-storage", "aws", "files"]
+http_port = 8081
+compose = '''
+services:
+  s3-storage:
+    image: ghcr.io/m-hoseinzadeh/s3-storage:{{S3_STORAGE_VERSION}}
+    environment:
+      S3_ROOT: /data
+      S3_HOST: 0.0.0.0
+      S3_PORT: '8080'
+      S3_ADMIN_PORT: '8081'
+      S3_PUBLIC_PORT: '8082'
+      S3_ACCESS_KEY: '{{S3_ACCESS_KEY}}'
+      S3_SECRET_KEY: '{{S3_SECRET_KEY}}'
+      S3_ADMIN_ENABLED: '{{S3_ADMIN_ENABLED}}'
+      S3_PUBLIC_BUCKETS: '{{S3_PUBLIC_BUCKETS}}'
+      S3_DOMAINS: '{{S3_DOMAINS}}'
+      S3_DOMAIN_MAP: '{{S3_DOMAIN_MAP}}'
+      S3_API_PUBLIC_URL: '{{S3_API_PUBLIC_URL}}'
+      RUST_LOG: info
+    volumes:
+    - s3-storage-data:/data
+    ports:
+    - '{{HTTP_PORT}}:8081'
+    - '{{S3_API_PORT}}:8080'
+    - '{{S3_PUBLIC_PORT}}:8082'
+  backup:
+    image: alpine:3
+    command:
+    - sleep
+    - infinity
+    volumes:
+    - s3-storage-data:/data
+volumes:
+  s3-storage-data:
+'''
+
+[[variables]]
+key = "S3_ACCESS_KEY"
+label = "Access key"
+generate = true
+description = "SigV4 access key. Use this together with the secret key in your S3 SDK/CLI against the API port. The API runs open and unauthenticated only if both are left blank (not recommended)."
+
+[[variables]]
+key = "S3_SECRET_KEY"
+label = "Secret key"
+generate = true
+description = "SigV4 secret key, and the password you log in to the admin panel with."
+
+[[variables]]
+key = "S3_API_PORT"
+label = "S3 API port"
+default = "8080"
+description = "Host port published for the authenticated S3 protocol (container port 8080). This is the endpoint your SDK/CLI clients talk to."
+
+[[variables]]
+key = "S3_PUBLIC_PORT"
+label = "Public read port"
+default = "8082"
+description = "Host port published for anonymous read-only access to public buckets (container port 8082). The admin panel itself is on the HTTP port above (container port 8081)."
+
+[[variables]]
+key = "S3_ADMIN_ENABLED"
+label = "Enable admin panel"
+default = "true"
+description = "Serve the embedded web admin panel on the HTTP port. Requires the access/secret keys above (log in with them). Set to false to disable."
+
+[[variables]]
+key = "S3_API_PUBLIC_URL"
+label = "API public URL"
+default = ""
+description = "Public base URL the API is reached at, e.g. https://api.example.com. Required for the admin panel to mint presigned links; when blank the panel returns a clear error instead. Leave blank if you do not need presigned links."
+
+[[variables]]
+key = "S3_PUBLIC_BUCKETS"
+label = "Public buckets"
+default = ""
+description = "Comma-separated bucket names that allow anonymous GET/HEAD reads on the public port. Writes always require a signature. Leave blank for all-private."
+
+[[variables]]
+key = "S3_DOMAINS"
+label = "Virtual-host base domains"
+default = ""
+description = "Comma-separated base domains for <bucket>.<domain> virtual-hosted addressing, e.g. s3.example.com. Optional."
+
+[[variables]]
+key = "S3_DOMAIN_MAP"
+label = "Custom-domain map"
+default = ""
+description = "Comma-separated host=bucket mappings, e.g. files.example.com=assets,cdn.example.com=images. Point the domain's DNS/reverse proxy at the public port and preserve the Host header. Optional."
+
+[[variables]]
+key = "S3_STORAGE_VERSION"
+label = "Image tag"
+default = "latest"
+description = "s3-storage image tag from ghcr.io/m-hoseinzadeh/s3-storage."
+
+[[actions]]
+key = "backup"
+label = "Backup (tar of /data)"
+description = "Download a gzipped tar of the entire data root (all buckets, objects, and metadata sidecars)."
+kind = "backup"
+service = "backup"
+command = "tar czf - -C /data ."
+filename = "s3-storage-{{DATE}}.tar.gz"
+
+[[actions]]
+key = "restore"
+label = "Restore from tar"
+description = "Upload a backup tarball produced by the backup action; its contents are extracted into the data root."
+kind = "restore"
+service = "backup"
+upload_path = "/tmp/restore.tar.gz"
+load_command = "tar xzf {{FILE}} -C /data"
